@@ -70,13 +70,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Fetch latest release branch and checkout
-          git fetch origin ${{ inputs.release_branch }}:$release_branch
-          git checkout $release_branch
+          # Fetch remote and reset local branch to remote HEAD cleanly
+          git fetch origin ${{ inputs.release_branch }}
+          
+          # Create or reset the release branch locally to match remote exactly
+          git checkout -B ${{ inputs.release_branch }} origin/${{ inputs.release_branch }}
           
           branch_name="tekton-update-${{ inputs.version }}"
-          # Create or reset branch from release branch (force reset)
-          git checkout -B "$branch_name"
+          
+          # Create or reset the feature branch from the release branch HEAD exactly
+          git checkout -B "$branch_name" ${{ inputs.release_branch }}
           
           mkdir -p .tekton
           rsync -av --delete ../extracted/.tekton/ .tekton/
@@ -92,7 +95,6 @@ jobs:
           git commit -m "Update Tekton output-image tags to version ${{ inputs.version }}"
           git push --set-upstream origin "$branch_name" --force
           echo "commit=true" >> $GITHUB_ENV
-
           
       - name: Create Pull Request
         if: env.commit == 'true'   # Only run if there were changes committed and pushed
