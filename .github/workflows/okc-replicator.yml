@@ -1,0 +1,114 @@
+name: OKC Replicator for tekton files
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: 'Target GitHub repository (e.g., org/abc-repo)'
+        required: true
+        type: string
+      release_branch:
+        description: 'Branch in target repo to merge PR into (e.g., rhoai-2.9)'
+        required: true
+        type: string
+      version:
+        description: 'New version identifier (e.g., v2.29.0)'
+        required: true
+        type: string
+      okc_folder:
+        description: 'Select folder inside OKC repo containing Tekton files'
+        required: true
+        type: choice
+        options:
+          - data-science-pipelines
+          - odh-model-controller
+          # Add all valid folder names here
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
+      
+    steps:
+      - name: Checkout OKC repository
+        uses: actions/checkout@v4
+
+      - name: Generate github-app token
+        id: app-token
+        uses: getsentry/action-github-app-token@v2
+        with:
+          app_id: ${{ secrets.ODH_DEVOPS_APP_ID }}
+          private_key: ${{ secrets.ODH_DEVOPS_APP_PRIVATE_KEY }}
+
+      - name: Prepare Tekton files
+        run: |
+          repo_folder="${{ inputs.okc_folder }}"
+          echo "Using OKC folder: $repo_folder"
+          if [ ! -d "$repo_folder/.tekton" ]; then
+            echo "ERROR: $repo_folder/.tekton does not exist!"
+            exit 1
+          fi
+          mkdir -p extracted/.tekton
+          cp -r "$repo_folder/.tekton/"* extracted/.tekton/
+          echo "Replacing output-image tag with version: ${{ inputs.version }}"
+          find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
+            sed -i -E '/name: output-image/{n; s|(value: .+:)[^[:space:]]+|\1'"${{ inputs.version }}"'|}' "$file"
+          done
+          
+      - name: Configure Git authentication
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          
+      - name: Create branch and commit updates
+        run: |
+          branch_name="tekton-update-${{ inputs.version }}"
+          mkdir repo-workspace
+          cd repo-workspace
+      
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+          git remote add origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ inputs.repository }}
+          git fetch origin
+      
+          if git ls-remote --exit-code --heads origin "$branch_name" > /dev/null; then
+            git checkout -b "$branch_name" origin/"$branch_name"
+          else
+            git checkout -b "$branch_name"
+          fi
+      
+          mkdir -p .tekton
+          rsync -av --delete ../extracted/.tekton/ .tekton/
+      
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+      
+          git add .tekton
+          git commit -m "Update Tekton output-image tags to version ${{ inputs.version }}"
+          git push origin "$branch_name"
+        env:
+          TOKEN: ${{ steps.app-token.outputs.token }}
+
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO: ${{ inputs.repository }}
+          BASE: ${{ inputs.release_branch }}
+          HEAD: tekton-update-${{ inputs.version }}
+          VERSION: ${{ inputs.version }}
+          OKC_FOLDER: ${{ inputs.okc_folder }}
+        run: |
+          gh pr create \
+            --repo "$REPO" \
+            --base "$BASE" \
+            --head "$HEAD" \
+            --title "Update Tekton files to version $VERSION" \
+            --body "This PR updates the \`output-image\` tags in \`$OKC_FOLDER/.tekton/\` to version \`$VERSION\`."
