@@ -3,10 +3,14 @@ name: OKC Replicator for tekton files
 on:
   workflow_dispatch:
     inputs:
-      repository:
-        description: 'Target GitHub repository (e.g., org/abc-repo)'
+      component:
+        description: 'Component name (used for both OKC folder and GitHub repository under DevOps-automation-tasks)'
         required: true
-        type: string
+        type: choice
+        options:
+          - data-science-pipelines
+          - odh-model-controller
+          # Add all valid components here
       release_branch:
         description: 'Branch in target repo to merge PR into (e.g., rhoai-2.9)'
         required: true
@@ -15,14 +19,6 @@ on:
         description: 'New version identifier (e.g., v2.29.0)'
         required: true
         type: string
-      okc_folder:
-        description: 'Select folder inside OKC repo containing Tekton files'
-        required: true
-        type: choice
-        options:
-          - data-science-pipelines
-          - odh-model-controller
-          # Add all valid folder names here
 
 jobs:
   create-pr:
@@ -32,7 +28,6 @@ jobs:
       contents: write
       pull-requests: write
       repository-projects: write
-      
 
     steps:
       - name: Checkout OKC repository
@@ -46,10 +41,15 @@ jobs:
         with:
           app_id: ${{ secrets.ODH_DEVOPS_APP_ID }}
           private_key: ${{ secrets.ODH_DEVOPS_APP_PRIVATE_KEY }}
-      
+
+      - name: Set environment variables
+        run: |
+          echo "REPOSITORY=DevOps-automation-tasks/${{ inputs.component }}" >> $GITHUB_ENV
+          echo "OKC_FOLDER=${{ inputs.component }}" >> $GITHUB_ENV
+
       - name: Prepare Tekton files
         run: |
-          repo_folder="okc-repo/${{ inputs.okc_folder }}"
+          repo_folder="okc-repo/${OKC_FOLDER}"
           echo "Using OKC folder: $repo_folder"
           if [ ! -d "$repo_folder/.tekton" ]; then
             echo "ERROR: $repo_folder/.tekton does not exist!"
@@ -61,54 +61,44 @@ jobs:
           find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
             sed -i -E '/name: output-image/{n; s|(value: .+:)[^[:space:]]+|\1'"${{ inputs.version }}"'|}' "$file"
           done
-          
+
       - name: Clone and push Tekton changes
         run: |
-          git clone https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ inputs.repository }} repo-workspace
+          git clone https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${REPOSITORY} repo-workspace
           cd repo-workspace
-          
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Fetch remote and reset local branch to remote HEAD cleanly
+
           git fetch origin ${{ inputs.release_branch }}
-          
-          # Create or reset the release branch locally to match remote exactly
           git checkout -B ${{ inputs.release_branch }} origin/${{ inputs.release_branch }}
-          
+
           branch_name="tekton-update-${{ inputs.version }}"
-          
-          # Create or reset the feature branch from the release branch HEAD exactly
           git checkout -B "$branch_name" ${{ inputs.release_branch }}
-          
+
           mkdir -p .tekton
           rsync -av --delete ../extracted/.tekton/ .tekton/
-          
+
           git add .tekton
-          
+
           if git diff --cached --quiet; then
             echo "No changes to commit."
             echo "commit=false" >> $GITHUB_ENV
             exit 0
           fi
-          
+
           git commit -m "Update Tekton output-image tags to version ${{ inputs.version }}"
           git push --set-upstream origin "$branch_name" --force
           echo "commit=true" >> $GITHUB_ENV
-          
+
       - name: Create Pull Request
-        if: env.commit == 'true'   # Only run if there were changes committed and pushed
+        if: env.commit == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          REPO: ${{ inputs.repository }}
-          BASE: ${{ inputs.release_branch }}
-          HEAD: tekton-update-${{ inputs.version }}
-          VERSION: ${{ inputs.version }}
-          OKC_FOLDER: ${{ inputs.okc_folder }}
         run: |
           gh pr create \
-            --repo "$REPO" \
-            --base "$BASE" \
-            --head "$HEAD" \
-            --title "Update Tekton files to version $VERSION" \
-            --body "This PR updates the \`output-image\` tags in \`$OKC_FOLDER/.tekton/\` to version \`$VERSION\`."
+            --repo "${REPOSITORY}" \
+            --base "${{ inputs.release_branch }}" \
+            --head "tekton-update-${{ inputs.version }}" \
+            --title "Update Tekton files to version ${{ inputs.version }}" \
+            --body "This PR updates the \`output-image\` tags in \`${OKC_FOLDER}/.tekton/\` to version \`${{ inputs.version }}\`."
