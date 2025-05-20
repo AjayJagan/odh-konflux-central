@@ -41,7 +41,7 @@ jobs:
         with:
           app_id: ${{ secrets.ODH_DEVOPS_APP_ID }}
           private_key: ${{ secrets.ODH_DEVOPS_APP_PRIVATE_KEY }}
-
+          
       - name: Set environment variables
         run: |
           echo "REPOSITORY=opendatahub-io/${{ inputs.component }}" >> $GITHUB_ENV
@@ -66,27 +66,22 @@ jobs:
         run: |
           git clone https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${REPOSITORY} repo-workspace
           cd repo-workspace
-
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
           git fetch origin ${{ inputs.release_branch }}
           git checkout -B ${{ inputs.release_branch }} origin/${{ inputs.release_branch }}
 
-          branch_name="tekton-update-${{ inputs.version }}"
+          branch_name="appstudio-${{ inputs.component }}-konflux-replicator"
           git checkout -B "$branch_name" ${{ inputs.release_branch }}
 
           mkdir -p .tekton
           rsync -av --delete ../extracted/.tekton/ .tekton/
-
           git add .tekton
-
           if git diff --cached --quiet; then
             echo "No changes to commit."
             echo "commit=false" >> $GITHUB_ENV
             exit 0
           fi
-
           git commit -m "Update Tekton output-image tags to version ${{ inputs.version }}"
           git push --set-upstream origin "$branch_name" --force
           echo "commit=true" >> $GITHUB_ENV
@@ -99,6 +94,6 @@ jobs:
           gh pr create \
             --repo "${REPOSITORY}" \
             --base "${{ inputs.release_branch }}" \
-            --head "tekton-update-${{ inputs.version }}" \
+            --head "appstudio-${{ inputs.component }}-konflux-replicator" \
             --title "Update Tekton files to version ${{ inputs.version }}" \
             --body "This PR updates the \`output-image\` tags in \`${OKC_FOLDER}/.tekton/\` to version \`${{ inputs.version }}\`."
