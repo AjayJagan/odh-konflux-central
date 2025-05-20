@@ -33,6 +33,9 @@ jobs:
       pull-requests: write
       repository-projects: write
       
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Checkout OKC repository
         uses: actions/checkout@v4
@@ -59,25 +62,19 @@ jobs:
             sed -i -E '/name: output-image/{n; s|(value: .+:)[^[:space:]]+|\1'"${{ inputs.version }}"'|}' "$file"
           done
           
-      - name: Configure Git authentication
+      - name: Clone repository
         run: |
-          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
-          
-      - name: Create branch and commit updates
-        run: |
-          branch_name="tekton-update-${{ inputs.version }}"
-          mkdir repo-workspace
+          git clone https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ inputs.repository }} repo-workspace
           cd repo-workspace
       
-          git init
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
       
-          git remote add origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ inputs.repository }}
-          git fetch origin
+          branch_name="tekton-update-${{ inputs.version }}"
       
+          git fetch origin
           if git ls-remote --exit-code --heads origin "$branch_name" > /dev/null; then
-            git checkout -b "$branch_name" origin/"$branch_name"
+            git checkout "$branch_name"
           else
             git checkout -b "$branch_name"
           fi
@@ -92,9 +89,7 @@ jobs:
       
           git add .tekton
           git commit -m "Update Tekton output-image tags to version ${{ inputs.version }}"
-          git push origin "$branch_name"
-        env:
-          TOKEN: ${{ steps.app-token.outputs.token }}
+          git push --set-upstream origin "$branch_name"
 
 
       - name: Create Pull Request
