@@ -44,7 +44,7 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "REPOSITORY=DevOps-automation-tasks/${{ inputs.component }}" >> $GITHUB_ENV
+          echo "REPOSITORY=opendatahub-io/${{ inputs.component }}" >> $GITHUB_ENV
           echo "OKC_FOLDER=${{ inputs.component }}" >> $GITHUB_ENV
 
       - name: Prepare Tekton files
