@@ -70,26 +70,19 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          branch_name="tekton-update-${{ inputs.version }}"
+          # Fetch latest release branch and checkout
+          git fetch origin ${{ inputs.release_branch }}:$release_branch
+          git checkout $release_branch
           
-          git fetch origin
-          if git ls-remote --exit-code --heads origin "$branch_name" > /dev/null; then
-            git checkout "$branch_name"
-          else
-            git checkout -b "$branch_name"
-          fi
+          branch_name="tekton-update-${{ inputs.version }}"
+          # Create or reset branch from release branch (force reset)
+          git checkout -B "$branch_name"
           
           mkdir -p .tekton
           rsync -av --delete ../extracted/.tekton/ .tekton/
           
-          # Add all changes including new files:
           git add .tekton
           
-          echo "Checking git status and diff after git add:"
-          git status
-          git diff --cached || true  # show staged diff
-          
-          # Now check if anything staged for commit:
           if git diff --cached --quiet; then
             echo "No changes to commit."
             echo "commit=false" >> $GITHUB_ENV
@@ -97,8 +90,9 @@ jobs:
           fi
           
           git commit -m "Update Tekton output-image tags to version ${{ inputs.version }}"
-          git push --set-upstream origin "$branch_name"
+          git push --set-upstream origin "$branch_name" --force
           echo "commit=true" >> $GITHUB_ENV
+
           
       - name: Create Pull Request
         if: env.commit == 'true'   # Only run if there were changes committed and pushed
