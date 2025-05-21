@@ -8,7 +8,7 @@ metadata:
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
-      == "konflux-poc"
+      == $$TARGET_BRANCH$$
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
@@ -591,7 +591,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-feast-operator-konflux-poc
+    serviceAccountName: build-pipeline-odh-feast-operator
   workspaces:
   - name: git-auth
     secret:
