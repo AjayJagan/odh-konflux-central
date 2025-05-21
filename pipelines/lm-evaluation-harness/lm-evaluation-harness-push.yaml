@@ -23,7 +23,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/open-data-hub-tenant/lm-evaluation-harness-konflux-poc:{{revision}}
+    value: quay.io/opendatahub/ta-lmes-job:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
     value: Dockerfile.lmes-job
   - name: path-context

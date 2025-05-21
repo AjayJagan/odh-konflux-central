@@ -23,7 +23,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/open-data-hub-tenant/kserve-agent-konflux-poc:{{revision}}
+    value: quay.io/opendatahub/kserve-agent:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
     value: agent.Dockerfile
   - name: path-context

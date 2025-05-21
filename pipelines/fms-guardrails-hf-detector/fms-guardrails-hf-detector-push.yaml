@@ -23,7 +23,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/open-data-hub-tenant/guardrails-detectors-konflux-poc:{{revision}}
+    value: quay.io/opendatahub/guardrails-detector-huggingface-runtime:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
     value: Dockerfile.hf
   - name: path-context

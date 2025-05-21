@@ -23,7 +23,8 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/open-data-hub-tenant/caikit-nlp-konflux-poc:{{revision}}
+    value: quay.io/opendatahub/caikit-nlp:$$OUTPUT_IMAGE_TAG$$
+
   - name: dockerfile
     value: Dockerfile
   - name: path-context

@@ -701,7 +701,7 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: fms-guardrails-orchestrator
-  containerImage: quay.io/opendatahub/odh-fms-guardrails-orchestrator-rhel9
+  containerImage: quay.io/opendatahub/ta-guardrails-orchestrator
   source:
     git:
       context: ./
@@ -719,7 +719,7 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: trustyai-vllm-orchestrator-gateway
-  containerImage: quay.io/opendatahub/trustyai-vllm-orchestrator-gateway
+  containerImage: quay.io/opendatahub/vllm-orchestrator-gateway
   source:
     git:
       context: ./
@@ -737,7 +737,7 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: fms-guardrails-regex-detector
-  containerImage: quay.io/opendatahub/odh-trustyai-guardrails-regex-detector-rhel9
+  containerImage: quay.io/opendatahub/regex-detector
   source:
     git:
       context: ./

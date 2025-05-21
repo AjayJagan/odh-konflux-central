@@ -23,7 +23,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/trustyai/trustyai-service-operator:"$VERSION_NAME"
+    value: quay.io/opendatahub/trustyai-service-operator:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
     value: Dockerfile
   - name: path-context
