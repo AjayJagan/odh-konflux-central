@@ -76,7 +76,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/codeflare-operator.git
+      url: https://github.com/opendatahub-io/codeflare-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -94,7 +94,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/odh-dashboard.git
+      url: https://github.com/opendatahub-io/odh-dashboard
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -112,7 +112,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: argo-argoexec/Dockerfile.konflux
-      url: https://github.com/opendatahub-io/argo-workflows.git
+      url: https://github.com/opendatahub-io/argo-workflows
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -130,7 +130,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: argo-workflowcontroller/Dockerfile.konflux
-      url: https://github.com/opendatahub-io/argo-workflows.git
+      url: https://github.com/opendatahub-io/argo-workflows
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -148,7 +148,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/data-science-pipelines-operator.git
+      url: https://github.com/opendatahub-io/data-science-pipelines-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -166,7 +166,7 @@ spec:
     git:
       context: ./components/
       dockerfileUrl: notebook-controller/Dockerfile.konflux
-      url: https://github.com/opendatahub-io/kubeflow.git
+      url: https://github.com/opendatahub-io/kubeflow
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -184,7 +184,7 @@ spec:
     git:
       context: ./ray-operator/
       dockerfileUrl: ./ray-operator/Dockerfile.konflux
-      url: https://github.com/opendatahub-io/kuberay.git
+      url: https://github.com/opendatahub-io/kuberay
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -202,7 +202,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/kueue.git
+      url: https://github.com/opendatahub-io/kueue
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -220,7 +220,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: backend/Dockerfile.konflux.api
-      url: https://github.com/opendatahub-io/data-science-pipelines.git
+      url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -238,7 +238,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: backend/Dockerfile.konflux.driver
-      url: https://github.com/opendatahub-io/data-science-pipelines.git
+      url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -256,7 +256,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: backend/Dockerfile.konflux.launcher
-      url: https://github.com/opendatahub-io/data-science-pipelines.git
+      url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -274,7 +274,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: backend/Dockerfile.konflux.persistenceagent
-      url: https://github.com/opendatahub-io/data-science-pipelines.git
+      url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -292,7 +292,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: backend/Dockerfile.konflux.scheduledworkflow
-      url: https://github.com/opendatahub-io/data-science-pipelines.git
+      url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -310,7 +310,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: ml_metadata/tools/docker_server/Dockerfile.konflux
-      url: https://github.com/opendatahub-io/ml-metadata.git
+      url: https://github.com/opendatahub-io/ml-metadata
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -328,7 +328,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/rest-proxy.git
+      url: https://github.com/opendatahub-io/rest-proxy
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -346,7 +346,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/odh-model-controller.git
+      url: https://github.com/opendatahub-io/odh-model-controller
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -364,7 +364,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/modelmesh-runtime-adapter.git
+      url: https://github.com/opendatahub-io/modelmesh-runtime-adapter
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -382,7 +382,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/modelmesh-serving.git
+      url: https://github.com/opendatahub-io/modelmesh-serving
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -400,7 +400,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/modelmesh.git
+      url: https://github.com/opendatahub-io/modelmesh
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -418,7 +418,7 @@ spec:
     git:
       context: ./components/
       dockerfileUrl: odh-notebook-controller/Dockerfile.konflux
-      url: https://github.com/opendatahub-io/kubeflow.git
+      url: https://github.com/opendatahub-io/kubeflow
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -436,7 +436,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: build/images/training-operator/Dockerfile.konflux
-      url: https://github.com/opendatahub-io/training-operator.git
+      url: https://github.com/opendatahub-io/training-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -449,12 +449,12 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-trustyai-service-operator
-  containerImage: quay.io/opendatahub/odh-trustyai-service-operator-rhel9
+  containerImage: quay.io/opendatahub/trustyai-service-operator
   source:
     git:
       context: ./
       dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/trustyai-service-operator.git
+      url: https://github.com/opendatahub-io/trustyai-service-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -467,12 +467,12 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-trustyai-service
-  containerImage: quay.io/opendatahub/odh-trustyai-service-rhel9
+  containerImage: quay.io/opendatahub/trustyai-service
   source:
     git:
       context: ./
       dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/trustyai-explainability.git
+      url: https://github.com/opendatahub-io/trustyai-explainability
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -485,12 +485,12 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-model-registry
-  containerImage: quay.io/opendatahub/odh-model-registry-rhel9
+  containerImage: quay.io/opendatahub/model-registry
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/model-registry.git
+      dockerfileUrl: Dockerfile
+      url: https://github.com/opendatahub-io/model-registry
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -503,12 +503,12 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-model-registry-operator
-  containerImage: quay.io/opendatahub/odh-model-registry-operator-rhel9
+  containerImage: quay.io/opendatahub/model-registry-operator
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/model-registry-operator.git
+      dockerfileUrl: Dockerfile
+      url: https://github.com/opendatahub-io/model-registry-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -521,12 +521,12 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-ml-pipelines-runtime-generic
-  containerImage: quay.io/opendatahub/odh-ml-pipelines-runtime-generic-rhel9
+  containerImage: quay.io/opendatahub/odh-ml-pipelines-runtime-generic
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
-      url: https://github.com/opendatahub-io/ilab-on-ocp.git
+      dockerfileUrl: Dockerfile
+      url: https://github.com/opendatahub-io/ilab-on-ocp
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -539,11 +539,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-feast-operator
-  containerImage: quay.io/opendatahub/odh-feast-operator-rhel9
+  containerImage: quay.io/opendatahub/feast-operator
   source:
     git:
       context: infra/feast-operator
-      dockerfileUrl: Dockerfiles/Dockerfile.feast-operator.konflux
+      dockerfileUrl: Dockerfile
       url: https://github.com/opendatahub-io/feast
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -557,14 +557,12 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-feature-server
-  containerImage: quay.io/opendatahub/odh-feature-server-rhel9
+  containerImage: quay.io/opendatahub/feature-server
   source:
     git:
       context: .
-      dockerfileUrl: Dockerfiles/Dockerfile.feature-server.konflux
-      url: https://github.com/opendatahub-io/feast
-      
-      
+      dockerfileUrl: sdk/python/feast/infra/feature_servers/multicloud/Dockerfile
+      url: https://github.com/opendatahub-io/feast   
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -654,7 +652,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      url: https://github.com/opendatahub-io/must-gather.git
+      url: https://github.com/opendatahub-io/must-gather
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -680,78 +678,6 @@ metadata:
   annotations:
     build.appstudio.openshift.io/request: configure-pac-no-mr
     mintmaker.appstudio.redhat.com/disabled: true
-    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-multi-platform-oci-ta","bundle":"latest"}'
-  name: vllm-cuda
-spec:
-  application: opendatahub-release
-  componentName: vllm-cuda
-  containerImage: quay.io/opendatahub/vllm-cuda
-  source:
-    git:
-      context: ./
-      dockerfileUrl: Dockerfile.ubi
-      url: https://github.com/opendatahub-io/vllm
----
-apiVersion: appstudio.redhat.com/v1alpha1
-kind: Component
-metadata:
-  annotations:
-    build.appstudio.openshift.io/request: configure-pac-no-mr
-    mintmaker.appstudio.redhat.com/disabled: true
-    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-multi-platform-oci-ta","bundle":"latest"}'
-  name: vllm-rocm
-spec:
-  application: opendatahub-release
-  componentName: vllm-rocm
-  containerImage: quay.io/opendatahub/vllm
-  source:
-    git:
-      context: ./
-      dockerfileUrl: Dockerfile.rocm.ubi
-      url: https://github.com/opendatahub-io/vllm
----
-apiVersion: appstudio.redhat.com/v1alpha1
-kind: Component
-metadata:
-  annotations:
-    build.appstudio.openshift.io/request: configure-pac-no-mr
-    mintmaker.appstudio.redhat.com/disabled: true
-    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
-  name: vllm-gaudi
-spec:
-  application: opendatahub-release
-  componentName: vllm-gaudi
-  containerImage: quay.io/opendatahub/vllm
-  source:
-    git:
-      context: ./
-      dockerfileUrl: Dockerfile.hpu.ubi
-      url: https://github.com/opendatahub-io/vllm-gaudi.git
----
-apiVersion: appstudio.redhat.com/v1alpha1
-kind: Component
-metadata:
-  annotations:
-    build.appstudio.openshift.io/request: configure-pac-no-mr
-    mintmaker.appstudio.redhat.com/disabled: true
-    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-multi-platform-oci-ta","bundle":"latest"}'
-  name: vllm-cpu
-spec:
-  application: opendatahub-release
-  componentName: vllm-cpu
-  containerImage: quay.io/opendatahub/vllm
-  source:
-    git:
-      context: ./
-      dockerfileUrl: Dockerfile.s390x.ubi
-      url: https://github.com/opendatahub-io/vllm.git
----
-apiVersion: appstudio.redhat.com/v1alpha1
-kind: Component
-metadata:
-  annotations:
-    build.appstudio.openshift.io/request: configure-pac-no-mr
-    mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
   name: ta-lmes-driver
 spec:
@@ -762,7 +688,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.driver
-      url: https://github.com/opendatahub-io/trustyai-service-operator.git
+      url: https://github.com/opendatahub-io/trustyai-service-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -780,7 +706,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.lmes-job
-      url: https://github.com/opendatahub-io/lm-evaluation-harness.git
+      url: https://github.com/opendatahub-io/lm-evaluation-harness
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -811,7 +737,7 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: trustyai-vllm-orchestrator-gateway
-  containerImage: quay.io/opendatahub/odh-trustyai-vllm-orchestrator-gateway-rhel9
+  containerImage: quay.io/opendatahub/trustyai-vllm-orchestrator-gateway
   source:
     git:
       context: ./
@@ -840,6 +766,7 @@ apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
 metadata:
   annotations:
+    build.appstudio.openshift.io/request: configure-pac-no-mr
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
   name: fms-guardrails-hf-detector
