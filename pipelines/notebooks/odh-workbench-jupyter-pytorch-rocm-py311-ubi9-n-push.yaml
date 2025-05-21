@@ -15,7 +15,7 @@ metadata:
       "jupyter/utils/**".pathChanged())
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: odh-release
+    appstudio.openshift.io/application: opendatahub-release
     appstudio.openshift.io/component: odh-rocm-pytorch-notebook-kpoc
     pipelines.appstudio.openshift.io/type: build
   name: odh-rocm-pytorch-notebook-kpoc-on-push

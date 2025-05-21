@@ -11,7 +11,7 @@ metadata:
       == "konflux-poc"
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: odh-release
+    appstudio.openshift.io/application: opendatahub-release
     appstudio.openshift.io/component: lm-evaluation-harness-konflux-poc
     pipelines.appstudio.openshift.io/type: build
   name: lm-evaluation-harness-konflux-poc-on-push

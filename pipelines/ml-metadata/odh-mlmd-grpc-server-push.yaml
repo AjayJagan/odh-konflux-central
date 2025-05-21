@@ -12,7 +12,7 @@ metadata:
       == "konflux-poc"
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: odh-release
+    appstudio.openshift.io/application: opendatahub-release
     appstudio.openshift.io/component: odh-mlmd-grpc-server
     pipelines.appstudio.openshift.io/type: build
   name: odh-mlmd-grpc-server-on-push

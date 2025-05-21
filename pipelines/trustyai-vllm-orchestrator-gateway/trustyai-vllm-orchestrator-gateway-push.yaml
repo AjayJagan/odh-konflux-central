@@ -11,7 +11,7 @@ metadata:
       == "konflux-poc"
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: odh-release
+    appstudio.openshift.io/application: opendatahub-release
     appstudio.openshift.io/component: vllm-orchestrator-gateway-konflux-poc
     pipelines.appstudio.openshift.io/type: build
   name: vllm-orchestrator-gateway-konflux-poc-on-push

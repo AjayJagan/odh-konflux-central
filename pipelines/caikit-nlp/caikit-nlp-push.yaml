@@ -11,7 +11,7 @@ metadata:
       == "konflux-poc"
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: odh-release
+    appstudio.openshift.io/application: opendatahub-release
     appstudio.openshift.io/component: caikit-nlp-konflux-poc
     pipelines.appstudio.openshift.io/type: build
   name: caikit-nlp-konflux-poc-on-push
