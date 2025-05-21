@@ -10,15 +10,15 @@ metadata:
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
       == "odh-poc"
       && (
-      ".tekton/odh-generic-data-science-notebook-kpoc-push.yaml".pathChanged() ||
+      ".tekton/odh-workbench-jupyter-datascience-cpu-py311-ubi9-n-push.yaml".pathChanged() ||
       "jupyter/datascience/ubi9-python-3.11/**".pathChanged() ||
       "jupyter/utils/**".pathChanged())
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: odh-release
-    appstudio.openshift.io/component: odh-generic-data-science-notebook-kpoc
+    appstudio.openshift.io/component: odh-workbench-jupyter-datascience-cpu-py311-ubi9-n
     pipelines.appstudio.openshift.io/type: build
-  name: odh-generic-data-science-notebook-kpoc-on-push
+  name: odh-workbench-jupyter-datascience-cpu-py311-ubi9-n-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -27,7 +27,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/open-data-hub-tenant/odh-generic-data-science-notebook-kpoc:{{revision}}
+    value: quay.io/redhat-user-workloads/open-data-hub-tenant/odh-workbench-jupyter-datascience-cpu-py311-ubi9-n:{{revision}}
   - name: dockerfile
     value: jupyter/datascience/ubi9-python-3.11/Dockerfile.cpu
   - name: path-context
@@ -607,7 +607,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-generic-data-science-notebook-kpoc
+    serviceAccountName: build-pipeline-odh-workbench-jupyter-datascience-cpu-py311-ubi9-n
   workspaces:
   - name: git-auth
     secret:
