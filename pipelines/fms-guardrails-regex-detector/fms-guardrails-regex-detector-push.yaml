@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: guardrails-regex-detector-konflux-poc
+    appstudio.openshift.io/component: fms-guardrails-regex-detector
     pipelines.appstudio.openshift.io/type: build
-  name: guardrails-regex-detector-konflux-poc-on-push
+  name: guardrails-regex-detector-on-push
   namespace: open-data-hub-tenant
 spec:
   params:

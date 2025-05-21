@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: trustyai-explainability-konflux-poc
+    appstudio.openshift.io/component: odh-trustyai-service
     pipelines.appstudio.openshift.io/type: build
-  name: trustyai-explainability-konflux-poc-on-push
+  name: odh-trustyai-service-on-push
   namespace: open-data-hub-tenant
 spec:
   params:

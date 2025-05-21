@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: fms-guardrails-orchestrator-konflux-poc
+    appstudio.openshift.io/component: fms-guardrails-orchestrator
     pipelines.appstudio.openshift.io/type: build
-  name: fms-guardrails-orchestrator-konflux-poc-on-push
+  name: fms-guardrails-orchestrator-on-push
   namespace: open-data-hub-tenant
 spec:
   params:

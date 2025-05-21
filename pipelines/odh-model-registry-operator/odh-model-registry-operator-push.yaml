@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: model-registry-operator-konflux-poc
+    appstudio.openshift.io/component: odh-model-registry-operator
     pipelines.appstudio.openshift.io/type: build
-  name: model-registry-operator-konflux-poc-on-push
+  name: odh-model-registry-operator-on-push
   namespace: open-data-hub-tenant
 spec:
   params:

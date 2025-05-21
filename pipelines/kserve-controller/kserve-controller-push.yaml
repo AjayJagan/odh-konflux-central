@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: kserve-controller-konflux-poc
+    appstudio.openshift.io/component: kserve-controller
     pipelines.appstudio.openshift.io/type: build
-  name: kserve-controller-konflux-poc-on-push
+  name: kserve-controller-on-push
   namespace: open-data-hub-tenant
 spec:
   params:

@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: feast-feature-server-konflux-poc
+    appstudio.openshift.io/component: odh-feature-server
     pipelines.appstudio.openshift.io/type: build
-  name: feast-feature-server-konflux-poc-on-push
+  name: odh-feature-server-on-push
   namespace: open-data-hub-tenant
 spec:
   params:

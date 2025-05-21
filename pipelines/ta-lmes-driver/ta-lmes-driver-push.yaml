@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: trustyai-service-operator-lmes-driver-konflux-poc
+    appstudio.openshift.io/component: ta-lmes-driver
     pipelines.appstudio.openshift.io/type: build
-  name: trustyai-service-operator-lmes-driver-konflux-poc-on-push
+  name: ta-lmes-driver-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
