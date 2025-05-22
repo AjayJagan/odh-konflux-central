@@ -57,10 +57,15 @@ jobs:
           fi
           mkdir -p extracted/.tekton
           cp -r "$repo_folder/.tekton/"* extracted/.tekton/
-          echo "Replacing output-image tag with version: ${{ inputs.version }}"
+          echo "Updating output-image tag and CEL target_branch to: ${{ inputs.version }} and ${{ inputs.release_branch }}"
           find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
+            # Update the output-image version
             sed -i -E '/name: output-image/{n; s|(value: .+:)[^[:space:]]+|\1'"${{ inputs.version }}"'|}' "$file"
+            
+            # Update the CEL target_branch in pipelinesascode annotation
+            sed -i -E 's|(pipelinesascode\.tekton\.dev/on-cel-expression:.*target_branch\s*==\s*")[^"]+(")|\1'"${{ inputs.release_branch }}"'\2|' "$file"
           done
+
 
       - name: Clone and push Tekton changes
         run: |
