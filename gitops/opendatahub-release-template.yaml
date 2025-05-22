@@ -71,11 +71,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-codeflare-operator
-  containerImage: quay.io/opendatahub/odh-codeflare-operator-rhel9
+  containerImage: quay.io/opendatahub/odh-codeflare-operator
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
+      dockerfileUrl: Dockerfile
       url: https://github.com/opendatahub-io/codeflare-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -89,48 +89,13 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-dashboard
-  containerImage: quay.io/opendatahub/odh-dashboard-rhel9
+  containerImage: quay.io/opendatahub/odh-dashboard
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
+      dockerfileUrl: Dockerfile
       url: https://github.com/opendatahub-io/odh-dashboard
----
-apiVersion: appstudio.redhat.com/v1alpha1
-kind: Component
-metadata:
-  annotations:
-    build.appstudio.openshift.io/request: configure-pac-no-mr
-    mintmaker.appstudio.redhat.com/disabled: true
-    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
-  name: odh-data-science-pipelines-argo-argoexec
-spec:
-  application: opendatahub-release
-  componentName: odh-data-science-pipelines-argo-argoexec
-  containerImage: quay.io/opendatahub/odh-data-science-pipelines-argo-argoexec-rhel9
-  source:
-    git:
-      context: ./
-      dockerfileUrl: argo-argoexec/Dockerfile.konflux
-      url: https://github.com/opendatahub-io/argo-workflows
----
-apiVersion: appstudio.redhat.com/v1alpha1
-kind: Component
-metadata:
-  annotations:
-    build.appstudio.openshift.io/request: configure-pac-no-mr
-    mintmaker.appstudio.redhat.com/disabled: true
-    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
-  name: odh-data-science-pipelines-argo-workflowcontroller
-spec:
-  application: opendatahub-release
-  componentName: odh-data-science-pipelines-argo-workflowcontroller
-  containerImage: quay.io/opendatahub/odh-data-science-pipelines-argo-workflowcontroller-rhel9
-  source:
-    git:
-      context: ./
-      dockerfileUrl: argo-workflowcontroller/Dockerfile.konflux
-      url: https://github.com/opendatahub-io/argo-workflows
+
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -143,11 +108,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-data-science-pipelines-operator-controller
-  containerImage: quay.io/opendatahub/odh-data-science-pipelines-operator-controller-rhel9
+  containerImage: quay.io/opendatahub/data-science-pipelines-operator
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
+      dockerfileUrl: Dockerfile
       url: https://github.com/opendatahub-io/data-science-pipelines-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -161,11 +126,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-kf-notebook-controller
-  containerImage: quay.io/opendatahub/odh-kf-notebook-controller-rhel9
+  containerImage: quay.io/opendatahub/kubeflow-notebook-controller
   source:
     git:
       context: ./components/
-      dockerfileUrl: notebook-controller/Dockerfile.konflux
+      dockerfileUrl: notebook-controller/Dockerfile
       url: https://github.com/opendatahub-io/kubeflow
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -179,11 +144,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-kuberay-operator-controller
-  containerImage: quay.io/opendatahub/odh-kuberay-operator-controller-rhel9
+  containerImage: quay.io//opendatahub/kuberay-operator
   source:
     git:
       context: ./ray-operator/
-      dockerfileUrl: ./ray-operator/Dockerfile.konflux
+      dockerfileUrl: ./ray-operator/Dockerfile.rhoai
       url: https://github.com/opendatahub-io/kuberay
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -197,11 +162,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-kueue-controller
-  containerImage: quay.io/opendatahub/odh-kueue-controller-rhel9
+  containerImage: quay.io/opendatahub/kueue
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
+      dockerfileUrl: Dockerfile
       url: https://github.com/opendatahub-io/kueue
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -215,11 +180,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-ml-pipelines-api-server-v2
-  containerImage: quay.io/opendatahub/odh-ml-pipelines-api-server-v2-rhel9
+  containerImage: quay.io/opendatahub/ds-pipelines-api-server
   source:
     git:
       context: ./
-      dockerfileUrl: backend/Dockerfile.konflux.api
+      dockerfileUrl: backend/Dockerfile
       url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -233,11 +198,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-ml-pipelines-driver
-  containerImage: quay.io/opendatahub/odh-ml-pipelines-driver-rhel9
+  containerImage: quay.io/opendatahub/ds-pipelines-driver
   source:
     git:
       context: ./
-      dockerfileUrl: backend/Dockerfile.konflux.driver
+      dockerfileUrl: backend/Dockerfile.driver
       url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -251,11 +216,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-ml-pipelines-launcher
-  containerImage: quay.io/opendatahub/odh-ml-pipelines-launcher-rhel9
+  containerImage: quay.io/opendatahub/ds-pipelines-launcher
   source:
     git:
       context: ./
-      dockerfileUrl: backend/Dockerfile.konflux.launcher
+      dockerfileUrl: backend/Dockerfile.launcher
       url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -269,11 +234,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-ml-pipelines-persistenceagent-v2
-  containerImage: quay.io/opendatahub/odh-ml-pipelines-persistenceagent-v2-rhel9
+  containerImage: quay.io/opendatahub/ds-pipelines-persistenceagent
   source:
     git:
       context: ./
-      dockerfileUrl: backend/Dockerfile.konflux.persistenceagent
+      dockerfileUrl: backend/Dockerfile.persistenceagent
       url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -287,11 +252,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-ml-pipelines-scheduledworkflow-v2
-  containerImage: quay.io/opendatahub/odh-ml-pipelines-scheduledworkflow-v2-rhel9
+  containerImage: quay.io/opendatahub/ds-pipelines-scheduledworkflow
   source:
     git:
       context: ./
-      dockerfileUrl: backend/Dockerfile.konflux.scheduledworkflow
+      dockerfileUrl: backend/Dockerfile.scheduledworkflow
       url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -305,11 +270,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-mlmd-grpc-server
-  containerImage: quay.io/opendatahub/odh-mlmd-grpc-server-rhel9
+  containerImage: quay.io/opendatahub/mlmd-grpc-server
   source:
     git:
       context: ./
-      dockerfileUrl: ml_metadata/tools/docker_server/Dockerfile.konflux
+      dockerfileUrl: ml_metadata/tools/docker_server/Dockerfile.redhat
       url: https://github.com/opendatahub-io/ml-metadata
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -323,11 +288,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-mm-rest-proxy
-  containerImage: quay.io/opendatahub/odh-mm-rest-proxy-rhel9
+  containerImage: quay.io/opendatahub/rest-proxy
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
+      dockerfileUrl: Dockerfile
       url: https://github.com/opendatahub-io/rest-proxy
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -341,11 +306,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-model-controller
-  containerImage: quay.io/opendatahub/odh-model-controller-rhel9
+  containerImage: quay.io/opendatahub/odh-model-controller
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
+      dockerfileUrl: Dockerfile
       url: https://github.com/opendatahub-io/odh-model-controller
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -359,11 +324,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-modelmesh-runtime-adapter
-  containerImage: quay.io/opendatahub/odh-modelmesh-runtime-adapter-rhel9
+  containerImage: quay.io/opendatahub/modelmesh-runtime-adapter
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
+      dockerfileUrl: Dockerfile
       url: https://github.com/opendatahub-io/modelmesh-runtime-adapter
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -377,11 +342,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-modelmesh-serving-controller
-  containerImage: quay.io/opendatahub/odh-modelmesh-serving-controller-rhel9
+  containerImage: quay.io/opendatahub/modelmesh-controller
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
+      dockerfileUrl: Dockerfile
       url: https://github.com/opendatahub-io/modelmesh-serving
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -395,11 +360,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-modelmesh
-  containerImage: quay.io/opendatahub/odh-modelmesh-rhel9
+  containerImage: quay.io/opendatahub/modelmesh
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
+      dockerfileUrl: Dockerfile
       url: https://github.com/opendatahub-io/modelmesh
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -413,11 +378,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-notebook-controller
-  containerImage: quay.io/opendatahub/odh-notebook-controller-rhel9
+  containerImage: quay.io/opendatahub/odh-notebook-controller
   source:
     git:
       context: ./components/
-      dockerfileUrl: odh-notebook-controller/Dockerfile.konflux
+      dockerfileUrl: odh-notebook-controller/Dockerfile
       url: https://github.com/opendatahub-io/kubeflow
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -431,11 +396,11 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-training-operator
-  containerImage: quay.io/opendatahub/odh-training-operator-rhel9
+  containerImage: quay.io/opendatahub/training-operator
   source:
     git:
       context: ./
-      dockerfileUrl: build/images/training-operator/Dockerfile.konflux
+      dockerfileUrl: build/images/training-operator/Dockerfile.rhoai
       url: https://github.com/opendatahub-io/training-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
