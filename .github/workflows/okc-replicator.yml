@@ -70,8 +70,8 @@ jobs:
             # Update the output-image version
             sed -i -E '/name: output-image/{n; s|(value: .+:)[^[:space:]]+|\1'"${{ inputs.version }}"'|}' "$file"
 
-            # Update the CEL target_branch in pipelinesascode annotation
-            sed -i -E 's|(pipelinesascode\.tekton\.dev/on-cel-expression:.*target_branch\s*==\s*")[^"]+(")|\1'"${{ inputs.release_branch }}"'\2|' "$file"
+            # Update the CEL target_branch across multiline values
+            perl -0777 -i -pe 's/(pipelinesascode\.tekton\.dev\/on-cel-expression:.*?target_branch\s*==\s*")[^"]+(")/\1'"${{ inputs.release_branch }}"'\2/s' "$file"
           done
 
 
