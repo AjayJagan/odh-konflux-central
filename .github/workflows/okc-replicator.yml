@@ -47,27 +47,33 @@ jobs:
           echo "REPOSITORY=opendatahub-io/${{ inputs.component }}" >> $GITHUB_ENV
           echo "OKC_FOLDER=${{ inputs.component }}" >> $GITHUB_ENV
 
-      - name: Prepare Tekton files
-        run: |
-          repo_folder="okc-repo/${OKC_FOLDER}/pipelines/${{ inputs.component }}"
-          echo "Using pipeline path: $repo_folder"
+            - name: Prepare Tekton files
+              run: |
+                repo_folder="okc-repo/pipelines/${OKC_FOLDER}"
+                echo "Using pipeline path: $repo_folder"
+      
+                if [ ! -d "$repo_folder" ]; then
+                  echo "ERROR: $repo_folder does not exist!"
+                  exit 1
+                fi
+      
+                mkdir -p extracted/pipelines/${OKC_FOLDER}
+                find "$repo_folder" -type f -name "*push.yaml" -exec cp {} extracted/pipelines/${OKC_FOLDER}/ \;
+      
+                if [ -z "$(ls -A extracted/pipelines/${OKC_FOLDER})" ]; then
+                  echo "ERROR: No *push.yaml files found in $repo_folder"
+                  exit 1
+                fi
+      
+                echo "Updating output-image tag and CEL target_branch to: ${{ inputs.version }} and ${{ inputs.release_branch }}"
+                find extracted/pipelines/${OKC_FOLDER}/ -type f -name "*.yaml" | while read file; do
+                  # Update the output-image version
+                  sed -i -E '/name: output-image/{n; s|(value: .+:)[^[:space:]]+|\1'"${{ inputs.version }}"'|}' "$file"
+      
+                  # Update the CEL target_branch in pipelinesascode annotation
+                  sed -i -E 's|(pipelinesascode\.tekton\.dev/on-cel-expression:.*target_branch\s*==\s*")[^"]+(")|\1'"${{ inputs.release_branch }}"'\2|' "$file"
+                done
 
-          if [ ! -d "$repo_folder" ]; then
-            echo "ERROR: $repo_folder does not exist!"
-            exit 1
-          fi
-
-          mkdir -p extracted/pipelines/${{ inputs.component }}
-          cp -r "$repo_folder/"* extracted/pipelines/${{ inputs.component }}/
-
-          echo "Updating output-image tag and CEL target_branch to: ${{ inputs.version }} and ${{ inputs.release_branch }}"
-          find extracted/pipelines/${{ inputs.component }}/ -type f -name "*.yaml" | while read file; do
-            # Update the output-image version
-            sed -i -E '/name: output-image/{n; s|(value: .+:)[^[:space:]]+|\1'"${{ inputs.version }}"'|}' "$file"
-
-            # Update the CEL target_branch in pipelinesascode annotation
-            sed -i -E 's|(pipelinesascode\.tekton\.dev/on-cel-expression:.*target_branch\s*==\s*")[^"]+(")|\1'"${{ inputs.release_branch }}"'\2|' "$file"
-          done
 
       - name: Clone and push Tekton changes
         run: |
