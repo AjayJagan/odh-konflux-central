@@ -8,13 +8,13 @@ metadata:
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
-      == "konflux-poc"
+      == "$$TARGET_BRANCH$$"
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: odh-release
-    appstudio.openshift.io/component: text-generation-inference-odh-poc
+    appstudio.openshift.io/application: opendatahub-release
+    appstudio.openshift.io/component: text-generation-inference
     pipelines.appstudio.openshift.io/type: build
-  name: text-generation-inference-odh-poc-on-push
+  name: text-generation-inference-on-push
   namespace: open-data-hub-tenant
 spec:
   timeouts:
@@ -26,7 +26,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/open-data-hub-tenant/text-generation-inference-odh-poc:{{revision}}
+    value: quay.io/opendatahub/text-generation-inference:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
     value: Dockerfile
   - name: path-context
@@ -92,7 +92,7 @@ spec:
         path-context
       name: dockerfile
       type: string
-    - default: "false"
+    - default: "true"
       description: Force rebuild image
       name: rebuild
       type: string
@@ -643,7 +643,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-text-generation-inference-odh-poc
+    serviceAccountName: build-pipeline-text-generation-inference
   workspaces:
   - name: git-auth
     secret:
