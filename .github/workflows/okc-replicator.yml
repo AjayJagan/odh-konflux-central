@@ -89,7 +89,7 @@ jobs:
 
           mkdir -p .tekton
           rsync -av --delete ../extracted/.tekton/ .tekton/
-          git add .tekton
+          git add -f .tekton
 
           if git diff --cached --quiet; then
             echo "No changes to commit."
