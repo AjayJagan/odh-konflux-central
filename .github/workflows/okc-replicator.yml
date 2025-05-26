@@ -31,14 +31,18 @@ jobs:
       repository-projects: write
 
     steps:
-      
+      - name: Checkout OKC repository
+        uses: actions/checkout@v4
+        with:
+          path: okc-repo
+
       - name: Generate github-app token
         id: app-token
         uses: getsentry/action-github-app-token@v2
         with:
           app_id: ${{ secrets.ODH_DEVOPS_APP_ID }}
           private_key: ${{ secrets.ODH_DEVOPS_APP_PRIVATE_KEY }}
-
+          
       - name: Set environment variables
         run: |
           echo "REPOSITORY=opendatahub-io/${{ inputs.component }}" >> $GITHUB_ENV
@@ -54,22 +58,23 @@ jobs:
             exit 1
           fi
 
-          mkdir -p extracted/.tekton
-          find "$repo_folder" -type f -name "*push.yaml" -exec cp {} extracted/.tekton/ \;
+          mkdir -p extracted/pipelines/${OKC_FOLDER}
+          find "$repo_folder" -type f -name "*push.yaml" -exec cp {} extracted/pipelines/${OKC_FOLDER}/ \;
 
-          if [ -z "$(ls -A extracted/.tekton)" ]; then
+          if [ -z "$(ls -A extracted/pipelines/${OKC_FOLDER})" ]; then
             echo "ERROR: No *push.yaml files found in $repo_folder"
             exit 1
           fi
 
           echo "Updating output-image tag and CEL target_branch to: ${{ inputs.version }} and ${{ inputs.release_branch }}"
-          find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
+          find extracted/pipelines/${OKC_FOLDER}/ -type f -name "*.yaml" | while read file; do
             # Update the output-image version
             sed -i -E '/name: output-image/{n; s|(value: .+:)[^[:space:]]+|\1'"${{ inputs.version }}"'|}' "$file"
 
-            # Update the CEL target_branch value where it's set to $$TARGET_BRANCH$$
-            perl -0777 -i -pe 's/(target_branch\s*==\s*")\$\$TARGET_BRANCH\$\$(")/\1'"${{ inputs.release_branch }}"'\2/g' "$file"
+            # Update the CEL target_branch across multiline values
+            perl -0777 -i -pe 's/(pipelinesascode\.tekton\.dev\/on-cel-expression:.*?target_branch\s*==\s*")[^"]+(")/\1'"${{ inputs.release_branch }}"'\2/s' "$file"
           done
+
 
       - name: Clone and push Tekton changes
         run: |
@@ -83,9 +88,9 @@ jobs:
           branch_name="appstudio-${{ inputs.component }}-konflux-replicator"
           git checkout -B "$branch_name" ${{ inputs.release_branch }}
 
-          mkdir -p .tekton
-          rsync -av --delete ../extracted/.tekton/ .tekton/
-          git add .tekton
+          mkdir -p pipelines/${{ inputs.component }}
+          rsync -av --delete ../extracted/pipelines/${{ inputs.component }}/ pipelines/${{ inputs.component }}/
+          git add pipelines/${{ inputs.component }}
 
           if git diff --cached --quiet; then
             echo "No changes to commit."
@@ -107,4 +112,4 @@ jobs:
             --base "${{ inputs.release_branch }}" \
             --head "appstudio-${{ inputs.component }}-konflux-replicator" \
             --title "Update Tekton files to version ${{ inputs.version }}" \
-            --body "This PR updates the \`output-image\` tags and CEL expressions in \`.tekton/\` to version \`${{ inputs.version }}\` and branch \`${{ inputs.release_branch }}\`."
+            --body "This PR updates the \`output-image\` tags and CEL expressions in \`pipelines/${{ inputs.component }}/\` to version \`${{ inputs.version }}\` and branch \`${{ inputs.release_branch }}\`."
