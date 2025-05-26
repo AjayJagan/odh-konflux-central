@@ -72,7 +72,10 @@ jobs:
             sed -i -E '/name: output-image/{n; s|(value: .+:)[^[:space:]]+|\1'"${{ inputs.version }}"'|}' "$file"
 
             # Update the CEL target_branch value where it's set to $$TARGET_BRANCH$$
-            perl -0777 -i -pe 's/(target_branch\s*==\s*")\$\$TARGET_BRANCH\$\$(")/\1'"${{ inputs.release_branch }}"'\2/g' "$file"
+            #perl -0777 -i -pe 's/(target_branch\s*==\s*")\$\$TARGET_BRANCH\$\$(")/\1'"${{ inputs.release_branch }}"'\2/g' "$file"
+            # Update CEL expression containing $$TARGET_BRANCH$$ across lines
+            perl -0777 -i -pe 's/(pipelinesascode\.tekton\.dev\/on-cel-expression:.*?target_branch\s*==\s*)\$\$TARGET_BRANCH\$\$/${1}'"${{ inputs.release_branch }}"'/s' "$file"
+
           done
 
       - name: Clone and push Tekton changes
