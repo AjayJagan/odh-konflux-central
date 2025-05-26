@@ -40,8 +40,8 @@ jobs:
         id: app-token
         uses: getsentry/action-github-app-token@v2
         with:
-          app_id: ${{ secrets._APP_ID }}
-          private_key: ${{ secrets._PRIVATE_KEY }}
+          app_id: ${{ secrets.ODH_DEVOPS_APP_ID }}
+          private_key: ${{ secrets.ODH_DEVOPS_APP_PRIVATE_KEY }}
 
       - name: Set environment variables
         run: |
