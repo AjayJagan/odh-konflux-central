@@ -10,6 +10,7 @@ on:
         options:
           - data-science-pipelines
           - odh-model-controller
+          - kserve
           # Add all valid components here
       release_branch:
         description: 'Branch in target repo to merge PR into (e.g., rhoai-2.9)'
