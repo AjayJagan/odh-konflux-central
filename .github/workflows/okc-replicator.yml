@@ -4,25 +4,54 @@ on:
   workflow_dispatch:
     inputs:
       component:
-        description: 'Component name (used for both OKC folder and GitHub repository under DevOps-automation-tasks)'
+        description: 'Component name'
         required: true
         type: choice
         options:
+          - caikit-nlp
+          - caikit-tgis-serving
+          - codeflare-operator
+          - data-science-pipelines-operator
           - data-science-pipelines
-          - odh-model-controller
+          - feast
+          - fms-guardrails-orchestrator
+          - guardrails-detector
+          - guardrails-regex-detector
+          - ilab-on-ocp
           - kserve
+          - kubeflow
+          - kuberay
+          - kueue
+          - lm-evaluation-harness
+          - ml-metadata
+          - model-registry-operator
+          - model-registry
+          - modelmesh-runtime-adapter
+          - modelmesh-serving
+          - modelmesh
+          - notebooks
+          - odh-dashboard
+          - odh-model-controller
+          - openvino-model-server
+          - rest-proxy
+          - ta-lmes-driver
+          - text-generation-inference
+          - training-operator
+          - trustyai-explainability
+          - trustyai-service-operator
+          - vllm-orchestrator-gateway
           # Add all valid components here
       release_branch:
-        description: 'Branch in target repo to merge PR into (e.g., rhoai-2.9)'
+        description: 'Target Release Branch'
         required: true
         type: string
       version:
-        description: 'New version identifier (e.g., v2.29.0)'
+        description: 'New version'
         required: true
         type: string
 
 jobs:
-  create-pr:
+  update-tekton-pipelines-and-create-pr:
     runs-on: ubuntu-latest
 
     permissions:
@@ -71,8 +100,6 @@ jobs:
             # Update the output-image version
             sed -i -E '/name: output-image/{n; s|(value: .+:)[^[:space:]]+|\1'"${{ inputs.version }}"'|}' "$file"
 
-            # Update the CEL target_branch value where it's set to $$TARGET_BRANCH$$
-            #perl -0777 -i -pe 's/(target_branch\s*==\s*")\$\$TARGET_BRANCH\$\$(")/\1'"${{ inputs.release_branch }}"'\2/g' "$file"
             # Update CEL expression containing $$TARGET_BRANCH$$ across lines
             perl -0777 -i -pe 's/(pipelinesascode\.tekton\.dev\/on-cel-expression:.*?target_branch\s*==\s*)\$\$TARGET_BRANCH\$\$/${1}'"${{ inputs.release_branch }}"'/s' "$file"
 
