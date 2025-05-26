@@ -2,29 +2,19 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/notebooks?rev={{revision}}
+    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/opendatahub-operator?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
-    build.appstudio.openshift.io/build-nudge-files: "manifests/base/params-latest.env"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
-      == "$$TARGET_BRANCH$$"
-      && !("manifests/base/params-latest.env".pathChanged())
-      && ( ".tekton/odh-workbench-jupyter-tensorflow-cuda-py311-ubi9-n-push.yaml".pathChanged() ||
-           "jupyter/tensorflow/ubi9-python-3.11/**".pathChanged() || 
-           "cuda/**".pathChanged() ||
-           "jupyter/utils/**".pathChanged() || 
-           "jupyter/minimal/ubi9-python-3.11/start-notebook.sh".pathChanged() ||
-           "jupyter/datascience/ubi9-python-3.11/mongodb-org-6.0.repo-x86_64/**".pathChanged() ||
-           "jupyter/datascience/ubi9-python-3.11/mssql-2022.repo-x86_64/**".pathChanged() ||
-           "jupyter/datascience/ubi9-python-3.11/setup-elyra.sh".pathChanged() )
+      == "konflux-poc" && ("bundle/**".pathChanged() || "Dockerfiles/bundle.Dockerfile".pathChanged() || ".tekton/odh-operator-bundle-odh-poc1-push.yaml".pathChanged())
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: odh-workbench-jupyter-tensorflow-cuda-py311-ubi9-n
+    appstudio.openshift.io/application: odh-release
+    appstudio.openshift.io/component: odh-operator-bundle-odh-poc1
     pipelines.appstudio.openshift.io/type: build
-  name: odh-workbench-jupyter-tensorflow-cuda-py311-ubi9-n-on-push
+  name: odh-operator-bundle-odh-poc1-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -33,14 +23,9 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/odh-workbench-jupyter-tensorflow-cuda-py311-ubi9-n:{{revision}}
+    value: quay.io/redhat-user-workloads/open-data-hub-tenant/odh-operator-bundle-odh-poc1:v2.29.0
   - name: dockerfile
-    value: jupyter/tensorflow/ubi9-python-3.11/Dockerfile.cuda
-  - name: path-context
-    value: .
-  - name: additional-tags
-    value:
-    - '$$OUTPUT_IMAGE_TAG$$'
+    value: Dockerfiles/bundle.Dockerfile
   pipelineSpec:
     description: |
       This pipeline is ideal for building container images from a Containerfile while maintaining trust after pipeline customization.
@@ -82,7 +67,7 @@ spec:
         path-context
       name: dockerfile
       type: string
-    - default: "true"
+    - default: "false"
       description: Force rebuild image
       name: rebuild
       type: string
@@ -322,7 +307,7 @@ spec:
         - name: name
           value: deprecated-image-check
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-deprecated-image-check:0.5@sha256:ecd33669676b3a193ff4c2c6223cb912cc1b0cf5cc36e080eaec7718500272cf
+          value: quay.io/konflux-ci/tekton-catalog/task-deprecated-image-check:0.5@sha256:eb8136b543147b4a3e88ca3cc661ca6a11e303f35f0db44059f69151beea8496
         - name: kind
           value: task
         resolver: bundles
@@ -344,7 +329,7 @@ spec:
         - name: name
           value: clair-scan
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-clair-scan:0.2@sha256:878ae247ffc58d95a9ac68e4d658ef91ef039363e03e65a386bc0ead02d9d7d8
+          value: quay.io/konflux-ci/tekton-catalog/task-clair-scan:0.2@sha256:7c73e2beca9b8306387efeaf775831440ec799b05a5f5c008a65bb941a1e91f6
         - name: kind
           value: task
         resolver: bundles
@@ -364,7 +349,7 @@ spec:
         - name: name
           value: ecosystem-cert-preflight-checks
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-ecosystem-cert-preflight-checks:0.2@sha256:1157c6ac9805af8b8874e4b8d68d2403d99e1c007f63623566b5d848b27c1826
+          value: quay.io/konflux-ci/tekton-catalog/task-ecosystem-cert-preflight-checks:0.2@sha256:dea8d9b4bec3e99d612d799798acf132df48276164b5193ea68f9f3c25ae425b
         - name: kind
           value: task
         resolver: bundles
@@ -412,7 +397,7 @@ spec:
         - name: name
           value: clamav-scan
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-clamav-scan:0.2@sha256:24182598bf5161c4007988a7236e240f361c77a0a9b6973a6712dbae50d296bc
+          value: quay.io/konflux-ci/tekton-catalog/task-clamav-scan:0.2@sha256:59094118aa07d5b0199565c4e0b2d0f4feb9a4741877c8716877572e2c4804f9
         - name: kind
           value: task
         resolver: bundles
@@ -543,9 +528,6 @@ spec:
       params:
       - name: IMAGE
         value: $(tasks.build-image-index.results.IMAGE_URL)
-      - name: ADDITIONAL_TAGS
-        value:
-        - $(params.additional-tags[*])
       runAfter:
       - build-image-index
       taskRef:
@@ -576,7 +558,7 @@ spec:
         - name: name
           value: push-dockerfile-oci-ta
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-push-dockerfile-oci-ta:0.1@sha256:d0ee13ab3d9564f7ee806a8ceaced934db493a3a40e11ff6db3a912b8bbace95
+          value: quay.io/konflux-ci/tekton-catalog/task-push-dockerfile-oci-ta:0.1@sha256:278f84550844c1c050a65536799f4b54e7c203e0ac51393aa75379dd974c82e9
         - name: kind
           value: task
         resolver: bundles
@@ -608,7 +590,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-workbench-jupyter-tensorflow-cuda-py311-ubi9-n
+    serviceAccountName: build-pipeline-odh-operator-bundle-odh-poc1
   workspaces:
   - name: git-auth
     secret:

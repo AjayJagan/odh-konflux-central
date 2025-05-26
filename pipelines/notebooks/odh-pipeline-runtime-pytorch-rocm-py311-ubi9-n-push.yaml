@@ -7,15 +7,15 @@ metadata:
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
+    build.appstudio.openshift.io/build-nudge-files: "manifests/base/params-latest.env"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
-      == "odh-poc"
-      && (
-      ".tekton/odh-pipeline-runtime-pytorch-rocm-py311-ubi9-n-push.yaml".pathChanged() ||
-      "runtimes/rocm-pytorch/ubi9-python-3.11/**".pathChanged() ||
-      "jupyter/utils/**".pathChanged())
+      == "$$TARGET_BRANCH$$"
+      && !("manifests/base/params-latest.env".pathChanged())
+      && (".tekton/odh-pipeline-runtime-pytorch-rocm-py311-ubi9-n-push.yaml".pathChanged() || 
+          "runtimes/rocm-pytorch/ubi9-python-3.11/**".pathChanged() )
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: odh-release
+    appstudio.openshift.io/application: opendatahub-release
     appstudio.openshift.io/component: odh-pipeline-runtime-pytorch-rocm-py311-ubi9-n
     pipelines.appstudio.openshift.io/type: build
   name: odh-pipeline-runtime-pytorch-rocm-py311-ubi9-n-on-push
@@ -29,11 +29,14 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/open-data-hub-tenant/odh-pipeline-runtime-pytorch-rocm-py311-ubi9-n:{{revision}}
+    value: quay.io/opendatahub/odh-pipeline-runtime-pytorch-rocm-py311-ubi9-n:{{revision}}
   - name: dockerfile
     value: runtimes/rocm-pytorch/ubi9-python-3.11/Dockerfile.rocm
   - name: path-context
     value: .
+  - name: additional-tags
+    value:
+    - '$$OUTPUT_IMAGE_TAG$$'
   pipelineSpec:
     description: |
       This pipeline is ideal for building container images from a Containerfile while maintaining trust after pipeline customization.
@@ -536,6 +539,9 @@ spec:
       params:
       - name: IMAGE
         value: $(tasks.build-image-index.results.IMAGE_URL)
+      - name: ADDITIONAL_TAGS
+        value:
+        - $(params.additional-tags[*])
       runAfter:
       - build-image-index
       taskRef:
