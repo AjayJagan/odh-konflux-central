@@ -31,11 +31,7 @@ jobs:
       repository-projects: write
 
     steps:
-      - name: Checkout OKC repository
-        uses: actions/checkout@v4
-        with:
-          path: okc-repo
-
+      
       - name: Generate github-app token
         id: app-token
         uses: getsentry/action-github-app-token@v2
