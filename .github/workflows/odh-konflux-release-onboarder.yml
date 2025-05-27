@@ -1,4 +1,4 @@
-name: OKC Replicator for tekton files
+name: ODH Konflux Release Onboarder
 
 on:
   workflow_dispatch:
