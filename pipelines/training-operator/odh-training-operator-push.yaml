@@ -23,7 +23,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/open-data-hub-tenant/odh-training-operator:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/training-operator:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
     value: build/images/training-operator/Dockerfile.rhoai
   - name: path-context
