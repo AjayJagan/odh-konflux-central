@@ -23,7 +23,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/open-data-hub-tenant/odh-ml-pipelines-api-server-v2:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/ds-pipelines-api-server:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
     value: backend/Dockerfile
   - name: path-context
