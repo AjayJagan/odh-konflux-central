@@ -76,6 +76,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "v1.15.0"
       url: https://github.com/opendatahub-io/codeflare-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -94,6 +95,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "v2.33.1-odh-release"
       url: https://github.com/opendatahub-io/odh-dashboard
 
 ---
@@ -113,6 +115,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "v2.12.x"
       url: https://github.com/opendatahub-io/data-science-pipelines-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -131,6 +134,7 @@ spec:
     git:
       context: ./components/
       dockerfileUrl: notebook-controller/Dockerfile
+      revision: "v1.10.0-2"
       url: https://github.com/opendatahub-io/kubeflow
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -149,6 +153,7 @@ spec:
     git:
       context: ./ray-operator/
       dockerfileUrl: ./ray-operator/Dockerfile.rhoai
+      revision: "v1.3.2"
       url: https://github.com/opendatahub-io/kuberay
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -167,6 +172,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "v0.10.1-odh-2"
       url: https://github.com/opendatahub-io/kueue
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -185,6 +191,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: backend/Dockerfile
+      revision: "v2.12.x"
       url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -203,6 +210,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: backend/Dockerfile.driver
+      revision: "v2.12.x"
       url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -221,6 +229,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: backend/Dockerfile.launcher
+      revision: "v2.12.x"
       url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -239,6 +248,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: backend/Dockerfile.persistenceagent
+      revision: "v2.12.x"
       url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -257,6 +267,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: backend/Dockerfile.scheduledworkflow
+      revision: "v2.12.x"
       url: https://github.com/opendatahub-io/data-science-pipelines
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -275,6 +286,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: ml_metadata/tools/docker_server/Dockerfile.redhat
+      revision: "v1.14.0+Bremote.1"
       url: https://github.com/opendatahub-io/ml-metadata
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -293,6 +305,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "odh-v2.28"
       url: https://github.com/opendatahub-io/rest-proxy
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -311,6 +324,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "odh-v2.28"
       url: https://github.com/opendatahub-io/odh-model-controller
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -329,6 +343,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "odh-v2.28"
       url: https://github.com/opendatahub-io/modelmesh-runtime-adapter
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -347,6 +362,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "odh-v2.28"
       url: https://github.com/opendatahub-io/modelmesh-serving
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -365,6 +381,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "odh-v2.28"
       url: https://github.com/opendatahub-io/modelmesh
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -383,6 +400,7 @@ spec:
     git:
       context: ./components/
       dockerfileUrl: odh-notebook-controller/Dockerfile
+      revision: "v1.10.0-2"
       url: https://github.com/opendatahub-io/kubeflow
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -401,6 +419,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: build/images/training-operator/Dockerfile.rhoai
+      revision: "v1.9.0-odh-3"
       url: https://github.com/opendatahub-io/training-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -419,6 +438,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.konflux
+      revision: "v1.36.0"
       url: https://github.com/opendatahub-io/trustyai-service-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -437,6 +457,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.konflux
+      revision: "v0.28.0"
       url: https://github.com/opendatahub-io/trustyai-explainability
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -455,6 +476,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "v0.2.17"
       url: https://github.com/opendatahub-io/model-registry
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -473,6 +495,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "v0.2.17"
       url: https://github.com/opendatahub-io/model-registry-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -491,6 +514,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revisin: "v2.13.x"
       url: https://github.com/opendatahub-io/ilab-on-ocp
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -509,6 +533,7 @@ spec:
     git:
       context: infra/feast-operator
       dockerfileUrl: Dockerfile
+      revision: "v0.49.0"
       url: https://github.com/opendatahub-io/feast
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -527,6 +552,7 @@ spec:
     git:
       context: .
       dockerfileUrl: sdk/python/feast/infra/feature_servers/multicloud/Dockerfile
+      revision: "v0.49.0"
       url: https://github.com/opendatahub-io/feast   
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -545,6 +571,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: agent.Dockerfile
+      revision: "odh-v2.29"
       url: https://github.com/opendatahub-io/kserve
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -563,6 +590,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "odh-v2.29"
       url: https://github.com/opendatahub-io/kserve
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -581,6 +609,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: router.Dockerfile
+      revision: "odh-v2.29"
       url: https://github.com/opendatahub-io/kserve
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -599,6 +628,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: python/storage-initializer.Dockerfile
+      revision: "odh-v2.29"
       url: https://github.com/opendatahub-io/kserve
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -617,6 +647,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "v0.2.0"
       url: https://github.com/opendatahub-io/caikit-nlp
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -635,6 +666,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.driver
+      revision: "konflux-poc"
       url: https://github.com/opendatahub-io/trustyai-service-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -653,6 +685,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.lmes-job
+      revision: "release-0.4.8"
       url: https://github.com/opendatahub-io/lm-evaluation-harness
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -671,6 +704,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "konflux-poc"
       url: https://github.com/opendatahub-io/fms-guardrails-orchestrator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -689,6 +723,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "konflux-poc"
       url: https://github.com/opendatahub-io/vllm-orchestrator-gateway
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -707,6 +742,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "konflux-poc"
       url: https://github.com/opendatahub-io/guardrails-regex-detector
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -725,6 +761,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: detectors/Dockerfile.hf
+      revision: "konflux-poc"
       url: https://github.com/opendatahub-io/guardrails-detectors
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -743,6 +780,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -763,6 +801,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: jupyter/minimal/ubi9-python-3.11/Dockerfile.cpu
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -783,6 +822,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: jupyter/minimal/ubi9-python-3.11/Dockerfile.cuda
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -803,6 +843,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: jupyter/minimal/ubi9-python-3.11/Dockerfile.rocm
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -823,6 +864,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: jupyter/datascience/ubi9-python-3.11/Dockerfile.cpu
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -843,6 +885,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: jupyter/pytorch/ubi9-python-3.11/Dockerfile.cuda
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -863,6 +906,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: jupyter/rocm/pytorch/ubi9-python-3.11/Dockerfile.rocm
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -883,6 +927,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: jupyter/tensorflow/ubi9-python-3.11/Dockerfile.cuda
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -903,6 +948,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: jupyter/rocm/tensorflow/ubi9-python-3.11/Dockerfile.rocm
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -923,6 +969,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: jupyter/trustyai/ubi9-python-3.11/Dockerfile.cpu
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -943,6 +990,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: runtimes/datascience/ubi9-python-3.11/Dockerfile.cpu
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -963,6 +1011,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: runtimes/minimal/ubi9-python-3.11/Dockerfile.cpu
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -983,6 +1032,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: runtimes/pytorch/ubi9-python-3.11/Dockerfile.cuda
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -1003,6 +1053,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: runtimes/rocm-pytorch/ubi9-python-3.11/Dockerfile.rocm
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -1023,6 +1074,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: runtimes/tensorflow/ubi9-python-3.11/Dockerfile.cuda
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -1043,6 +1095,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: runtimes/rocm-tensorflow/ubi9-python-3.11/Dockerfile.rocm
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -1063,6 +1116,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: codeserver/ubi9-python-3.11/Dockerfile.cpu
+      revision: "v1.31.0"
       url: https://github.com/opendatahub-io/notebooks
 
 ---
@@ -1082,6 +1136,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "release"
       url: https://github.com/opendatahub-io/caikit-tgis-serving
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -1100,6 +1155,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile.redhat
+      revision: "2025.1-release"
       url: https://github.com/opendatahub-io/openvino_model_server
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -1118,4 +1174,5 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
+      revision: "release"
       url: https://github.com/opendatahub-io/text-generation-inference
