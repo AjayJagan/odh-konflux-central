@@ -24,6 +24,7 @@ spec:
     git:
       context: catalog/v4.19
       dockerfileUrl: Dockerfile
+      revision: "v2.28.0"
       url: https://github.com/opendatahub-io/opendatahub-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -41,6 +42,7 @@ spec:
   source:
     git:
       dockerfileUrl: Dockerfiles/bundle.Dockerfile
+      revision: "v2.28.0"
       url: https://github.com/opendatahub-io/opendatahub-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -58,6 +60,7 @@ spec:
   source:
     git:
       dockerfileUrl: Dockerfiles/Dockerfile
+      revision: "v2.28.0"
       url: https://github.com/opendatahub-io/opendatahub-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
