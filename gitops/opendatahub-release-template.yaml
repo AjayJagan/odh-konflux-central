@@ -151,7 +151,7 @@ metadata:
 spec:
   application: opendatahub-release
   componentName: odh-kuberay-operator-controller
-  containerImage: quay.io//opendatahub/kuberay-operator
+  containerImage: quay.io/opendatahub/kuberay-operator
   source:
     git:
       context: ./ray-operator/
