@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: fms-guardrails-hf-detectors
+    appstudio.openshift.io/component: fms-guardrails-hf-detector
     pipelines.appstudio.openshift.io/type: build
-  name: fms-guardrails-hf-detectors-on-push
+  name: fms-guardrails-hf-detector-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
