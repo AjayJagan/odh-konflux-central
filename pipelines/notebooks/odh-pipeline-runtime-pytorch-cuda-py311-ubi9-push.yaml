@@ -1,5 +1,6 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
+#test
 metadata:
   annotations:
     build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/notebooks?rev={{revision}}
@@ -11,32 +12,44 @@ metadata:
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
       == "$$TARGET_BRANCH$$"
       && !("manifests/base/params-latest.env".pathChanged())
-      && ( ".tekton/odh-workbench-jupyter-minimal-cuda-py311-ubi9-n-push.yaml".pathChanged() || 
-           "jupyter/utils/**".pathChanged() || 
-           "jupyter/minimal/ubi9-python-3.11/**".pathChanged() || 
+      && ( ".tekton/odh-pipeline-runtime-pytorch-cuda-py311-ubi9-push.yaml".pathChanged() ||
+           "runtimes/pytorch/ubi9-python-3.11/**".pathChanged() || 
            "cuda/**".pathChanged() )
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: odh-workbench-jupyter-minimal-cuda-py311-ubi9-n
+    appstudio.openshift.io/component: odh-pipeline-runtime-pytorch-cuda-py311-ubi9
     pipelines.appstudio.openshift.io/type: build
-  name: odh-workbench-jupyter-minimal-cuda-py311-ubi9-n-on-push
+  name: odh-pipeline-runtime-pytorch-cuda-py311-ubi9-on-push
   namespace: open-data-hub-tenant
 spec:
+  timeouts:
+    pipeline: 8h
   params:
   - name: git-url
     value: '{{source_url}}'
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/odh-workbench-jupyter-minimal-cuda-py311-ubi9-n:{{revision}}
+    value: quay.io/opendatahub/odh-pipeline-runtime-pytorch-cuda-py311-ubi9:{{revision}}
   - name: dockerfile
-    value: jupyter/minimal/ubi9-python-3.11/Dockerfile.cuda
+    value: runtimes/pytorch/ubi9-python-3.11/Dockerfile.cuda
   - name: path-context
     value: .
   - name: additional-tags
     value:
     - '$$OUTPUT_IMAGE_TAG$$'
+  taskRunSpecs:
+    - pipelineTaskName: build-container
+      stepSpecs:
+        - name: build
+          computeResources:
+            requests:
+              cpu: '8'
+              memory: 16Gi
+            limits:
+              cpu: '16'
+              memory: 32Gi
   pipelineSpec:
     description: |
       This pipeline is ideal for building container images from a Containerfile while maintaining trust after pipeline customization.
@@ -664,7 +677,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-workbench-jupyter-minimal-cuda-py311-ubi9-n
+    serviceAccountName: build-pipeline-odh-pipeline-runtime-pytorch-cuda-py311-ubi9
   workspaces:
   - name: git-auth
     secret:

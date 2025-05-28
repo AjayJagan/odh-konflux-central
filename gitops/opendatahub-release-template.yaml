@@ -793,12 +793,12 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-workbench-jupyter-minimal-cpu-py311-ubi9-n
+  name: odh-workbench-jupyter-minimal-cpu-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-workbench-jupyter-minimal-cpu-py311-ubi9-n
+  componentName: odh-workbench-jupyter-minimal-cpu-py311-ubi9
   containerImage: quay.io/opendatahub/odh-workbench-jupyter-minimal-cpu-py311-ubi9
   source:
     git:
@@ -814,12 +814,12 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-workbench-jupyter-minimal-cuda-py311-ubi9-n
+  name: odh-workbench-jupyter-minimal-cuda-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-workbench-jupyter-minimal-cuda-py311-ubi9-n
+  componentName: odh-workbench-jupyter-minimal-cuda-py311-ubi9
   containerImage: quay.io/opendatahub/odh-workbench-jupyter-minimal-cuda-py311-ubi9
   source:
     git:
@@ -835,12 +835,12 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-workbench-jupyter-minimal-rocm-py311-ubi9-n
+  name: odh-workbench-jupyter-minimal-rocm-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-workbench-jupyter-minimal-rocm-py311-ubi9-n
+  componentName: odh-workbench-jupyter-minimal-rocm-py311-ubi9
   containerImage: quay.io/opendatahub/odh-workbench-jupyter-minimal-rocm-py311-ubi9
   source:
     git:
@@ -856,12 +856,12 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-workbench-jupyter-datascience-cpu-py311-ubi9-n
+  name: odh-workbench-jupyter-datascience-cpu-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-workbench-jupyter-datascience-cpu-py311-ubi9-n
+  componentName: odh-workbench-jupyter-datascience-cpu-py311-ubi9
   containerImage: quay.io/opendatahub/odh-workbench-jupyter-datascience-cpu-py311-ubi9
   source:
     git:
@@ -877,12 +877,12 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-workbench-jupyter-pytorch-cuda-py311-ubi9-n
+  name: odh-workbench-jupyter-pytorch-cuda-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-workbench-jupyter-pytorch-cuda-py311-ubi9-n
+  componentName: odh-workbench-jupyter-pytorch-cuda-py311-ubi9
   containerImage: quay.io/opendatahub/odh-workbench-jupyter-pytorch-cuda-py311-ubi9
   source:
     git:
@@ -898,12 +898,12 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-workbench-jupyter-pytorch-rocm-py311-ubi9-n
+  name: odh-workbench-jupyter-pytorch-rocm-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-workbench-jupyter-pytorch-rocm-py311-ubi9-n
+  componentName: odh-workbench-jupyter-pytorch-rocm-py311-ubi9
   containerImage: quay.io/opendatahub/odh-workbench-jupyter-pytorch-rocm-py311-ubi9
   source:
     git:
@@ -919,12 +919,12 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-workbench-jupyter-tensorflow-cuda-py311-ubi9-n
+  name: odh-workbench-jupyter-tensorflow-cuda-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-workbench-jupyter-tensorflow-cuda-py311-ubi9-n
+  componentName: odh-workbench-jupyter-tensorflow-cuda-py311-ubi9
   containerImage: quay.io/opendatahub/odh-workbench-jupyter-tensorflow-cuda-py311-ubi9
   source:
     git:
@@ -940,12 +940,12 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-workbench-jupyter-tensorflow-rocm-py311-ubi9-n
+  name: odh-workbench-jupyter-tensorflow-rocm-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-workbench-jupyter-tensorflow-rocm-py311-ubi9-n
+  componentName: odh-workbench-jupyter-tensorflow-rocm-py311-ubi9
   containerImage: quay.io/opendatahub/odh-workbench-jupyter-tensorflow-rocm-py311-ubi9
   source:
     git:
@@ -961,12 +961,12 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-workbench-jupyter-trustyai-cpu-py311-ubi9-n
+  name: odh-workbench-jupyter-trustyai-cpu-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-workbench-jupyter-trustyai-cpu-py311-ubi9-n
+  componentName: odh-workbench-jupyter-trustyai-cpu-py311-ubi9
   containerImage: quay.io/opendatahub/odh-workbench-jupyter-trustyai-cpu-py311-ubi9
   source:
     git:
@@ -982,13 +982,13 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-pipeline-runtime-datascience-cpu-py311-ubi9-n
+  name: odh-pipeline-runtime-datascience-cpu-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-pipeline-runtime-datascience-cpu-py311-ubi9-n
-  containerImage: quay.io/opendatahub/odh-runtime-datascience-cpu-py311-ubi9
+  componentName: odh-pipeline-runtime-datascience-cpu-py311-ubi9
+  containerImage: quay.io/opendatahub/odh-pipeline-runtime-datascience-cpu-py311-ubi9
   source:
     git:
       context: ./
@@ -1003,13 +1003,13 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-pipeline-runtime-minimal-cpu-py311-ubi9-n
+  name: odh-pipeline-runtime-minimal-cpu-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-pipeline-runtime-minimal-cpu-py311-ubi9-n
-  containerImage: quay.io/opendatahub/odh-runtime-minimal-cpu-py311-ubi9
+  componentName: odh-pipeline-runtime-minimal-cpu-py311-ubi9
+  containerImage: quay.io/opendatahub/odh-pipeline-runtime-minimal-cpu-py311-ubi9
   source:
     git:
       context: ./
@@ -1024,13 +1024,13 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-pipeline-runtime-pytorch-cuda-py311-ubi9-n
+  name: odh-pipeline-runtime-pytorch-cuda-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-pipeline-runtime-pytorch-cuda-py311-ubi9-n
-  containerImage: quay.io/opendatahub/odh-runtime-pytorch-cuda-py311-ubi9
+  componentName: odh-pipeline-runtime-pytorch-cuda-py311-ubi9
+  containerImage: quay.io/opendatahub/odh-pipeline-runtime-pytorch-cuda-py311-ubi9
   source:
     git:
       context: ./
@@ -1045,13 +1045,13 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-pipeline-runtime-pytorch-rocm-py311-ubi9-n
+  name: odh-pipeline-runtime-pytorch-rocm-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-pipeline-runtime-pytorch-rocm-py311-ubi9-n
-  containerImage: quay.io/opendatahub/odh-runtime-pytorch-rocm-py311-ubi9
+  componentName: odh-pipeline-runtime-pytorch-rocm-py311-ubi9
+  containerImage: quay.io/opendatahub/odh-pipeline-runtime-pytorch-rocm-py311-ubi9
   source:
     git:
       context: ./
@@ -1066,13 +1066,13 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-pipeline-runtime-tensorflow-cuda-py311-ubi9-n
+  name: odh-pipeline-runtime-tensorflow-cuda-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-pipeline-runtime-tensorflow-cuda-py311-ubi9-n
-  containerImage: quay.io/opendatahub/odh-runtime-tensorflow-cuda-py311-ubi9
+  componentName: odh-pipeline-runtime-tensorflow-cuda-py311-ubi9
+  containerImage: quay.io/opendatahub/odh-pipeline-runtime-tensorflow-cuda-py311-ubi9
   source:
     git:
       context: ./
@@ -1087,13 +1087,13 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-pipeline-runtime-tensorflow-rocm-py311-ubi9-n
+  name: odh-pipeline-runtime-tensorflow-rocm-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-pipeline-runtime-tensorflow-rocm-py311-ubi9-n
-  containerImage: quay.io/opendatahub/odh-runtime-tensorflow-rocm-py311-ubi9
+  componentName: odh-pipeline-runtime-tensorflow-rocm-py311-ubi9
+  containerImage: quay.io/opendatahub/odh-pipeline-runtime-tensorflow-rocm-py311-ubi9
   source:
     git:
       context: ./
@@ -1108,12 +1108,12 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name: odh-workbench-codeserver-datascience-cpu-py311-ubi9-n
+  name: odh-workbench-codeserver-datascience-cpu-py311-ubi9
 spec:
   application: opendatahub-release
   build-nudges-ref:
     - nudge-only-notebooks
-  componentName: odh-workbench-codeserver-datascience-cpu-py311-ubi9-n
+  componentName: odh-workbench-codeserver-datascience-cpu-py311-ubi9
   containerImage: quay.io/opendatahub/odh-workbench-codeserver-datascience-cpu-py311-ubi9
   source:
     git:
