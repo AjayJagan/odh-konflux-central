@@ -79,7 +79,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revision: "v1.15.0"
+      revision: "main"
       url: https://github.com/opendatahub-io/codeflare-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -156,7 +156,7 @@ spec:
     git:
       context: ./ray-operator/
       dockerfileUrl: ./ray-operator/Dockerfile.rhoai
-      revision: "v1.3.2"
+      revision: "release-v1.3.2"
       url: https://github.com/opendatahub-io/kuberay
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -175,7 +175,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revision: "v0.10.1-odh-2"
+      revision: "dev"
       url: https://github.com/opendatahub-io/kueue
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -422,7 +422,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: build/images/training-operator/Dockerfile.rhoai
-      revision: "v1.9.0-odh-3"
+      revision: "dev"
       url: https://github.com/opendatahub-io/training-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
