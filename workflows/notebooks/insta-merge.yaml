@@ -6,6 +6,8 @@ on:
       - manifests/base/params-latest.env
     types:
       - opened
+    branches:
+      - '$$OUTPUT_IMAGE_TAG$$'
 
 permissions:
   contents: write
