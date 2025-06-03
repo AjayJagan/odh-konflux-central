@@ -104,6 +104,20 @@ jobs:
             perl -0777 -i -pe 's/(target_branch\s*==\s*)(["]?)\$\$TARGET_BRANCH\$\$(["]?)/\1"'"${{ inputs.release_branch }}"'"/g' "$file"
           done
 
+      - name: Prepare GitHub workflow files (if applicable)
+        run: |
+          src_dir="workflows/${{ inputs.component }}"
+          dest_dir="extracted/.github/workflows"
+          mkdir -p "$dest_dir"
+
+          if [ -d "$src_dir" ]; then
+            echo "Copying workflow files from $src_dir to $dest_dir"
+            find "$src_dir" -type f -name "*.yaml" -exec cp {} "$dest_dir/" \;
+          else
+            echo "No workflows directory found for component '${{ inputs.component }}'. Skipping."
+          fi
+
+
       - name: Clone and push Tekton changes
         run: |
           git clone https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${REPOSITORY} repo-workspace
@@ -118,7 +132,7 @@ jobs:
 
           mkdir -p .tekton
           rsync -av --delete ../extracted/.tekton/ .tekton/
-          git add -f .tekton
+          git add -f .tekton .github/workflows
 
           if git diff --cached --quiet; then
             echo "No changes to commit."
