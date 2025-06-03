@@ -126,23 +126,39 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin ${{ inputs.release_branch }}
           git checkout -B ${{ inputs.release_branch }} origin/${{ inputs.release_branch }}
-
+      
           branch_name="appstudio-${{ inputs.component }}-konflux-replicator"
           git checkout -B "$branch_name" ${{ inputs.release_branch }}
-
+      
+          # Copy .tekton files
           mkdir -p .tekton
           rsync -av --delete ../extracted/.tekton/ .tekton/
-          git add -f .tekton .github/workflows
-
+          git add -f .tekton
+      
+          # Conditionally copy workflows if available
+          workflow_src="../extracted/.github/workflows"
+          workflow_dest=".github/workflows"
+      
+          if [ -d "$workflow_src" ]; then
+            echo "Copying workflow files from $workflow_src to $workflow_dest"
+            mkdir -p "$workflow_dest"
+            rsync -av --delete "$workflow_src/" "$workflow_dest/"
+            git add -f "$workflow_dest"
+          else
+            echo "No workflow files found for component '${{ inputs.component }}'. Skipping workflow update."
+          fi
+      
+          # Commit if there are changes
           if git diff --cached --quiet; then
             echo "No changes to commit."
             echo "commit=false" >> $GITHUB_ENV
             exit 0
           fi
-
+      
           git commit -m "Update Tekton output-image tags to version ${{ inputs.version }}"
           git push --set-upstream origin "$branch_name" --force
           echo "commit=true" >> $GITHUB_ENV
+
 
       - name: Create Pull Request
         if: env.commit == 'true'
