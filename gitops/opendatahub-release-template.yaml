@@ -327,7 +327,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revision: "odh-v2.28"
+      revision: "main"
       url: https://github.com/opendatahub-io/odh-model-controller
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -346,7 +346,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revision: "odh-v2.28"
+      revision: "release-0.12.0-rc0"
       url: https://github.com/opendatahub-io/modelmesh-runtime-adapter
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -365,7 +365,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revision: "odh-v2.28"
+      revision: "release-0.12.0-rc0"
       url: https://github.com/opendatahub-io/modelmesh-serving
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -384,7 +384,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revision: "odh-v2.28"
+      revision: "release-0.12.0-rc0"
       url: https://github.com/opendatahub-io/modelmesh
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
