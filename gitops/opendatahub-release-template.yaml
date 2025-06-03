@@ -137,7 +137,7 @@ spec:
     git:
       context: ./components/
       dockerfileUrl: notebook-controller/Dockerfile
-      revision: "v1.10.0-2"
+      revision: "v1.10"
       url: https://github.com/opendatahub-io/kubeflow
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -403,7 +403,7 @@ spec:
     git:
       context: ./components/
       dockerfileUrl: odh-notebook-controller/Dockerfile
-      revision: "v1.10.0-2"
+      revision: "v1.10"
       url: https://github.com/opendatahub-io/kubeflow
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
