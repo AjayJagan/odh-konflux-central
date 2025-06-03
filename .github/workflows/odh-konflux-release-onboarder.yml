@@ -142,7 +142,7 @@ jobs:
           if [ -d "$workflow_src" ]; then
             echo "Copying workflow files from $workflow_src to $workflow_dest"
             mkdir -p "$workflow_dest"
-            rsync -av --delete "$workflow_src/" "$workflow_dest/"
+            rsync -av "$workflow_src/" "$workflow_dest/"
             git add -f "$workflow_dest"
           else
             echo "No workflow files found for component '${{ inputs.component }}'. Skipping workflow update."
