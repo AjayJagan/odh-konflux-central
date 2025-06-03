@@ -113,10 +113,15 @@ jobs:
           if [ -d "$src_dir" ]; then
             echo "Copying workflow files from $src_dir to $dest_dir"
             find "$src_dir" -type f -name "*.yaml" -exec cp {} "$dest_dir/" \;
+      
+            echo "Updating $$TARGET_BRANCH$$ to ${{ inputs.release_branch }} in GitHub workflow files"
+            find "$dest_dir" -type f -name "*.yaml" | while read file; do
+              # Replace $$TARGET_BRANCH$$ with the actual release branch name
+              perl -0777 -i -pe 's/(\bbranches:\s*-\s*)(["]?)\$\$TARGET_BRANCH\$\$(["]?)/\1"'"${{ inputs.release_branch }}"'"/g' "$file"
+            done
           else
             echo "No workflows directory found for component '${{ inputs.component }}'. Skipping."
           fi
-
 
       - name: Clone and push Tekton changes
         run: |
