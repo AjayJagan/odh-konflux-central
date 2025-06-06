@@ -308,7 +308,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revision: "odh-v2.28"
+      revision: "release-0.12.0-rc0"
       url: https://github.com/opendatahub-io/rest-proxy
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
