@@ -30,6 +30,7 @@ on:
           - modelmesh-serving
           - modelmesh
           - notebooks
+          - opendatahub-operator
           - odh-dashboard
           - odh-model-controller
           - openvino-model-server
