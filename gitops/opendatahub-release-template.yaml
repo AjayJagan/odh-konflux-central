@@ -440,7 +440,7 @@ spec:
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
+      dockerfileUrl: Dockerfile
       revision: "v1.36.0"
       url: https://github.com/opendatahub-io/trustyai-service-operator
 ---
@@ -459,7 +459,7 @@ spec:
   source:
     git:
       context: ./
-      dockerfileUrl: Dockerfile.konflux
+      dockerfileUrl: Dockerfile
       revision: "v0.28.0"
       url: https://github.com/opendatahub-io/trustyai-explainability
 ---
@@ -517,7 +517,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revisin: "v2.13.x"
+      revision: "v2.13.x"
       url: https://github.com/opendatahub-io/ilab-on-ocp
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
