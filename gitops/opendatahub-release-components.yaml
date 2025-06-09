@@ -79,7 +79,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revision: "main"
+      revision: "konflux-poc"
       url: https://github.com/opendatahub-io/codeflare-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -175,7 +175,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revision: "dev"
+      revision: "konflux-poc"
       url: https://github.com/opendatahub-io/kueue
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -289,7 +289,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: ml_metadata/tools/docker_server/Dockerfile.redhat
-      revision: "master"
+      revision: "konflux-poc"
       url: https://github.com/opendatahub-io/ml-metadata
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -327,7 +327,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revision: "main"
+      revision: "konflux-poc"
       url: https://github.com/opendatahub-io/odh-model-controller
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -422,7 +422,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: build/images/training-operator/Dockerfile.rhoai
-      revision: "dev"
+      revision: "konflux-poc"
       url: https://github.com/opendatahub-io/training-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
