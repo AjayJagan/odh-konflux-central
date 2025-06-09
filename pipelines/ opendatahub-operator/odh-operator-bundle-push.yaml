@@ -27,6 +27,8 @@ spec:
   - name: dockerfile
     value: Dockerfiles/bundle.Dockerfile
   - name: rebuild
+  - name: target_branch
+    value: '{{target_branch}}'
     value: true
   pipelineSpec:
     description: |
@@ -70,6 +72,44 @@ spec:
         operator: in
         values:
         - "Failed"
+    - name: trigger-fbc-fragment-gha
+      params:
+      - name: target_branch
+        value: "$(params.target_branch)"
+      when:
+      - input: $(tasks.status)
+        operator: in
+        values: ["Succeeded"]
+      taskSpec:
+        params:
+        - name: target_branch
+          type: string
+        steps:
+        - name: trigger-workflow
+          image: quay.io/centos/centos:stream9
+          env:
+          - name: TARGET_BRANCH
+            value: "$(params.target_branch)"
+          - name: GITHUB_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: github-token-secret
+                key: token
+          script: |
+            #!/bin/bash
+            set -e
+
+            OWNER="opendatahub-io"
+            REPO="opendatahub-operator"
+            WORKFLOW_FILE="process-fbc-fragment.yaml"
+
+            echo "Triggering GitHub Actions workflow $WORKFLOW_FILE for branch $TARGET_BRANCH"
+
+            curl -X POST "https://api.github.com/repos/$OWNER/$REPO/actions/workflows/$WORKFLOW_FILE/dispatches" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              -H "Content-Type: application/json" \
+              -d '{ "ref": "'"$TARGET_BRANCH"'" }'
     params:
     - description: Source Repository URL
       name: git-url
