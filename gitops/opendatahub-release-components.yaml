@@ -175,7 +175,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revision: "konflux-poc"
+      revision: "main"
       url: https://github.com/opendatahub-io/kueue
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -422,7 +422,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: build/images/training-operator/Dockerfile.rhoai
-      revision: "konflux-poc"
+      revision: "master"
       url: https://github.com/opendatahub-io/training-operator
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
