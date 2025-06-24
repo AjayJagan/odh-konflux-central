@@ -15,7 +15,7 @@ on:
           - data-science-pipelines
           - feast
           - fms-guardrails-orchestrator
-          - guardrails-detector
+          - guardrails-detectors
           - guardrails-regex-detector
           - ilab-on-ocp
           - kserve
