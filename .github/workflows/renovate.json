@@ -14,5 +14,6 @@
         "enabled": false
       }
     ]
-  }
+  },
+  "updateNotScheduled": false
 }
