@@ -553,8 +553,8 @@ spec:
   containerImage: quay.io/opendatahub/feature-server
   source:
     git:
-      context: .
-      dockerfileUrl: sdk/python/feast/infra/feature_servers/multicloud/Dockerfile
+      context: sdk/python/feast/infra/feature_servers/multicloud
+      dockerfileUrl: Dockerfile
       revision: "stable"
       url: https://github.com/opendatahub-io/feast   
 ---
@@ -629,8 +629,8 @@ spec:
   containerImage: quay.io/opendatahub/kserve-storage-initializer
   source:
     git:
-      context: ./
-      dockerfileUrl: python/storage-initializer.Dockerfile
+      context: ./python
+      dockerfileUrl: storage-initializer.Dockerfile
       revision: "odh-v2.29"
       url: https://github.com/opendatahub-io/kserve
 ---
