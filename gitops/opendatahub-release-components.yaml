@@ -762,8 +762,8 @@ spec:
   containerImage: quay.io/opendatahub/guardrails-detector-huggingface-runtime
   source:
     git:
-      context: ./
-      dockerfileUrl: detectors/Dockerfile.hf
+      context: ./detectors
+      dockerfileUrl: Dockerfile.hf
       revision: "konflux-poc"
       url: https://github.com/opendatahub-io/guardrails-detectors
 ---
