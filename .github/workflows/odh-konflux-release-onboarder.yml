@@ -95,13 +95,11 @@ jobs:
             exit 1
           fi
 
-          echo "Updating output-image tag and CEL target_branch to: ${{ inputs.version }} and ${{ inputs.release_branch }}"
           find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
             # Update the output-image version
             sed -i -E '/name: output-image/{n; s|(value: .+:)[^[:space:]]+|\1'"${{ inputs.version }}"'|}' "$file"
-
             # Update CEL expression containing $$TARGET_BRANCH$$ across lines
-            perl -0777 -i -pe 's/(target_branch\s*==\s*)(["]?)\$\$TARGET_BRANCH\$\$(["]?)/\1"'"${{ inputs.release_branch }}"'"/g' "$file"
+            perl -0777 -i -pe "s#(target_branch\s*==\s*)([\"']?)\\\$\\\$TARGET_BRANCH\\\$\\\$([\"']?)#\1\"${{ inputs.release_branch }}\"#g" "$file"
           done
 
       - name: Prepare GitHub workflow files (if applicable)
