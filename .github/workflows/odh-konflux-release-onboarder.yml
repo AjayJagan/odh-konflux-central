@@ -40,6 +40,7 @@ on:
           - trustyai-explainability
           - trustyai-service-operator
           - vllm-orchestrator-gateway
+          - llama-stack-k8s-operator
           # Add all valid components here
       release_branch:
         description: 'Target Release Branch'

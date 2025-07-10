@@ -1179,3 +1179,22 @@ spec:
       dockerfileUrl: Dockerfile
       revision: "release"
       url: https://github.com/opendatahub-io/text-generation-inference
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: llama-stack-k8s-operator
+spec:
+  application: opendatahub-release
+  componentName: llama-stack-k8s-operator
+  containerImage: quay.io/opendatahub/llama-stack-k8s-operator
+  source:
+    git:
+      context: .
+      dockerfileUrl: Dockerfile
+      revision: odh
+      url: https://github.com/opendatahub-io/llama-stack-k8s-operator
