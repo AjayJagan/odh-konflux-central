@@ -1494,3 +1494,38 @@ spec:
       dockerfileUrl: Dockerfile
       revision: "release"
       url: https://github.com/opendatahub-io/text-generation-inference
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: llm-d-inference-scheduler
+spec:
+  application: opendatahub-release
+  componentName: llm-d-inference-scheduler
+  containerImage: quay.io/opendatahub/llm-d-inference-scheduler
+  source:
+    git:
+      dockerfileUrl: Dockerfile
+      revision: konflux-poc
+      url: https://github.com/opendatahub-io/llm-d-inference-scheduler.git
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: llm-d-routing-sidecar
+spec:
+  application: opendatahub-release
+  componentName: llm-d-routing-sidecar
+  containerImage: quay.io/opendatahub/llm-d-routing-sidecar
+  source:
+    git:
+      revision: konflux-poc
+      url: https://github.com/opendatahub-io/llm-d-routing-sidecar
