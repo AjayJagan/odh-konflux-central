@@ -40,6 +40,8 @@ on:
           - trustyai-explainability
           - trustyai-service-operator
           - vllm-orchestrator-gateway
+          - llm-d-inference-scheduler
+          - llm-d-routing-sidecar
           # Add all valid components here
       release_branch:
         description: 'Target Release Branch'
