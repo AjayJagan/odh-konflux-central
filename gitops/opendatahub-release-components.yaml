@@ -1129,6 +1129,48 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: odh-workbench-rstudio-minimal-cpu-py311-c9s
+spec:
+  application: opendatahub-release
+  build-nudges-ref:
+    - nudge-only-notebooks
+  componentName: odh-workbench-rstudio-minimal-cpu-py311-c9s
+  containerImage: quay.io/opendatahub/odh-workbench-rstudio-minimal-cpu-py311-c9s
+  source:
+    git:
+      context: ./
+      dockerfileUrl: rstudio/c9s-python-3.11/Dockerfile.cpu
+      revision: "main"
+      url: https://github.com/opendatahub-io/notebooks
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: odh-workbench-rstudio-minimal-cuda-py311-c9s
+spec:
+  application: opendatahub-release
+  build-nudges-ref:
+    - nudge-only-notebooks
+  componentName: odh-workbench-rstudio-minimal-cuda-py311-c9s
+  containerImage: quay.io/opendatahub/odh-workbench-rstudio-minimal-cuda-py311-c9s
+  source:
+    git:
+      context: ./
+      dockerfileUrl: rstudio/c9s-python-3.11/Dockerfile.cuda
+      revision: "main"
+      url: https://github.com/opendatahub-io/notebooks
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
   name: odh-workbench-jupyter-minimal-cpu-py312-ubi9
 spec:
   application: opendatahub-release
