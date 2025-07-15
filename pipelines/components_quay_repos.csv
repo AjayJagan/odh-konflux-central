@@ -57,3 +57,6 @@ odh-fbc-fragment,quay.io/opendatahub/opendatahub-operator-catalog
 odh-operator-bundle,quay.io/opendatahub/opendatahub-operator-bundle
 odh-operator,quay.io/opendatahub/opendatahub-operator
 odh-codeflare-operator,quay.io/opendatahub/odh-codeflare-operator
+llama-stack-k8s-operator,quay.io/opendatahub/llama-stack-k8s-operator
+llm-d-inference-scheduler,quay.io/opendatahub/llm-d-inference-scheduler
+llm-d-routing-sidecar,quay.io/opendatahub/llm-d-routing-sidecar
