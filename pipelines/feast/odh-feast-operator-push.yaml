@@ -204,8 +204,6 @@ spec:
         value: $(params.rebuild)
       - name: skip-checks
         value: $(params.skip-checks)
-      runAfter:
-      - rhoai-init
       taskRef:
         params:
         - name: name
@@ -215,7 +213,8 @@ spec:
         - name: kind
           value: task
         resolver: bundles
-
+      runAfter:
+      - rhoai-init
     - name: clone-repository
       params:
       - name: url
