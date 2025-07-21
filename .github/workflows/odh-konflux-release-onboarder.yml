@@ -134,7 +134,8 @@ jobs:
           git checkout -B ${{ inputs.release_branch }} origin/${{ inputs.release_branch }}
       
           #branch_name="appstudio-${{ inputs.component }}-konflux-replicator"
-          branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}"
+          #branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}"
+          branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}-$(date +%s)"
 
           git checkout -B "$branch_name" ${{ inputs.release_branch }}
       
