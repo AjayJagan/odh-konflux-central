@@ -162,7 +162,7 @@ jobs:
           fi
       
           git commit -m "Update Tekton output-image tags to version ${{ inputs.version }}"
-          git push --set-upstream origin "$branch_name" --force
+          git push --set-upstream origin "$branch_name"
           echo "commit=true" >> $GITHUB_ENV
 
 
