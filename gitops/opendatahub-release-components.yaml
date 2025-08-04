@@ -1646,3 +1646,22 @@ spec:
       dockerfileUrl: argo-workflowcontroller/Dockerfile.ODH
       revision: konflux-poc
       url: https://github.com/opendatahub-io/argo-workflows
+
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: odh-model-registry-mod-arch
+spec:
+  application: opendatahub-release
+  componentName: odh-model-registry-mod-arch
+  containerImage: quay.io/opendatahub/odh-mod-arch-modular-architecture
+  source:
+    git:
+      dockerfileUrl: Dockerfile
+      revision: modarch-poc
+      url: https://github.com/opendatahub-io/odh-dashboard
