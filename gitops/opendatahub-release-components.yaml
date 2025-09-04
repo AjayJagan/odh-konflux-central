@@ -1665,3 +1665,107 @@ spec:
       dockerfileUrl: packages/model-registry/Dockerfile.workspace
       revision: modarch-poc
       url: https://github.com/opendatahub-io/odh-dashboard
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: odh-base-image-cuda-py312-c9s
+spec:
+  application: opendatahub-release
+  componentName: odh-base-image-cuda-py312-c9s
+  containerImage: quay.io/opendatahub/odh-base-image-cuda-py312-c9s
+  source:
+    git:
+      context: .
+      dockerfileUrl: base-images/cuda/12.6/c9s-python-3.12/Dockerfile.cuda
+      revision: poc
+      url: https://github.com/opendatahub-io/notebooks.git
+---
+
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: odh-base-image-cuda-py312-ubi9
+spec:
+  application: opendatahub-release
+  componentName: odh-base-image-cuda-py312-ubi9
+  containerImage: quay.io/opendatahub/odh-base-image-cuda-py312-ubi9
+  source:
+    git:
+      context: .
+      dockerfileUrl: base-images/cuda/12.6/ubi9-python-3.12/Dockerfile.cuda
+      revision: poc
+      url: https://github.com/opendatahub-io/notebooks.git
+---
+
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: odh-base-image-rocm-py312-ubi9
+spec:
+  application: opendatahub-release
+  componentName: odh-base-image-rocm-py312-ubi9
+  containerImage: quay.io/opendatahub/odh-base-image-rocm-py312-ubi9
+  source:
+    git:
+      context: .
+      dockerfileUrl: base-images/rocm/6.2/ubi9-python-3.12/Dockerfile.rocm
+      revision: poc
+      url: https://github.com/opendatahub-io/notebooks.git
+---
+
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: odh-base-image-cuda-py311-c9s
+spec:
+  application: opendatahub-release
+  componentName: odh-base-image-cuda-py311-c9s
+  containerImage: quay.io/opendatahub/odh-base-image-cuda-py311-c9s
+  source:
+    git:
+      context: .
+      dockerfileUrl: base-images/cuda/12.6/c9s-python-3.11/Dockerfile.cuda
+      revision: poc
+      url: https://github.com/opendatahub-io/notebooks.git
+---
+
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: odh-base-image-rocm-py312-c9s
+spec:
+  application: opendatahub-release
+  componentName: odh-base-image-rocm-py312-c9s
+  containerImage: quay.io/opendatahub/odh-base-image-rocm-py312-c9s
+  source:
+    git:
+      context: .
+      dockerfileUrl: base-images/rocm/6.2/c9s-python-3.12/Dockerfile.rocm
+      revision: poc
+      url: https://github.com/opendatahub-io/notebooks.git
+---
