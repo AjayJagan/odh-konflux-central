@@ -1786,6 +1786,6 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revision: "main"
+      revision: "konflux-poc"
       url: https://github.com/opendatahub-io/model-metadata-collection
 ---
