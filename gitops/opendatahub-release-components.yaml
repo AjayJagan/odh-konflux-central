@@ -1777,10 +1777,10 @@ metadata:
     build.appstudio.openshift.io/request: configure-pac-no-mr
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
-  name: model-metadata-collection
+  name: odh-model-metadata-collection
 spec:
   application: opendatahub-release
-  componentName: model-metadata-collection
+  componentName: odh-model-metadata-collection
   containerImage: quay.io/opendatahub/odh-model-metadata-collection
   source:
     git:
