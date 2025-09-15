@@ -1769,3 +1769,23 @@ spec:
       revision: poc
       url: https://github.com/opendatahub-io/notebooks.git
 ---
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+  name: model-metadata-collection
+spec:
+  application: opendatahub-release
+  componentName: model-metadata-collection
+  containerImage: quay.io/opendatahub/odh-model-metadata-collection
+  source:
+    git:
+      context: ./
+      dockerfileUrl: Dockerfile
+      revision: "main"
+      url: https://github.com/opendatahub-io/model-metadata-collection
+---
