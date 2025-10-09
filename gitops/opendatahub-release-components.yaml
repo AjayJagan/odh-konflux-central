@@ -1789,3 +1789,24 @@ spec:
       revision: "konflux-poc"
       url: https://github.com/opendatahub-io/model-metadata-collection
 ---
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: odh-mod-arch-gen-ai
+spec:
+  application: opendatahub-release
+  componentName: odh-mod-arch-gen-ai
+  containerImage: quay.io/opendatahub/odh-mod-arch-modular-architecture
+  source:
+    git:
+      context: .
+      dockerfileUrl: packages/gen-ai/Dockerfile.workspace
+      revision: "genai-poc"
+      url: https://github.com/opendatahub-io/odh-dashboard
+---
