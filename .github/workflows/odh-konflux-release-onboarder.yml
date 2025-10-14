@@ -21,7 +21,6 @@ on:
           - kserve
           - kubeflow
           - kuberay
-          - kueue
           - lm-evaluation-harness
           - ml-metadata
           - model-registry-operator

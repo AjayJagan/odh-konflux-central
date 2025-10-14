@@ -34,7 +34,7 @@ metadata:
     build.appstudio.openshift.io/request: configure-pac-no-mr
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
-  name: odh-operator-bundlef
+  name: odh-operator-bundle
 spec:
   application: opendatahub-release
   componentName: odh-operator-bundle
