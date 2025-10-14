@@ -9,7 +9,7 @@ fms-guardrails-orchestrator,quay.io/opendatahub/ta-guardrails-orchestrator
 odh-kf-notebook-controller,quay.io/opendatahub/kubeflow-notebook-controller
 odh-notebook-controller,quay.io/opendatahub/odh-notebook-controller
 odh-kuberay-operator-controller,quay.io/opendatahub/kuberay-operator
-odh-kueue-controller,quay.io/opendatahub/kueue
+odh-kube-auth-proxy,quay.io/opendatahub/odh-kube-auth-proxy
 lm-evaluation-harness,quay.io/opendatahub/ta-lmes-job
 odh-mlmd-grpc-server,quay.io/opendatahub/mlmd-grpc-server
 odh-modelmesh-runtime-adapter,quay.io/opendatahub/modelmesh-runtime-adapter
