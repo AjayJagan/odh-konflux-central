@@ -26,8 +26,6 @@ spec:
     value: '{{revision}}'
   - name: output-image
     value: quay.io/opendatahub/odh-mod-arch-gen-ai:$$OUTPUT_IMAGE_TAG$$
-  - name: image-expires-after
-    value: 5d
   - name: dockerfile
     value: packages/gen-ai/Dockerfile.workspace
   - name: path-context
