@@ -802,7 +802,7 @@ spec:
     git:
       context: ./
       dockerfileUrl: Dockerfile
-      revision: "main"
+      revision: "candidate"
       url: https://github.com/opendatahub-io/notebooks
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -1809,4 +1809,84 @@ spec:
       dockerfileUrl: packages/gen-ai/Dockerfile.workspace
       revision: "genai-poc"
       url: https://github.com/opendatahub-io/odh-dashboard
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: kube-auth-proxy
+spec:
+  application: opendatahub-release
+  componentName: kube-auth-proxy
+  containerImage: quay.io/opendatahub/kube-auth-proxy
+  source:
+    git:
+      dockerfileUrl: Dockerfile
+      revision: main
+      url: https://github.com/opendatahub-io/kube-auth-proxy.git
+---
+
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: llama-stack-provider-ragas
+spec:
+  application: opendatahub-release
+  componentName: llama-stack-provider-ragas
+  containerImage: quay.io/opendatahub/llama-stack-provider-ragas
+  source:
+    git:
+      dockerfileUrl: Containerfile
+      revision: incubation
+      url: https://github.com/opendatahub-io/llama-stack-provider-ragas.git
+---
+
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: odh-base-image-cpu-py312-c9s
+spec:
+  application: opendatahub-release
+  componentName: odh-base-image-cpu-py312-c9s
+  containerImage: quay.io/opendatahub/odh-base-image-cpu-py312-c9s
+  source:
+    git:
+      context: .
+      dockerfileUrl: base-images/cpu/c9s-python-3.12/Dockerfile.cpu
+      revision: main
+      url: https://github.com/opendatahub-io/notebooks.git
+---
+
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: odh-base-image-cpu-py312-ubi9
+spec:
+  application: opendatahub-release
+  componentName: odh-base-image-cpu-py312-ubi9
+  containerImage: quay.io/opendatahub/odh-base-image-cpu-py312-ubi9
+  source:
+    git:
+      context: .
+      dockerfileUrl: base-images/cpu/ubi9-python-3.12/Dockerfile.cpu
+      revision: main
+      url: https://github.com/opendatahub-io/notebooks.git
 ---
