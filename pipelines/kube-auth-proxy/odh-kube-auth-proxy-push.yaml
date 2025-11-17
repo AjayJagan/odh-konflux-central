@@ -12,7 +12,7 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: odh-kube-auth-proxy
+    appstudio.openshift.io/component: kube-auth-proxy
     pipelines.appstudio.openshift.io/type: build
   name: odh-kube-auth-proxy-on-push
   namespace: open-data-hub-tenant
