@@ -28,6 +28,9 @@ spec:
     value: Dockerfile
   - name: path-context
     value: .
+  - name: build-args
+    value:
+    - RUNTIMES=lightgbm sklearn xgboost
   pipelineSpec:
     description: |
       This pipeline is ideal for building container images from a Containerfile while maintaining trust after pipeline customization.
