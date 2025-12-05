@@ -32,7 +32,7 @@ on:
           - opendatahub-operator
           - odh-dashboard
           - odh-model-controller
-          - openvino-model-server
+          - openvino_model_server
           - rest-proxy
           - text-generation-inference
           - training-operator
