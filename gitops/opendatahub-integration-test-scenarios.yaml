@@ -2,24 +2,22 @@
 apiVersion: appstudio.redhat.com/v1beta2
 kind: IntegrationTestScenario
 metadata:
+  labels:
+    test.appstudio.openshift.io/optional: "false"
   name: opendatahub-operator-e2e-test-scenario
   namespace: open-data-hub-tenant
 spec:
   application: opendatahub-release
   contexts:
-  - description: execute the integration test when component odh-operator updates
-    name: component_odh-operator
+    - description: execute the integration test when component odh-operator updates
+      name: component_odh-operator
   resolverRef:
     params:
-    - name: org
-      value: opendatahub-io
-    - name: repo
-      value: odh-konflux-central
-    - name: serverURL
-      value: https://github.com
-    - name: revision
-      value: main
-    - name: pathInRepo
-      value: integration-tests/opendatahub-operator/e2e-test.yaml
+      - name: url
+        value: https://github.com/opendatahub-io/odh-konflux-central.git
+      - name: revision
+        value: main
+      - name: pathInRepo
+        value: integration-tests/opendatahub-operator/e2e-test.yaml
     resolver: git
     resourceKind: pipeline
