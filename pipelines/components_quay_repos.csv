@@ -86,3 +86,4 @@ odh-base-image-cpu-py312-c9s,quay.io/opendatahub/odh-base-image-cpu-py312-c9s
 trainer,quay.io/opendatahub/trainer
 mlflow,quay.io/opendatahub/mlflow
 mlflow-operator,quay.io/opendatahub/mlflow-operator
+eval-hub,quay.io/opendatahub/eval-hub

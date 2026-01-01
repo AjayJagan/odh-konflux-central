@@ -51,6 +51,7 @@ on:
           - trainer
           - mlflow
           - mlflow-operator
+          - eval-hub
           # Add all valid components here
       release_branch:
         description: 'Target Release Branch'
