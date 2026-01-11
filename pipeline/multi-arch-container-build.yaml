@@ -81,10 +81,6 @@ spec:
   - default: "synk-secret"
     description: Synk Token Secret Name
     name: synk-secret
-  - name: build-platforms
-    default:
-    - linux-extra-fast/amd64
-    description: List of platforms to build the container images on. The available set of values is determined by the configuration of the multi-platform-controller.
   - description: Additional labels to add to build image
     name: additional-labels
     type: array
