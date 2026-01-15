@@ -15,7 +15,7 @@ metadata:
     appstudio.openshift.io/application: opendatahub-builds
     appstudio.openshift.io/component: kserve-agent
     pipelines.appstudio.openshift.io/type: build
-  name: kserve-agent-on-pull_request
+  name: kserve-agent-on-pull-request
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -32,6 +32,8 @@ spec:
   - name: build-platforms
     value:
     - linux/x86_64
+    - 'odh-pr' 
+    - 'odh-pr-{{revision}}'
   - name: additional-tags
     value:
     - '{{target_branch}}-{{revision}}'
