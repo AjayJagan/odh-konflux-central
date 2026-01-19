@@ -24,15 +24,13 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/guardrails-detector-huggingface-runtime:{{revision}}
+    value: quay.io/opendatahub/guardrails-detector-huggingface-runtime:odh-pr
   - name: dockerfile
     value: Dockerfile.hf
   - name: path-context
     value: detectors
   - name: additional-tags
     value:
-    - '{{target_branch}}-{{revision}}'
-    - 'odh-pr' 
     - 'odh-pr-{{revision}}'
   - name: pipeline-type
     value: pull-request

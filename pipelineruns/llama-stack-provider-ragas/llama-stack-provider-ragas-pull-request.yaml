@@ -24,15 +24,13 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/llama-stack-provider-ragas:{{revision}}
+    value: quay.io/opendatahub/llama-stack-provider-ragas:odh-pr
   - name: dockerfile
     value: Containerfile
   - name: path-context
     value: .
   - name: additional-tags
     value:
-    - '{{target_branch}}-{{revision}}'
-    - 'odh-pr' 
     - 'odh-pr-{{revision}}'
   - name: pipeline-type
     value: pull-request
