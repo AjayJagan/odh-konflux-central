@@ -5,39 +5,37 @@ metadata:
     build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/notebooks?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
-    build.appstudio.redhat.com/pull_request_number: '{{pull_request_number}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
-    pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && target_branch
-      == "stable"
-  creationTimestamp: null
+    build.appstudio.openshift.io/build-nudge-files: "manifests/base/params-latest.env"
+    pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch == "stable" && !("manifests/base/params-latest.env".pathChanged()) && ( ".tekton/odh-workbench-rstudio-minimal-cpu-py312-c9s-push.yaml".pathChanged() || "rstudio/c9s-python-3.12/**".pathChanged() || "rstudio/c9s-python-3.12/build-args/cpu.conf".pathChanged() )
+  creationTimestamp:
   labels:
-    appstudio.openshift.io/application: opendatahub-builds
-    appstudio.openshift.io/component: odh-workbench-jupyter-minimal-cuda-py312
+    appstudio.openshift.io/application: opendatahub-release
+    appstudio.openshift.io/component: odh-workbench-rstudio-minimal-cpu-py312-c9s
     pipelines.appstudio.openshift.io/type: build
-  name: odh-workbench-jupyter-minimal-cuda-py312-on-pull-request
+  name: odh-workbench-rstudio-minimal-cpu-py312-c9s-on-push
   namespace: open-data-hub-tenant
 spec:
+  timeouts:
+    pipeline: 8h
   params:
   - name: git-url
     value: '{{source_url}}'
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/odh-workbench-jupyter-minimal-cuda-py312-ubi9:{{revision}}
+    value: quay.io/opendatahub/odh-workbench-rstudio-minimal-cpu-py312-c9s:{{revision}}
   - name: dockerfile
-    value: jupyter/minimal/ubi9-python-3.12/Dockerfile.cuda
+    value: rstudio/c9s-python-3.12/Dockerfile.cpu
+  - name: build-args-file
+    value: rstudio/c9s-python-3.12/build-args/cpu.conf
   - name: path-context
     value: .
-  - name: build-args-file
-    value: jupyter/minimal/ubi9-python-3.12/build-args/cuda.conf
   - name: additional-tags
     value:
     - '{{target_branch}}-{{revision}}'
-    - 'odh-pr'
-    - 'odh-pr-{{revision}}'
-  - name: pipeline-type
-    value: pull-request
+    - 'odh-stable'
   pipelineRef:
     resolver: git
     params:
@@ -48,7 +46,7 @@ spec:
     - name: pathInRepo
       value: pipeline/multi-arch-container-build.yaml
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-workbench-jupyter-minimal-cuda-py312
+    serviceAccountName: build-pipeline-odh-workbench-rstudio-minimal-cpu-py312-c9s
   workspaces:
   - name: git-auth
     secret:
