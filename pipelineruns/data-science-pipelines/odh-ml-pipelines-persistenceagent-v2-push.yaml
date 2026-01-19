@@ -23,15 +23,11 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/ds-pipelines-persistenceagent:{{revision}}
+    value: quay.io/opendatahub/ds-pipelines-persistenceagent:odh-stable
   - name: dockerfile
     value: backend/Dockerfile.persistenceagent
   - name: path-context
     value: .
-  - name: additional-tags
-    value:
-    - '{{target_branch}}-{{revision}}'
-    - 'odh-stable' 
   pipelineRef:
     resolver: git
     params:
