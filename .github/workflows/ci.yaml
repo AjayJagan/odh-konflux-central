@@ -10,6 +10,7 @@ on:
         options:
           - caikit-nlp
           - caikit-tgis-serving
+          - notebooks
           # Add all valid components here
 
       release_branch:
