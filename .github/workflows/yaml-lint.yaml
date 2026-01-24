@@ -6,6 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   yamllint:
     name: YAML Lint
@@ -13,12 +16,21 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: "false"
+
+      # pipx does not have an --offline mode, https://github.com/pypa/pipx/issues/1505
+      # uv does not have cache prefetch, https://github.com/astral-sh/uv/issues/13365
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
 
       - name: Run yamllint
         uses: ./.github/actions/action-yamllint
         with:
           strict: true
           config_file: .yamllint
+          yamllint_version: "1.38.0"
+          uv_exclude_newer: "2026-01-24"
 
   kubeconform:
     name: Kubeconform Schema Validation
