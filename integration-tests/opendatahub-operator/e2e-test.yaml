@@ -51,10 +51,10 @@ spec:
                   fieldPath: metadata.labels['appstudio.openshift.io/component']
           script: |
             #!/bin/sh
-    
+
             # Extract the component container image from the SNAPSHOT JSON data
             COMPONENT_CONTAINER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.components[] | select(.name == $component_name) | .containerImage' <<< "${SNAPSHOT}")
-    
+
             # Log the extracted variable
             echo "  COMPONENT_CONTAINER_IMAGE: ${COMPONENT_CONTAINER_IMAGE}"
     - name: check-prerequisites
@@ -101,7 +101,7 @@ spec:
 
     - name: provision-cluster
       runAfter:
-        - find-component-image
+        - provision-eaas-space
       taskSpec:
         results:
           - name: clusterName
