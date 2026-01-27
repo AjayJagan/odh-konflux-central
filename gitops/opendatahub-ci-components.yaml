@@ -461,7 +461,7 @@ spec:
       context: sdk/python/feast/infra/feature_servers/multicloud
       dockerfileUrl: Dockerfile
       revision: "stable"
-      url: https://github.com/opendatahub-io/feast   
+      url: https://github.com/opendatahub-io/feast
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -1535,7 +1535,7 @@ metadata:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-multi-platform-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
     build.appstudio.openshift.io/request: configure-pac-no-mr
-  name:  odh-maas-api-ci
+  name: odh-maas-api-ci
 spec:
   application: opendatahub-builds
   componentName: odh-maas-api-ci
