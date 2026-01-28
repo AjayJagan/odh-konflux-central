@@ -12,8 +12,8 @@ metadata:
       == "master"
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: kserve-router
+    appstudio.openshift.io/application: opendatahub-builds
+    appstudio.openshift.io/component: kserve-router-ci
     pipelines.appstudio.openshift.io/type: build
   name: kserve-router-on-pull-request
   namespace: open-data-hub-tenant
@@ -33,7 +33,7 @@ spec:
     value:
     - 'odh-pr-{{revision}}'
   - name: pipeline-type
-    value: pull_request-request
+    value: pull-request
   pipelineRef:
     resolver: git
     params:
@@ -42,7 +42,7 @@ spec:
     - name: revision
       value: main
     - name: pathInRepo
-      value: pipeline/multi-archcontainer-build.yaml
+      value: pipeline/multi-arch-container-build.yaml
   taskRunTemplate:
     serviceAccountName: build-pipeline-kserve-router
   workspaces:

@@ -13,7 +13,7 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
-    appstudio.openshift.io/component: kserve-controller
+    appstudio.openshift.io/component: kserve-controller-ci
     pipelines.appstudio.openshift.io/type: build
   name: kserve-controller-on-pull-request
   namespace: open-data-hub-tenant
@@ -42,7 +42,7 @@ spec:
     - name: revision
       value: main
     - name: pathInRepo
-      value: pipeline/multi-archcontainer-build.yaml
+      value: pipeline/multi-arch-container-build.yaml
   taskRunTemplate:
     serviceAccountName: build-pipeline-kserve-controller
   workspaces:
