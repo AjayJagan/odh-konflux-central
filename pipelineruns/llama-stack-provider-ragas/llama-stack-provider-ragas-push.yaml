@@ -12,7 +12,7 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
-    appstudio.openshift.io/component: llama-stack-provider-ragas
+    appstudio.openshift.io/component: llama-stack-provider-ragas-ci
     pipelines.appstudio.openshift.io/type: build
   name: llama-stack-provider-ragas-on-push
   namespace: open-data-hub-tenant

@@ -8,9 +8,42 @@ on:
         required: true
         type: choice
         options:
-          - caikit-nlp
-          - caikit-tgis-serving
+          - data-science-pipelines-operator
+          - data-science-pipelines
+          - feast
+          - fms-guardrails-orchestrator
+          - guardrails-detectors
+          - guardrails-regex-detector
+          - ilab-on-ocp
+          - kserve
+          - kubeflow
+          - kuberay
+          - lm-evaluation-harness
+          - ml-metadata
+          - model-registry-operator
+          - model-registry
           - notebooks
+          - opendatahub-operator
+          - odh-dashboard
+          - odh-model-controller
+          - openvino_model_server
+          - training-operator
+          - trustyai-explainability
+          - trustyai-service-operator
+          - vllm-orchestrator-gateway
+          - llm-d-inference-scheduler
+          - llm-d-routing-sidecar
+          - llama-stack-k8s-operator
+          - odh-data-science-pipelines-argo-argoexec
+          - odh-data-science-pipelines-argo-workflowcontroller
+          - odh-model-metadata-collection
+          - kube-auth-proxy
+          - llama-stack-provider-ragas
+          - mlserver
+          - trainer
+          - mlflow
+          - mlflow-operator
+          - eval-hub
           # Add all valid components here
 
       release_branch:

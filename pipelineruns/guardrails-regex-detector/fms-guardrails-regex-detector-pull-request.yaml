@@ -13,7 +13,7 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
-    appstudio.openshift.io/component: fms-guardrails-regex-detector
+    appstudio.openshift.io/component: fms-guardrails-regex-detector-ci
     pipelines.appstudio.openshift.io/type: build
   name: guardrails-regex-detector-on-pull-request
   namespace: open-data-hub-tenant
@@ -30,7 +30,7 @@ spec:
   - name: path-context
     value: .
   - name: additional-tags
-    value:
+    value: 
     - 'odh-pr-{{revision}}'
   - name: pipeline-type
     value: pull-request

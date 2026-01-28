@@ -12,7 +12,7 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
-    appstudio.openshift.io/component: fms-guardrails-regex-detector
+    appstudio.openshift.io/component: fms-guardrails-regex-detector-ci
     pipelines.appstudio.openshift.io/type: build
   name: guardrails-regex-detector-on-push
   namespace: open-data-hub-tenant
@@ -23,7 +23,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/regex-detector:odh-stable
+    value: quay.io/opendatahub/regex-detector:odh-stable 
   - name: dockerfile
     value: Dockerfile
   - name: path-context

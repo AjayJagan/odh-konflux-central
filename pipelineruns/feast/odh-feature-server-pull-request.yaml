@@ -12,8 +12,8 @@ metadata:
       == "stable"
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: odh-feature-server
+    appstudio.openshift.io/application: opendatahub-builds
+    appstudio.openshift.io/component: odh-feature-server-ci
     pipelines.appstudio.openshift.io/type: build
   name: odh-feature-server-on-pull-request
   namespace: open-data-hub-tenant
@@ -30,7 +30,7 @@ spec:
   - name: path-context
     value: sdk/python/feast/infra/feature_servers/multicloud
   - name: additional-tags
-    value:
+    value: 
     - 'odh-pr-{{revision}}'
   - name: pipeline-type
     value: pull-request
