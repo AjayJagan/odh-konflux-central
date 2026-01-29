@@ -159,7 +159,6 @@ jobs:
 
           # Copy .tekton files
           mkdir -p .tekton
-          rsync -av --delete ../extracted/.tekton/ .tekton/
           git add -f .tekton
 
           # Conditionally copy workflows if available
