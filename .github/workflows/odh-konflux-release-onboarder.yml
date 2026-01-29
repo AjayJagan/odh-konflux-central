@@ -98,26 +98,29 @@ jobs:
         run: |
           repo_folder="okc-repo/pipelines/${OKC_FOLDER}"
           echo "Using pipeline path: $repo_folder"
-
+      
           if [ ! -d "$repo_folder" ]; then
             echo "ERROR: $repo_folder does not exist!"
             exit 1
           fi
-
+      
           mkdir -p extracted/.tekton
+      
+          # Copy only *push.yaml files
           find "$repo_folder" -type f -name "*push.yaml" -exec cp {} extracted/.tekton/ \;
-
+      
           if [ -z "$(ls -A extracted/.tekton)" ]; then
             echo "ERROR: No *push.yaml files found in $repo_folder"
             exit 1
           fi
-
+      
+          echo "Applying substitutions to Tekton files..."
+      
           find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
-            # Replace $$OUTPUT_IMAGE_TAG$$ with version (preserves 'v' prefix and handles all occurrences including build-args)
             sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${{ inputs.version }}"'|g' "$file"
-            # Replace $$TARGET_BRANCH$$ with build branch (the branch images are built from)
             sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
           done
+
 
       - name: Prepare GitHub workflow files (if applicable)
         run: |
