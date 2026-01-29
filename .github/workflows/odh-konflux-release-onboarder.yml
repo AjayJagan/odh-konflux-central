@@ -52,9 +52,14 @@ on:
           - mlflow
           - mlflow-operator
           - eval-hub
+          - spark-operator
           # Add all valid components here
-      release_branch:
-        description: 'Target Release Branch'
+      pr_target_branch:
+        description: 'Branch to open the PR against (e.g. master).'
+        required: true
+        type: string
+      build_branch:
+        description: 'Branch that images are built from (e.g. stable).'
         required: true
         type: string
       version:
@@ -93,26 +98,29 @@ jobs:
         run: |
           repo_folder="okc-repo/pipelines/${OKC_FOLDER}"
           echo "Using pipeline path: $repo_folder"
-
+      
           if [ ! -d "$repo_folder" ]; then
             echo "ERROR: $repo_folder does not exist!"
             exit 1
           fi
-
+      
           mkdir -p extracted/.tekton
+      
+          # Copy only *push.yaml files
           find "$repo_folder" -type f -name "*push.yaml" -exec cp {} extracted/.tekton/ \;
-
+      
           if [ -z "$(ls -A extracted/.tekton)" ]; then
             echo "ERROR: No *push.yaml files found in $repo_folder"
             exit 1
           fi
-
+      
+          echo "Applying substitutions to Tekton files..."
+      
           find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
-            # Replace $$OUTPUT_IMAGE_TAG$$ with version (preserves 'v' prefix and handles all occurrences including build-args)
             sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${{ inputs.version }}"'|g' "$file"
-            # Replace $$TARGET_BRANCH$$ with release branch
-            sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.release_branch }}"'|g' "$file"
+            sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
           done
+
 
       - name: Prepare GitHub workflow files (if applicable)
         run: |
@@ -124,10 +132,10 @@ jobs:
             echo "Copying workflow files from $src_dir to $dest_dir"
             find "$src_dir" -type f -name "*.yaml" -exec cp {} "$dest_dir/" \;
 
-            echo "Updating $$TARGET_BRANCH$$ to ${{ inputs.release_branch }} in GitHub workflow files"
+            echo "Updating $$TARGET_BRANCH$$ to ${{ inputs.build_branch }} in GitHub workflow files"
             find "$dest_dir" -type f -name "*.yaml" | while read file; do
-            # Replace $$TARGET_BRANCH$$ with the actual release branch name
-            perl -0777 -i -pe 's/\$\$TARGET_BRANCH\$\$/'"${{ inputs.release_branch }}"'/g' "$file"
+            # Replace $$TARGET_BRANCH$$ with the build branch (the branch images are built from)
+            perl -0777 -i -pe 's/\$\$TARGET_BRANCH\$\$/'"${{ inputs.build_branch }}"'/g' "$file"
           done
           else
             echo "No workflows directory found for component '${{ inputs.component }}'. Skipping."
@@ -139,19 +147,19 @@ jobs:
           cd repo-workspace
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin ${{ inputs.release_branch }}
-          git checkout -B ${{ inputs.release_branch }} origin/${{ inputs.release_branch }}
+          git fetch origin ${{ inputs.pr_target_branch }}
+          git checkout -B ${{ inputs.pr_target_branch }} origin/${{ inputs.pr_target_branch }}
 
           #branch_name="appstudio-${{ inputs.component }}-konflux-replicator"
           #branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}"
           branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}-$(date +%s)"
           echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
 
-          git checkout -B "$branch_name" ${{ inputs.release_branch }}
+          git checkout -B "$branch_name" ${{ inputs.pr_target_branch }}
 
-          # Copy .tekton files
+          # Copy .tekton files (add/update only)
           mkdir -p .tekton
-          rsync -av --delete ../extracted/.tekton/ .tekton/
+          rsync -av ../extracted/.tekton/ .tekton/
           git add -f .tekton
 
           # Conditionally copy workflows if available
@@ -186,7 +194,10 @@ jobs:
         run: |
           gh pr create \
             --repo "${REPOSITORY}" \
-            --base "${{ inputs.release_branch }}" \
+            --base "${{ inputs.pr_target_branch }}" \
             --head "${BRANCH_NAME}" \
             --title "Update Tekton files to version ${{ inputs.version }}" \
-            --body "This PR updates the \`output-image\` tags and CEL expressions in \`.tekton/\` to version \`${{ inputs.version }}\` and branch \`${{ inputs.release_branch }}\`."
+            --body "This PR updates the \`output-image\` tags and CEL expressions in \`.tekton/\` to version \`${{ inputs.version }}\`.
+
+          - **PR target branch:** \`${{ inputs.pr_target_branch }}\` (changes land here first)
+          - **Build branch:** \`${{ inputs.build_branch }}\` (branch that images are built from)"

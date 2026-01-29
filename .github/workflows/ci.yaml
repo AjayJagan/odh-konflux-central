@@ -8,9 +8,42 @@ on:
         required: true
         type: choice
         options:
-          - caikit-nlp
-          - caikit-tgis-serving
+          - data-science-pipelines-operator
+          - data-science-pipelines
+          - feast
+          - fms-guardrails-orchestrator
+          - guardrails-detectors
+          - guardrails-regex-detector
+          - ilab-on-ocp
+          - kserve
+          - kubeflow
+          - kuberay
+          - lm-evaluation-harness
+          - ml-metadata
+          - model-registry-operator
+          - model-registry
           - notebooks
+          - opendatahub-operator
+          - odh-dashboard
+          - odh-model-controller
+          - openvino_model_server
+          - training-operator
+          - trustyai-explainability
+          - trustyai-service-operator
+          - vllm-orchestrator-gateway
+          - llm-d-inference-scheduler
+          - llm-d-routing-sidecar
+          - llama-stack-k8s-operator
+          - odh-data-science-pipelines-argo-argoexec
+          - odh-data-science-pipelines-argo-workflowcontroller
+          - odh-model-metadata-collection
+          - kube-auth-proxy
+          - llama-stack-provider-ragas
+          - mlserver
+          - trainer
+          - mlflow
+          - mlflow-operator
+          - eval-hub
           # Add all valid components here
 
       release_branch:
@@ -81,18 +114,61 @@ jobs:
           git checkout -B "$branch_name" ${{ inputs.release_branch }}
 
           mkdir -p .tekton
-          rsync -av --delete ../extracted/.tekton/ .tekton/
-          git add -f .tekton
 
+          echo "Detecting added vs updated PipelineRuns..."
+          
+          shopt -s nullglob
+          
+          ADDED=()
+          UPDATED=()
+          
+          for file in ../extracted/.tekton/*.yaml; do
+            filename=$(basename "$file")
+          
+            if [ -f ".tekton/$filename" ]; then
+              # Only mark as updated if content differs
+              if ! diff -q "$file" ".tekton/$filename" >/dev/null; then
+                UPDATED+=("$filename")
+              fi
+            else
+              ADDED+=("$filename")
+            fi
+          done
+          
+          # Sync files (no deletes)
+          rsync -av ../extracted/.tekton/ .tekton/
+          
+          # Logging
+          if [ ${#ADDED[@]} -gt 0 ]; then
+            echo "Added PipelineRuns:"
+            for f in "${ADDED[@]}"; do
+              echo "  + $f"
+            done
+          else
+            echo "No PipelineRuns added"
+          fi
+          
+          if [ ${#UPDATED[@]} -gt 0 ]; then
+            echo "Updated PipelineRuns:"
+            for f in "${UPDATED[@]}"; do
+              echo "  ~ $f"
+            done
+          else
+            echo "No PipelineRuns updated"
+          fi
+          
+          git add -f .tekton
+          
           if git diff --cached --quiet; then
             echo "No changes to commit."
             echo "commit=false" >> $GITHUB_ENV
             exit 0
           fi
-
+          
           git commit -m "Sync PipelineRuns from OKC"
           git push --set-upstream origin "$branch_name"
           echo "commit=true" >> $GITHUB_ENV
+
 
       - name: Create Pull Request
         if: env.commit == 'true'

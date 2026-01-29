@@ -12,8 +12,8 @@ metadata:
       == "master"
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: kserve-storage-initializer
+    appstudio.openshift.io/application: opendatahub-builds
+    appstudio.openshift.io/component: kserve-storage-initializer-ci
     pipelines.appstudio.openshift.io/type: build
   name: kserve-storage-initializer-on-pull-request
   namespace: open-data-hub-tenant
@@ -33,7 +33,7 @@ spec:
     value:
     - 'odh-pr-{{revision}}'
   - name: pipeline-type
-    value: pull_request-request
+    value: pull-request
   pipelineRef:
     resolver: git
     params:

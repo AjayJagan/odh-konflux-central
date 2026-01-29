@@ -12,7 +12,7 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
-    appstudio.openshift.io/component: fms-guardrails-orchestrator
+    appstudio.openshift.io/component: fms-guardrails-orchestrator-ci
     pipelines.appstudio.openshift.io/type: build
   name: fms-guardrails-orchestrator-on-push
   namespace: open-data-hub-tenant
@@ -23,7 +23,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/ta-guardrails-orchestrator:odh-stable
+    value: quay.io/opendatahub/ta-guardrails-orchestrator:odh-stable 
   - name: dockerfile
     value: Dockerfile.amd64
   - name: path-context

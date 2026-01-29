@@ -2,19 +2,21 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/guardrails-detectors?rev={{revision}}
+    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/odh-dashboard?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
-    pipelinesascode.tekton.dev/cancel-in-progress: "false"
+    pipelinesascode.tekton.dev/cancel-in-progress: "true"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
-      == "stable"
+      == "main" && ( " packages/gen-ai/**".pathChanged()
+      || ".tekton/odh-mod-arch-gen-ai-push.yaml".pathChanged() || "Dockerfile.workspace".pathChanged()
+      )
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
-    appstudio.openshift.io/component: guardrails-builtin-detectors
+    appstudio.openshift.io/component: odh-mod-arch-gen-ai-ci
     pipelines.appstudio.openshift.io/type: build
-  name: guardrails-builtin-detectors-on-push
+  name: odh-mod-arch-gen-ai-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -23,11 +25,11 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/odh-built-in-detector:odh-stable
+    value: quay.io/opendatahub/odh-mod-arch-gen-ai:odh-stable
   - name: dockerfile
-    value: Dockerfile.builtIn
+    value: packages/gen-ai/Dockerfile.workspace
   - name: path-context
-    value: detectors
+    value: .
   pipelineRef:
     resolver: git
     params:
@@ -38,7 +40,7 @@ spec:
     - name: pathInRepo
       value: pipeline/multi-arch-container-build.yaml
   taskRunTemplate:
-    serviceAccountName: build-pipeline-guardrails-builtin-detectors
+    serviceAccountName: build-pipeline-genai-poc
   workspaces:
   - name: git-auth
     secret:
