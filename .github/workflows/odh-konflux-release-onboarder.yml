@@ -157,8 +157,9 @@ jobs:
 
           git checkout -B "$branch_name" ${{ inputs.pr_target_branch }}
 
-          # Copy .tekton files
+          # Copy .tekton files (add/update only)
           mkdir -p .tekton
+          rsync -av ../extracted/.tekton/ .tekton/
           git add -f .tekton
 
           # Conditionally copy workflows if available
