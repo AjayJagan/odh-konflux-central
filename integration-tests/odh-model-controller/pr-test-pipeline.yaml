@@ -158,8 +158,6 @@ spec:
         value: "$(tasks.parse-metadata.results.source-git-url)"
       - name: git-rev
         value: "$(tasks.parse-metadata.results.target-git-branch)"
-      - name: namespace
-        value: "$(params.NAMESPACE)"
       - name: component-image
         value: "$(tasks.parse-metadata.results.component-container-image)"
       taskSpec:
@@ -167,8 +165,6 @@ spec:
           - name: git-url
             type: string
           - name: git-rev
-            type: string
-          - name: namespace
             type: string
           - name: component-image
             type: string
