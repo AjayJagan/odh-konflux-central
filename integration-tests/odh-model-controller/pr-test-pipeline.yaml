@@ -160,7 +160,7 @@ spec:
         value: "$(tasks.parse-metadata.results.target-git-branch)"
       - name: namespace
         value: "$(params.NAMESPACE)"
-      - name: operator-image
+      - name: component-image
         value: "$(tasks.parse-metadata.results.component-container-image)"
       taskSpec:
         params:
@@ -170,7 +170,7 @@ spec:
             type: string
           - name: namespace
             type: string
-          - name: operator-image
+          - name: component-image
             type: string
         volumes:
           - name: credentials
@@ -218,7 +218,7 @@ spec:
               && curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
               && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
               && rm kubectl
-
+              ODH_MODEL_CONTROLLER_IMAGE=$(params.component-image)
               echo "ODH_MODEL_CONTROLLER_IMAGE=${ODH_MODEL_CONTROLLER_IMAGE}"
 
               git clone https://github.com/opendatahub-io/kserve.git /tmp/kserve
@@ -261,6 +261,65 @@ spec:
                 echo "KUBE_RBAC_PROXY_IMAGE=${KUBE_RBAC_PROXY_IMAGE}"
 
                 ./test/scripts/openshift-ci/run-e2e-tests.sh raw 2 raw
+              popd
+          - name: e2e-odh-llmisvc
+            image: golang:1.25-alpine
+            env:
+              - name: KUBECONFIG
+                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+            workingDir: /workspace/source
+            volumeMounts:
+              - name: credentials
+                mountPath: /credentials
+            script: |
+              set -euxo pipefail
+              apk add --no-cache bash make git curl \
+              && curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+              && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
+              && rm kubectl
+              ODH_MODEL_CONTROLLER_IMAGE=$(params.component-image)
+              echo "ODH_MODEL_CONTROLLER_IMAGE=${ODH_MODEL_CONTROLLER_IMAGE}"
+
+              git clone https://github.com/opendatahub-io/kserve.git /tmp/kserve
+              pushd /tmp/kserve
+                git fetch --all --tags
+                git checkout release-v0.15
+
+                export GITHUB_SHA="${PULL_BASE_SHA:-stable}"
+                export ODH_MODEL_CONTROLLER_IMAGE="${ODH_MODEL_CONTROLLER_IMAGE}"
+
+                echo "Loading environment variables from params.env"
+                #Parse params.env into shell vars with underscores instead of dashes
+                while IFS='=' read -r key value; do
+                  case "$key" in
+                    ''|\#*) continue ;;
+                  esac
+                  key="${key%%[[:space:]]*}"
+                  value="${value##[[:space:]]}"
+                  sane_key="${key//-/_}"
+                  printf -v "$sane_key" '%s' "$value"
+                done < config/overlays/odh/params.env
+
+                export KSERVE_CONTROLLER_IMAGE="${kserve_controller}"
+                export KSERVE_AGENT_IMAGE="${kserve_agent}"
+                export KSERVE_ROUTER_IMAGE="${kserve_router}"
+                export KSERVE_STORAGE_INITIALIZER_IMAGE="${kserve_storage_initializer}"
+                export LLMD_IMAGE="${kserve_llm_d}"
+                export LLMD_INFERENCE_SCHEDULER_IMAGE="${kserve_llm_d_inference_scheduler}"
+                export LLMD_ROUTING_SIDECAR_IMAGE="${kserve_llm_d_routing_sidecar}"
+                export KUBE_RBAC_PROXY_IMAGE="${kube_rbac_proxy}"
+
+                echo "Loaded all images from params.env:"
+                echo "KSERVE_CONTROLLER_IMAGE=${KSERVE_CONTROLLER_IMAGE}"
+                echo "KSERVE_AGENT_IMAGE=${KSERVE_AGENT_IMAGE}"
+                echo "KSERVE_ROUTER_IMAGE=${KSERVE_ROUTER_IMAGE}"
+                echo "KSERVE_STORAGE_INITIALIZER_IMAGE=${KSERVE_STORAGE_INITIALIZER_IMAGE}"
+                echo "LLMD_IMAGE=${LLMD_IMAGE}"
+                echo "LLMD_INFERENCE_SCHEDULER_IMAGE=${LLMD_INFERENCE_SCHEDULER_IMAGE}"
+                echo "LLMD_ROUTING_SIDECAR_IMAGE=${LLMD_ROUTING_SIDECAR_IMAGE}"
+                echo "KUBE_RBAC_PROXY_IMAGE=${KUBE_RBAC_PROXY_IMAGE}"
+
+                ./test/scripts/openshift-ci/run-e2e-tests.sh "llminferenceservice and (cluster_cpu and cluster_single_node)" 2 "llm-d"
               popd
       when:
         - input: "$(tasks.check-prerequisites.results.event-type)"

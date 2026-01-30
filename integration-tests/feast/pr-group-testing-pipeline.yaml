@@ -300,7 +300,7 @@ spec:
               oc whoami
 
               echo "SNAPSHOT=${SNAPSHOT}"
-              COMPONENT_NAME=feast-operator-poc
+              COMPONENT_NAME=odh-feast-operator-ci
               FEAST_OPERATOR_CONTROLLER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
               GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
               GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
@@ -308,7 +308,7 @@ spec:
               echo "GIT_COMMIT=${GIT_COMMIT}"
               echo "GIT_URL=${GIT_URL}"
 
-              COMPONENT_NAME=feature-server-poc
+              COMPONENT_NAME=odh-feature-server-ci
               FEAST_FEATURE_SERVER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
               GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
               GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
