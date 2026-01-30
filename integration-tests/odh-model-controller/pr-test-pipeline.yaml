@@ -200,7 +200,7 @@ spec:
               cd /workspace/source
 
           - name: e2e-odh-kserve
-            image: golang:1.25-alpine
+            image: quay.io/rhoai/rhoai-task-toolset:model-controller-its
             env:
               - name: KUBECONFIG
                 value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
@@ -210,10 +210,10 @@ spec:
                 mountPath: /credentials
             script: |
               set -euxo pipefail
-              apk add --no-cache bash make git curl \
-              && curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
-              && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
-              && rm kubectl
+              # apk add --no-cache bash make git curl \
+              # && curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+              # && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
+              # && rm kubectl && bash
               bash
               ODH_MODEL_CONTROLLER_IMAGE=$(params.component-image)
               echo "ODH_MODEL_CONTROLLER_IMAGE=${ODH_MODEL_CONTROLLER_IMAGE}"
@@ -260,7 +260,7 @@ spec:
                 ./test/scripts/openshift-ci/run-e2e-tests.sh raw 2 raw
               popd
           - name: e2e-odh-llmisvc
-            image: golang:1.25-alpine
+            image: quay.io/rhoai/rhoai-task-toolset:model-controller-its
             env:
               - name: KUBECONFIG
                 value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
@@ -270,12 +270,12 @@ spec:
                 mountPath: /credentials
             script: |
               set -euxo pipefail
-              apk add --no-cache bash make git curl \
-              && curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
-              && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
-              && rm kubectl
-              bash
+              # apk add --no-cache bash make git curl \
+              # && curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+              # && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
+              # && rm kubectl && bash
 
+              bash
               ODH_MODEL_CONTROLLER_IMAGE=$(params.component-image)
               echo "ODH_MODEL_CONTROLLER_IMAGE=${ODH_MODEL_CONTROLLER_IMAGE}"
 
