@@ -67,8 +67,8 @@ spec:
 
                   # Extract namespace and repository name from repo_path
                   # Format: namespace/project/repository
-                  namespace=$(echo "$repo_path" | cut -d'/' -f1-2)
-                  repository=$(echo "$repo_path" | cut -d'/' -f3)
+                  namespace=${repo_path%/*}
+                  repository=${repo_path##*/}
 
                   # Query Quay API to get the digest for the tag
                   api_url="https://quay.io/api/v1/repository/${namespace}/${repository}/tag/?specificTag=${TAG}"
