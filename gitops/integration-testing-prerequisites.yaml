@@ -1,0 +1,21 @@
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+    mintmaker.appstudio.redhat.com/disabled: 'true'
+    git-provider: github
+    git-provider-url: https://github.com
+  name: feast-group
+  namespace: open-data-hub-tenant
+spec:
+  application: group-testing
+  componentName: feast-group
+  containerImage: quay.io/redhat-user-workloads/open-data-hub-tenant/feast-group
+  source:
+    git:
+      dockerfileUrl: Dockerfile
+      url: https://github.com/opendatahub-io/feast
+      revision: "stable"
