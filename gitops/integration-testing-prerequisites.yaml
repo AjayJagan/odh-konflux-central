@@ -20,6 +20,27 @@ spec:
       url: https://github.com/opendatahub-io/feast
       revision: "stable"
 ---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+    mintmaker.appstudio.redhat.com/disabled: 'true'
+    git-provider: github
+    git-provider-url: https://github.com
+  name: kserve-group
+  namespace: open-data-hub-tenant
+spec:
+  application: group-testing
+  componentName: kserve-group
+  containerImage: quay.io/redhat-user-workloads/open-data-hub-tenant/kserve-group
+  source:
+    git:
+      dockerfileUrl: Dockerfile
+      url: https://github.com/opendatahub-io/kserve
+      revision: "master"
+---
 apiVersion: appstudio.redhat.com/v1beta2
 kind: IntegrationTestScenario
 metadata:
