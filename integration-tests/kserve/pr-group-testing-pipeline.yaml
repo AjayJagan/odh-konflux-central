@@ -740,11 +740,11 @@ spec:
           - name: source_branch
             valueFrom:
               fieldRef:
-                fieldPath: metadata.labels['pipelinesascode.tekton.dev/source-branch']
+                fieldPath: metadata.annotations['pipelinesascode.tekton.dev/source-branch']
           - name: repo_url
             valueFrom:
               fieldRef:
-                fieldPath: metadata.labels['pipelinesascode.tekton.dev/source-repo-url']
+                fieldPath: metadata.annotations['pipelinesascode.tekton.dev/source-repo-url']
           script: |
             echo ${source_branch}
             echo ${repo_url}
@@ -914,11 +914,11 @@ spec:
           - name: source_branch
             valueFrom:
               fieldRef:
-                fieldPath: metadata.labels['pipelinesascode.tekton.dev/source-branch']
+                fieldPath: metadata.annotations['pipelinesascode.tekton.dev/source-branch']
           - name: repo_url
             valueFrom:
               fieldRef:
-                fieldPath: metadata.labels['pipelinesascode.tekton.dev/source-repo-url']
+                fieldPath: metadata.annotations['pipelinesascode.tekton.dev/source-repo-url']
           script: |
             echo ${source_branch}
             echo ${repo_url}
@@ -1086,11 +1086,11 @@ spec:
           - name: source_branch
             valueFrom:
               fieldRef:
-                fieldPath: metadata.labels['pipelinesascode.tekton.dev/source-branch']
+                fieldPath: metadata.annotations['pipelinesascode.tekton.dev/source-branch']
           - name: repo_url
             valueFrom:
               fieldRef:
-                fieldPath: metadata.labels['pipelinesascode.tekton.dev/source-repo-url']
+                fieldPath: metadata.annotations['pipelinesascode.tekton.dev/source-repo-url']
           script: |
             echo ${source_branch}
             echo ${repo_url}
