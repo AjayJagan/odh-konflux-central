@@ -735,10 +735,19 @@ spec:
 
         - name: clone-repo
           image: alpine/git
+          env:
+          - name: source_branch
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.labels['pipelinesascode.tekton.dev/source-branch']
+          - name: repo_url
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.labels['pipelinesascode.tekton.dev/source-repo-url']
           script: |
-            echo $(params.git-url)
-            echo $(params.git-rev)
-            git clone --depth 1 --branch $(params.git-rev) $(params.git-url) /workspace/source
+            echo ${source_branch}
+            echo ${repo_url}
+            git clone --depth 1 --branch  ${source_branch} ${repo_url} /workspace/source
             git config --global --add safe.directory /workspace/source
             cd /workspace/source
 
@@ -900,10 +909,19 @@ spec:
 
         - name: clone-repo
           image: alpine/git
+          env:
+          - name: source_branch
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.labels['pipelinesascode.tekton.dev/source-branch']
+          - name: repo_url
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.labels['pipelinesascode.tekton.dev/source-repo-url']
           script: |
-            echo $(params.git-url)
-            echo $(params.git-rev)
-            git clone --depth 1 --branch $(params.git-rev) $(params.git-url) /workspace/source
+            echo ${source_branch}
+            echo ${repo_url}
+            git clone --depth 1 --branch  ${source_branch} ${repo_url} /workspace/source
             git config --global --add safe.directory /workspace/source
             cd /workspace/source
 
@@ -1063,10 +1081,19 @@ spec:
 
         - name: clone-repo
           image: alpine/git
+          env:
+          - name: source_branch
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.labels['pipelinesascode.tekton.dev/source-branch']
+          - name: repo_url
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.labels['pipelinesascode.tekton.dev/source-repo-url']
           script: |
-            echo $(params.git-url)
-            echo $(params.git-rev)
-            git clone --depth 1 --branch $(params.git-rev) $(params.git-url) /workspace/source
+            echo ${source_branch}
+            echo ${repo_url}
+            git clone --depth 1 --branch  ${source_branch} ${repo_url} /workspace/source
             git config --global --add safe.directory /workspace/source
             cd /workspace/source
 
