@@ -42,3 +42,27 @@ spec:
         value: integration-tests/odh-model-controller/pr-test-pipeline.yaml
     resolver: git
     resourceKind: pipeline
+
+---
+apiVersion: appstudio.redhat.com/v1beta2
+kind: IntegrationTestScenario
+metadata:
+  labels:
+    test.appstudio.openshift.io/optional: "false"
+  name: models-as-a-service-ci-its-manual
+  namespace: open-data-hub-tenant
+spec:
+  application: opendatahub-builds
+  contexts:
+    - description: execute the integration test when component odh-operator updates
+      name: component_odh-maas-api-ci
+  resolverRef:
+    params:
+      - name: url
+        value: https://github.com/opendatahub-io/odh-konflux-central.git
+      - name: revision
+        value: main
+      - name: pathInRepo
+        value: integration-tests/models-as-a-service/pr-test-pipeline.yaml
+    resolver: git
+    resourceKind: pipeline
