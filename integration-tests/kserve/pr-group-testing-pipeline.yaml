@@ -573,6 +573,8 @@ spec:
 
 
   - name: generate-snapshot
+    runAfter:
+      - audit-images
     description: Placeholder task that prints the Snapshot and outputs standard TEST_OUTPUT
     params:
       - name: COMPONENTS
