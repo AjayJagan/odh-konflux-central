@@ -14,6 +14,13 @@ spec:
     - description: Snapshot of the application
       name: SNAPSHOT
       type: string
+    - description: Source Repository URL
+      name: git-url
+      type: string
+    - default: ""
+      description: Revision of the Source Repository
+      name: revision
+      type: string
     - description: Fully Qualified Output Image
       name: output-image
       type: string
@@ -119,13 +126,9 @@ spec:
   - name: clone-repository
     params:
     - name: url
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.annotations['pipelinesascode.tekton.dev/source-repo-url']
+      value: $(params.git-url)
     - name: revision
-      valueFrom:
-        fieldRef:
-          fieldPath: metadata.annotations['pipelinesascode.tekton.dev/source-branch']
+      value: $(params.revision)
     - name: ociStorage
       value: $(params.output-image).git
     - name: ociArtifactExpiresAfter
