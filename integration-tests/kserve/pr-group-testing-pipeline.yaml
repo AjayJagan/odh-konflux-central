@@ -223,6 +223,8 @@ spec:
       value: "false"
     - name: BUILDAH_FORMAT
       value: $(params.buildah-format)
+    - name: PLATFORM
+      value: linux/x86_64
     runAfter:
     - prefetch-dependencies
     taskRef:
@@ -277,6 +279,8 @@ spec:
 #      value: "false"
 #    - name: BUILDAH_FORMAT
 #      value: $(params.buildah-format)
+#    - name: PLATFORM
+#      value: linux/x86_64
 #    runAfter:
 #    - prefetch-dependencies
 #    taskRef:
@@ -331,6 +335,8 @@ spec:
 #      value: "false"
 #    - name: BUILDAH_FORMAT
 #      value: $(params.buildah-format)
+#    - name: PLATFORM
+#      value: linux/x86_64
 #    runAfter:
 #    - prefetch-dependencies
 #    taskRef:
@@ -385,6 +391,8 @@ spec:
 #      value: "false"
 #    - name: BUILDAH_FORMAT
 #      value: $(params.buildah-format)
+#    - name: PLATFORM
+#      value: linux/x86_64
 #    runAfter:
 #    - prefetch-dependencies
 #    taskRef:
@@ -439,6 +447,8 @@ spec:
 #      value: "false"
 #    - name: BUILDAH_FORMAT
 #      value: $(params.buildah-format)
+#    - name: PLATFORM
+#      value: linux/x86_64
 #    runAfter:
 #    - prefetch-dependencies
 #    taskRef:
@@ -493,6 +503,8 @@ spec:
 #      value: "false"
 #    - name: BUILDAH_FORMAT
 #      value: $(params.buildah-format)
+#    - name: PLATFORM
+#      value: linux/x86_64
 #    runAfter:
 #    - prefetch-dependencies
 #    taskRef:
