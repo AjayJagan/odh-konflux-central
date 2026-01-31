@@ -1,0 +1,456 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: odh-pr-test
+spec:
+  description: |
+    An integration test which provisions an ephemeral Hypershift cluster, deploys opendatahub-operator
+    from a Konflux snapshot and runs the e2e tests against it.
+  params:
+    - description: List of components in the group
+      name: group-components
+      type: string
+    - description: Snapshot of the application
+      name: SNAPSHOT
+      type: string
+    - description: Fully Qualified Output Image
+      name: output-image
+      type: string
+      default: "quay.io/opendatahub/kserve"
+    - default: "true"
+      description: Force rebuild image
+      name: rebuild
+      type: string
+    - default: "true"
+      description: Skip checks against built image
+      name: skip-checks
+      type: string
+    - default: "false"
+      description: Execute the build with network isolation
+      name: hermetic
+      type: string
+    - default: ""
+      description: Build dependencies to be prefetched by Cachi2
+      name: prefetch-input
+      type: string
+    - name: prefetch-log-level
+      default: "info"
+      type: string
+      description: Set cachi2 log level (debug, info, warning, error)
+    - name: prefetch-config-file-content
+      default: ""
+      type: string
+      description: Pass configuration to cachi2. Note this needs to be passed as a YAML-formatted config dump, not as a file path!
+    - default: ""
+      description: Image tag expiration time, time values could be something like 1h, 2d, 3w for hours, days, and weeks, respectively.
+      name: image-expires-after
+    - default: []
+      description: Array of --build-arg values ("arg=value" strings) for buildah
+      name: build-args
+      type: array
+    - default: ""
+      description: Path to a file with build arguments for buildah, see https://www.mankier.com/1/buildah-build#--build-arg-file
+      name: build-args-file
+      type: string
+    - default: "false"
+      description: Whether to enable privileged mode, should be used only with remote VMs
+      name: privileged-nested
+      type: string
+    - default: "does-not-exist"
+      description: Kubernetes secret to mount into build, see https://www.redhat.com/en/blog/sensitive-data-containers
+      name: additional-build-secret
+      type: string
+    - description: Fetch all tags for the repo
+      name: fetch-git-tags
+      type: string
+      default: "false"
+    - description: Perform a shallow clone, fetching only the most recent N commits
+      name: clone-depth
+      type: string
+      default: "1"
+    - name: expected-cluster
+      default: ""
+      type: string
+      description: The cluster that this pipeline is expected to be run from
+    - name: buildah-format
+      default: docker
+      type: string
+      description: The format for the resulting image's mediaType. Valid values are oci or docker.
+    - name: pipeline-type
+      type: string
+      default: pull-request
+      description: Type of pipeline execution (push)
+  tasks:
+  - name: rhoai-init
+    params:
+    - name: expected-cluster
+      value: $(params.expected-cluster)
+    - name: pipeline-type
+      value: $(params.pipeline-type)
+    taskRef:
+      resolver: git
+      params:
+      - name: url
+        value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
+      - name: revision
+        value: odh
+      - name: pathInRepo
+        value: konflux-tekton-tasks/rhoai-init/0.3/rhoai-init.yaml
+  - name: init
+    params:
+    - name: image-url
+      value: $(params.output-image)
+    - name: rebuild
+      value: $(params.rebuild)
+    - name: skip-checks
+      value: $(params.skip-checks)
+    taskRef:
+      params:
+      - name: name
+        value: init
+      - name: bundle
+        value: quay.io/konflux-ci/tekton-catalog/task-init:0.2@sha256:75b88ee5e134a22ee35eb974808dfe6a63693115fa445208a9060a7175b448cf
+      - name: kind
+        value: task
+      resolver: bundles
+    runAfter:
+    - rhoai-init
+  - name: clone-repository
+    params:
+    - name: url
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.annotations['pipelinesascode.tekton.dev/source-repo-url']
+    - name: revision
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.annotations['pipelinesascode.tekton.dev/source-branch']
+    - name: ociStorage
+      value: $(params.output-image).git
+    - name: ociArtifactExpiresAfter
+      value: $(params.image-expires-after)
+    - name: fetchTags
+      value: $(params.fetch-git-tags)
+    - name: depth
+      value: $(params.clone-depth)
+    runAfter:
+    - init
+    taskRef:
+      params:
+      - name: name
+        value: git-clone-oci-ta
+      - name: bundle
+        value: quay.io/konflux-ci/tekton-catalog/task-git-clone-oci-ta:0.1@sha256:0a89e1a6304076525e9766f63a4cd006763d21d5aca6863281fc427537a23c6f
+      - name: kind
+        value: task
+      resolver: bundles
+    when:
+    - input: $(tasks.init.results.build)
+      operator: in
+      values:
+      - "true"
+    workspaces:
+    - name: basic-auth
+      workspace: git-auth
+  - name: prefetch-dependencies
+    params:
+    - name: input
+      value: $(params.prefetch-input)
+    - name: dev-package-managers
+      value: "true"
+    - name: SOURCE_ARTIFACT
+      value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)
+    - name: ociStorage
+      value: $(params.output-image).prefetch
+    - name: ociArtifactExpiresAfter
+      value: $(params.image-expires-after)
+    - name: log-level
+      value: $(params.prefetch-log-level)
+    - name: config-file-content
+      value: $(params.prefetch-config-file-content)
+    runAfter:
+    - clone-repository
+    taskRef:
+      params:
+      - name: name
+        value: prefetch-dependencies-oci-ta
+      - name: bundle
+        value: quay.io/konflux-ci/tekton-catalog/task-prefetch-dependencies-oci-ta:0.2@sha256:3fa0204a481044b21f0e784ce39cbd25e8fb49c664a5458f3eef351fff1c906e
+      - name: kind
+        value: task
+      resolver: bundles
+    workspaces:
+    - name: git-basic-auth
+      workspace: git-auth
+    - name: netrc
+      workspace: netrc
+
+#  - name: build-images
+#    timeout: 8h
+#    params:
+#    - name: ADDITIONAL_SECRET
+#      value: $(params.additional-build-secret)
+#    - name: IMAGE
+#      value: $(params.output-image)
+#    - name: DOCKERFILE
+#      value: $(params.dockerfile)
+#    - name: CONTEXT
+#      value: $(params.path-context)
+#    - name: HERMETIC
+#      value: $(params.hermetic)
+#    - name: PREFETCH_INPUT
+#      value: $(params.prefetch-input)
+#    - name: IMAGE_EXPIRES_AFTER
+#      value: $(params.image-expires-after)
+#    - name: COMMIT_SHA
+#      value: $(tasks.clone-repository.results.commit)
+#    - name: BUILD_ARGS
+#      value:
+#      - $(params.build-args[*])
+#    - name: BUILD_ARGS_FILE
+#      value: $(params.build-args-file)
+#    - name: PRIVILEGED_NESTED
+#      value: $(params.privileged-nested)
+#    - name: ACTIVATION_KEY
+#      value: custom-activation-key
+#    - name: LABELS
+#      value:
+#      - $(params.additional-labels[*])
+#      - url=$(params.git-url)
+#      - release=$(tasks.clone-repository.results.commit-timestamp)
+#      - git.url=$(params.git-url)
+#      - git.commit=$(params.revision)
+#    - name: additional-labels
+#      value:
+#        - "{{target_branch}}-{{revision}}"
+#    - name: SOURCE_ARTIFACT
+#      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
+#    - name: CACHI2_ARTIFACT
+#      value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
+#    - name: IMAGE_APPEND_PLATFORM
+#      value: "true"
+#    - name: BUILDAH_FORMAT
+#      value: $(params.buildah-format)
+#    runAfter:
+#    - prefetch-dependencies
+#    taskRef:
+#      params:
+#      - name: name
+#        value: buildah-remote-oci-ta
+#      - name: bundle
+#        value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.7@sha256:ef1c062b10c9fb17951350de76bce6bb54a4ea75fca4f37ea136d626c444bf78
+#      - name: kind
+#        value: task
+#      resolver: bundles
+#    when:
+#    - input: $(tasks.init.results.build)
+#      operator: in
+#      values:
+#      - "true"
+#
+#
+#
+#
+#
+#    - name: generate-snapshot
+#      description: Placeholder task that prints the Snapshot and outputs standard TEST_OUTPUT
+#      params:
+#        - name: COMPONENTS
+#          value: $(params.group-components)
+#      workspaces:
+#      - name: basic-auth
+#        workspace: git-auth
+#      taskRef:
+#        resolver: git
+#        params:
+#        - name: url
+#          value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
+#        - name: revision
+#          value: odh
+#        - name: pathInRepo
+#          value: konflux-tekton-tasks/generate-snapshot-for-group-testing/0.1/generate-snapshot-for-group-testing.yaml
+#    - name: audit-snapshot
+#      runAfter:
+#        - generate-snapshot
+#      params:
+#        - name: COMPONENTS
+#          value: $(params.group-components)
+#      taskSpec:
+#        params:
+#          - name: COMPONENTS
+#            description: List of components in the group
+#        steps:
+#          - name: audit-snapshot
+#            image: quay.io/konflux-ci/konflux-test:stable
+#            workingDir: /workspace
+#            env:
+#              - name: SNAPSHOT
+#                value: $(tasks.generate-snapshot.results.SNAPSHOT)
+#              - name: COMPONENTS
+#                value: $(params.COMPONENTS)
+#            script: |
+#              #!/bin/bash
+#              set -e
+#              echo "SNAPSHOT=${SNAPSHOT}"
+#
+#              # Parse JSON and iterate through each component
+#              while IFS= read -r row; do
+#                  COMPONENT_NAME=$(echo "$row" | base64 -d | jq -r '.key')
+#                  IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
+#                  GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
+#                  GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
+#                  echo "${COMPONENT_NAME} IMAGE: ${IMAGE}"
+#                  echo "GIT_COMMIT=${GIT_COMMIT}"
+#                  echo "GIT_URL=${GIT_URL}"
+#              done < <(echo "$COMPONENTS" | jq -r 'to_entries[] | @base64')
+#    - name: provision-eaas-space
+#      runAfter:
+#        - audit-snapshot
+#      taskRef:
+#        resolver: git
+#        params:
+#          - name: url
+#            value: https://github.com/konflux-ci/build-definitions.git
+#          - name: revision
+#            value: main
+#          - name: pathInRepo
+#            value: task/eaas-provision-space/0.1/eaas-provision-space.yaml
+#      params:
+#        - name: ownerName
+#          value: $(context.pipelineRun.name)
+#        - name: ownerUid
+#          value: $(context.pipelineRun.uid)
+#    - name: provision-cluster
+#      runAfter:
+#        - provision-eaas-space
+#      taskSpec:
+#        results:
+#          - name: clusterName
+#            value: "$(steps.create-cluster.results.clusterName)"
+#        steps:
+#          - name: get-supported-versions
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-get-supported-ephemeral-cluster-versions/0.1/eaas-get-supported-ephemeral-cluster-versions.yaml
+#            params:
+#              - name: eaasSpaceSecretRef
+#                value: $(tasks.provision-eaas-space.results.secretRef)
+#          - name: pick-version
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-get-latest-openshift-version-by-prefix/0.1/eaas-get-latest-openshift-version-by-prefix.yaml
+#            params:
+#              - name: prefix
+#                value: "$(steps.get-supported-versions.results.versions[0])."
+#          - name: create-cluster
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-create-ephemeral-cluster-hypershift-aws/0.1/eaas-create-ephemeral-cluster-hypershift-aws.yaml
+#            params:
+#              - name: eaasSpaceSecretRef
+#                value: $(tasks.provision-eaas-space.results.secretRef)
+#              - name: version
+#                value: "$(steps.pick-version.results.version)"
+#              - name: instanceType
+#                value: m5.2xlarge
+#    - name: deploy-and-test
+#      runAfter:
+#        - provision-cluster
+#      taskSpec:
+#        volumes:
+#          - name: credentials
+#            emptyDir: {}
+#        steps:
+#          - name: get-kubeconfig
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-get-ephemeral-cluster-credentials/0.1/eaas-get-ephemeral-cluster-credentials.yaml
+#            params:
+#              - name: eaasSpaceSecretRef
+#                value: $(tasks.provision-eaas-space.results.secretRef)
+#              - name: clusterName
+#                value: "$(tasks.provision-cluster.results.clusterName)"
+#              - name: credentials
+#                value: credentials
+#          - name: deploy-and-e2e
+#            image: quay.io/rhoai/rhoai-task-toolset:go-its
+#            env:
+#              - name: KUBECONFIG
+#                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+#              - name: SNAPSHOT
+#                value: $(tasks.generate-snapshot.results.SNAPSHOT)
+#            workingDir: /workspace/source
+#            volumeMounts:
+#              - name: credentials
+#                mountPath: /credentials
+#            script: |
+#              oc get pods
+#              oc whoami
+#
+#              echo "SNAPSHOT=${SNAPSHOT}"
+#              COMPONENT_NAME=odh-feast-operator-ci
+#              FEAST_OPERATOR_CONTROLLER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
+#              GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
+#              GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
+#              echo "  FEAST_OPERATOR_CONTROLLER_IMAGE: ${FEAST_OPERATOR_CONTROLLER_IMAGE}"
+#              echo "GIT_COMMIT=${GIT_COMMIT}"
+#              echo "GIT_URL=${GIT_URL}"
+#
+#              COMPONENT_NAME=odh-feature-server-ci
+#              FEAST_FEATURE_SERVER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
+#              GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
+#              GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
+#              echo "  FEAST_FEATURE_SERVER_IMAGE: ${FEAST_FEATURE_SERVER_IMAGE}"
+#              echo "GIT_COMMIT=${GIT_COMMIT}"
+#              echo "GIT_URL=${GIT_URL}"
+#
+#              REPO_URL=${GIT_URL}
+#              REVISION=${GIT_COMMIT}
+#
+#              echo "REPO_URL=${REPO_URL}"
+#              echo "REVISION=${REVISION}"
+#              git clone "${REPO_URL}" src_code
+#              cd src_code
+#              git checkout ${REVISION}
+#
+#              export RUN_ON_OPENSHIFT_CI=true
+#              cd infra/feast-operator
+#              make install && make deploy IMG=${FEAST_OPERATOR_CONTROLLER_IMAGE} FS_IMG=${FEAST_FEATURE_SERVER_IMAGE}
+#              oc wait --for condition=Available -n feast-operator-system deployment feast-operator-controller-manager
+#              make test-e2e
+#              make undeploy IMG=${FEAST_OPERATOR_CONTROLLER_IMAGE} FS_IMG=${FEAST_FEATURE_SERVER_IMAGE}
+#
+#              make test-previous-version
+#              oc delete deployment feast-operator-controller-manager -n feast-operator-system
+#
+#              make test-upgrade
+  workspaces:
+  - name: git-auth
+    optional: true
+  - name: netrc
+    optional: true
