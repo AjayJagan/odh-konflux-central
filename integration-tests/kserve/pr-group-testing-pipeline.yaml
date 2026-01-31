@@ -186,17 +186,68 @@ spec:
     - name: netrc
       workspace: netrc
 
-#  - name: build-images
-#    timeout: 8h
+  - name: build-llmisvc-controller
+    params:
+    - name: IMAGE
+      value: quay.io/opendatahub/llmisvc-controller:$(tasks.rhoai-init.results.mandatory-tag)
+    - name: DOCKERFILE
+      value: llmisvc-controller.Dockerfile
+    - name: CONTEXT
+      value: .
+    - name: HERMETIC
+      value: $(params.hermetic)
+    - name: PREFETCH_INPUT
+      value: $(params.prefetch-input)
+    - name: IMAGE_EXPIRES_AFTER
+      value: $(params.image-expires-after)
+    - name: COMMIT_SHA
+      value: $(tasks.clone-repository.results.commit)
+    - name: BUILD_ARGS
+      value:
+      - $(params.build-args[*])
+    - name: BUILD_ARGS_FILE
+      value: $(params.build-args-file)
+    - name: PRIVILEGED_NESTED
+      value: $(params.privileged-nested)
+    - name: ACTIVATION_KEY
+      value: custom-activation-key
+    - name: LABELS
+      value:
+      - git.url=$(params.git-url)
+      - git.commit=$(params.revision)
+    - name: SOURCE_ARTIFACT
+      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
+    - name: CACHI2_ARTIFACT
+      value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
+    - name: IMAGE_APPEND_PLATFORM
+      value: "false"
+    - name: BUILDAH_FORMAT
+      value: $(params.buildah-format)
+    runAfter:
+    - prefetch-dependencies
+    taskRef:
+      params:
+      - name: name
+        value: buildah-remote-oci-ta
+      - name: bundle
+        value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.7@sha256:ef1c062b10c9fb17951350de76bce6bb54a4ea75fca4f37ea136d626c444bf78
+      - name: kind
+        value: task
+      resolver: bundles
+    when:
+    - input: $(tasks.init.results.build)
+      operator: in
+      values:
+      - "true"
+
+#  - name: build-sklearn-serving-runtime
 #    params:
-#    - name: ADDITIONAL_SECRET
-#      value: $(params.additional-build-secret)
 #    - name: IMAGE
-#      value: $(params.output-image)
+#      value: quay.io/opendatahub/sklearn-serving-runtime:$(tasks.rhoai-init.results.mandatory-tag)
 #    - name: DOCKERFILE
-#      value: $(params.dockerfile)
+#      value: sklearn.Dockerfile
 #    - name: CONTEXT
-#      value: $(params.path-context)
+#      value: python
 #    - name: HERMETIC
 #      value: $(params.hermetic)
 #    - name: PREFETCH_INPUT
@@ -216,20 +267,14 @@ spec:
 #      value: custom-activation-key
 #    - name: LABELS
 #      value:
-#      - $(params.additional-labels[*])
-#      - url=$(params.git-url)
-#      - release=$(tasks.clone-repository.results.commit-timestamp)
 #      - git.url=$(params.git-url)
 #      - git.commit=$(params.revision)
-#    - name: additional-labels
-#      value:
-#        - "{{target_branch}}-{{revision}}"
 #    - name: SOURCE_ARTIFACT
 #      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
 #    - name: CACHI2_ARTIFACT
 #      value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
 #    - name: IMAGE_APPEND_PLATFORM
-#      value: "true"
+#      value: "false"
 #    - name: BUILDAH_FORMAT
 #      value: $(params.buildah-format)
 #    runAfter:
@@ -249,9 +294,257 @@ spec:
 #      values:
 #      - "true"
 #
+#  - name: build-custom-transformer
+#    params:
+#    - name: IMAGE
+#      value: quay.io/opendatahub/custom-transformer:$(tasks.rhoai-init.results.mandatory-tag)
+#    - name: DOCKERFILE
+#      value: custom_transformer.Dockerfile
+#    - name: CONTEXT
+#      value: python
+#    - name: HERMETIC
+#      value: $(params.hermetic)
+#    - name: PREFETCH_INPUT
+#      value: $(params.prefetch-input)
+#    - name: IMAGE_EXPIRES_AFTER
+#      value: $(params.image-expires-after)
+#    - name: COMMIT_SHA
+#      value: $(tasks.clone-repository.results.commit)
+#    - name: BUILD_ARGS
+#      value:
+#      - $(params.build-args[*])
+#    - name: BUILD_ARGS_FILE
+#      value: $(params.build-args-file)
+#    - name: PRIVILEGED_NESTED
+#      value: $(params.privileged-nested)
+#    - name: ACTIVATION_KEY
+#      value: custom-activation-key
+#    - name: LABELS
+#      value:
+#      - git.url=$(params.git-url)
+#      - git.commit=$(params.revision)
+#    - name: SOURCE_ARTIFACT
+#      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
+#    - name: CACHI2_ARTIFACT
+#      value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
+#    - name: IMAGE_APPEND_PLATFORM
+#      value: "false"
+#    - name: BUILDAH_FORMAT
+#      value: $(params.buildah-format)
+#    runAfter:
+#    - prefetch-dependencies
+#    taskRef:
+#      params:
+#      - name: name
+#        value: buildah-remote-oci-ta
+#      - name: bundle
+#        value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.7@sha256:ef1c062b10c9fb17951350de76bce6bb54a4ea75fca4f37ea136d626c444bf78
+#      - name: kind
+#        value: task
+#      resolver: bundles
+#    when:
+#    - input: $(tasks.init.results.build)
+#      operator: in
+#      values:
+#      - "true"
 #
+#  - name: build-custom-model-grpc
+#    params:
+#    - name: IMAGE
+#      value: quay.io/opendatahub/custom-model-grpc:$(tasks.rhoai-init.results.mandatory-tag)
+#    - name: DOCKERFILE
+#      value: custom_model_grpc.Dockerfile
+#    - name: CONTEXT
+#      value: python
+#    - name: HERMETIC
+#      value: $(params.hermetic)
+#    - name: PREFETCH_INPUT
+#      value: $(params.prefetch-input)
+#    - name: IMAGE_EXPIRES_AFTER
+#      value: $(params.image-expires-after)
+#    - name: COMMIT_SHA
+#      value: $(tasks.clone-repository.results.commit)
+#    - name: BUILD_ARGS
+#      value:
+#      - $(params.build-args[*])
+#    - name: BUILD_ARGS_FILE
+#      value: $(params.build-args-file)
+#    - name: PRIVILEGED_NESTED
+#      value: $(params.privileged-nested)
+#    - name: ACTIVATION_KEY
+#      value: custom-activation-key
+#    - name: LABELS
+#      value:
+#      - git.url=$(params.git-url)
+#      - git.commit=$(params.revision)
+#    - name: SOURCE_ARTIFACT
+#      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
+#    - name: CACHI2_ARTIFACT
+#      value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
+#    - name: IMAGE_APPEND_PLATFORM
+#      value: "false"
+#    - name: BUILDAH_FORMAT
+#      value: $(params.buildah-format)
+#    runAfter:
+#    - prefetch-dependencies
+#    taskRef:
+#      params:
+#      - name: name
+#        value: buildah-remote-oci-ta
+#      - name: bundle
+#        value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.7@sha256:ef1c062b10c9fb17951350de76bce6bb54a4ea75fca4f37ea136d626c444bf78
+#      - name: kind
+#        value: task
+#      resolver: bundles
+#    when:
+#    - input: $(tasks.init.results.build)
+#      operator: in
+#      values:
+#      - "true"
 #
+#  - name: build-success-200-isvc
+#    params:
+#    - name: IMAGE
+#      value: quay.io/opendatahub/success-200-isvc:$(tasks.rhoai-init.results.mandatory-tag)
+#    - name: DOCKERFILE
+#      value: success_200_isvc.Dockerfile
+#    - name: CONTEXT
+#      value: python
+#    - name: HERMETIC
+#      value: $(params.hermetic)
+#    - name: PREFETCH_INPUT
+#      value: $(params.prefetch-input)
+#    - name: IMAGE_EXPIRES_AFTER
+#      value: $(params.image-expires-after)
+#    - name: COMMIT_SHA
+#      value: $(tasks.clone-repository.results.commit)
+#    - name: BUILD_ARGS
+#      value:
+#      - $(params.build-args[*])
+#    - name: BUILD_ARGS_FILE
+#      value: $(params.build-args-file)
+#    - name: PRIVILEGED_NESTED
+#      value: $(params.privileged-nested)
+#    - name: ACTIVATION_KEY
+#      value: custom-activation-key
+#    - name: LABELS
+#      value:
+#      - git.url=$(params.git-url)
+#      - git.commit=$(params.revision)
+#    - name: SOURCE_ARTIFACT
+#      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
+#    - name: CACHI2_ARTIFACT
+#      value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
+#    - name: IMAGE_APPEND_PLATFORM
+#      value: "false"
+#    - name: BUILDAH_FORMAT
+#      value: $(params.buildah-format)
+#    runAfter:
+#    - prefetch-dependencies
+#    taskRef:
+#      params:
+#      - name: name
+#        value: buildah-remote-oci-ta
+#      - name: bundle
+#        value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.7@sha256:ef1c062b10c9fb17951350de76bce6bb54a4ea75fca4f37ea136d626c444bf78
+#      - name: kind
+#        value: task
+#      resolver: bundles
+#    when:
+#    - input: $(tasks.init.results.build)
+#      operator: in
+#      values:
+#      - "true"
 #
+#  - name: build-error-404-isvc
+#    params:
+#    - name: IMAGE
+#      value: quay.io/opendatahub/error-404-isvc:$(tasks.rhoai-init.results.mandatory-tag)
+#    - name: DOCKERFILE
+#      value: error_404_isvc.Dockerfile
+#    - name: CONTEXT
+#      value: python
+#    - name: HERMETIC
+#      value: $(params.hermetic)
+#    - name: PREFETCH_INPUT
+#      value: $(params.prefetch-input)
+#    - name: IMAGE_EXPIRES_AFTER
+#      value: $(params.image-expires-after)
+#    - name: COMMIT_SHA
+#      value: $(tasks.clone-repository.results.commit)
+#    - name: BUILD_ARGS
+#      value:
+#      - $(params.build-args[*])
+#    - name: BUILD_ARGS_FILE
+#      value: $(params.build-args-file)
+#    - name: PRIVILEGED_NESTED
+#      value: $(params.privileged-nested)
+#    - name: ACTIVATION_KEY
+#      value: custom-activation-key
+#    - name: LABELS
+#      value:
+#      - git.url=$(params.git-url)
+#      - git.commit=$(params.revision)
+#    - name: SOURCE_ARTIFACT
+#      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
+#    - name: CACHI2_ARTIFACT
+#      value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
+#    - name: IMAGE_APPEND_PLATFORM
+#      value: "false"
+#    - name: BUILDAH_FORMAT
+#      value: $(params.buildah-format)
+#    runAfter:
+#    - prefetch-dependencies
+#    taskRef:
+#      params:
+#      - name: name
+#        value: buildah-remote-oci-ta
+#      - name: bundle
+#        value: quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.7@sha256:ef1c062b10c9fb17951350de76bce6bb54a4ea75fca4f37ea136d626c444bf78
+#      - name: kind
+#        value: task
+#      resolver: bundles
+#    when:
+#    - input: $(tasks.init.results.build)
+#      operator: in
+#      values:
+#      - "true"
+
+  - name: audit-images
+    runAfter:
+#      - build-error-404-isvc
+#      - build-success-200-isvc
+#      - build-custom-model-grpc
+#      - build-custom-transformer
+#      - build-sklearn-serving-runtime
+      - build-llmisvc-controller
+    params:
+      - name: COMPONENTS
+        value: $(params.group-components)
+    taskSpec:
+      steps:
+        - name: audit-images
+          image: quay.io/konflux-ci/konflux-test:stable
+          workingDir: /workspace
+          env:
+            - name: IMAGE_DIGEST
+              value: $(tasks.build-llmisvc-controller.results.IMAGE_DIGEST)
+            - name: IMAGE_REF
+              value: $(tasks.build-llmisvc-controller.results.IMAGE_REF)
+            - name: IMAGE_URL
+              value: $(tasks.build-llmisvc-controller.results.IMAGE_URL)
+            - name: PR_TAG
+              value: $(tasks.rhoai-init.results.mandatory-tag)
+          script: |
+            #!/bin/bash
+            set -e
+            echo "**** llmisvc-controller image details ****"
+            echo "IMAGE_DIGEST = ${IMAGE_DIGEST}"
+            echo "IMAGE_REF = ${IMAGE_REF}"
+            echo "IMAGE_URL = ${IMAGE_URL}"
+            skopeo inspect docker://quay.io/opendatahub/llmisvc-controller:${PR_TAG}
+
+
 #
 #    - name: generate-snapshot
 #      description: Placeholder task that prints the Snapshot and outputs standard TEST_OUTPUT
