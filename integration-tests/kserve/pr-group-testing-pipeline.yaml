@@ -11,9 +11,6 @@ spec:
     - description: List of components in the group
       name: group-components
       type: string
-    - description: Snapshot of the application
-      name: SNAPSHOT
-      type: string
     - description: Source Repository URL
       name: git-url
       type: string
