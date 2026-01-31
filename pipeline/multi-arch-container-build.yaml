@@ -139,15 +139,17 @@ spec:
     params:
     - name: expected-cluster
       value: $(params.expected-cluster)
+    - name: pipeline-type
+      value: $(params.pipeline-type)
     taskRef:
       resolver: git
       params:
       - name: url
         value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
       - name: revision
-        value: 19a01971a39db7e50c40e6db8405dfa957eec70b
+        value: odh
       - name: pathInRepo
-        value: konflux-tekton-tasks/rhoai-init/0.1/rhoai-init.yaml
+        value: konflux-tekton-tasks/rhoai-init/0.3/rhoai-init.yaml
   - name: init
     params:
     - name: image-url
@@ -615,6 +617,7 @@ spec:
       value: $(tasks.build-image-index.results.IMAGE_DIGEST)
     - name: ADDITIONAL_TAGS
       value:
+      - $(tasks.rhoai-init.results.mandatory-tag)
       - $(params.additional-tags[*])
     runAfter:
     - build-image-index
