@@ -2,7 +2,7 @@
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  name: odh-pr-test
+  name: odh-pr-test-feast
 spec:
   description: |
     An integration test which provisions an ephemeral Hypershift cluster, deploys opendatahub-operator
