@@ -232,6 +232,7 @@ spec:
 
               ### RUN TEST CODE ###
               # Print last commit of current code
+              git config --global --add safe.directory /workspace/source
               git show
               # Check state of ODH operator source
               oc describe catalogsource -n openshift-marketplace community-operators
