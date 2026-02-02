@@ -218,6 +218,7 @@ spec:
               # Construct script to run in Python client tests pod
               SCRIPT="""
               # Print last commit of current code
+              git config --global --add safe.directory /workspace/source
               git show
               # Install Robot Framework tests requirements
               pip3.9 install -r test/robot/requirements.txt
