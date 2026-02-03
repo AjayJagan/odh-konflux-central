@@ -153,9 +153,9 @@ spec:
       - name: url
         value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
       - name: revision
-        value: 19a01971a39db7e50c40e6db8405dfa957eec70b
+        value: odh
       - name: pathInRepo
-        value: konflux-tekton-tasks/rhoai-init/0.1/rhoai-init.yaml
+        value: konflux-tekton-tasks/rhoai-init/0.3/rhoai-init.yaml
   - name: init
     params:
     - name: image-url
@@ -655,6 +655,7 @@ spec:
       value: $(tasks.build-image-index.results.IMAGE_DIGEST)
     - name: ADDITIONAL_TAGS
       value:
+      - $(tasks.rhoai-init.results.mandatory-tag)
       - $(params.additional-tags[*])
     runAfter:
     - build-image-index
@@ -777,10 +778,10 @@ spec:
             echo "exploring manifests"
             ls /var/workdir/cachi2
             ls /var/workdir/cachi2/prefetched-manifests
-            
+
             echo "exploring sources"
             ls /var/workdir/source
-            
+
             echo "****************** pushing the changes to odh-build-metadata ************************"
             META_DIR=/var/workdir/odh-build-metadata
             mkdir -p ${META_DIR}
@@ -795,8 +796,8 @@ spec:
             echo "components/odh-operator/docs" >> .git/info/sparse-checkout
             git fetch --depth=1 origin main
             git checkout main
-            
-            #add content to new-dir    
+
+            #add content to new-dir
             OUTPUT_IMAGE_DIGEST=${OUTPUT_IMAGE_DIGEST/sha256:/}
             mkdir -p components/odh-operator/${OUTPUT_IMAGE_DIGEST}/manifests
             cp -r /var/workdir/cachi2/prefetched-manifests/* components/odh-operator/${OUTPUT_IMAGE_DIGEST}/manifests
@@ -806,7 +807,7 @@ spec:
             git add --sparse components/odh-operator/${OUTPUT_IMAGE_DIGEST}
             git commit -m "build-meta for operator image ${OUTPUT_IMAGE_DIGEST}"
             git push
-            
+
 
     when:
     - input: "$(tasks.build-image-index.status)"

@@ -199,7 +199,7 @@ spec:
               git config --global --add safe.directory /workspace/source
               cd /workspace/source
 
-          - name: e2e-maas-api-openshift
+          - name: e2e-model-registry
             image: quay.io/rhoai/rhoai-task-toolset:model-registry
             env:
               - name: KUBECONFIG
