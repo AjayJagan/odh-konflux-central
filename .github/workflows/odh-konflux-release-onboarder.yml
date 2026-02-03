@@ -187,8 +187,12 @@ jobs:
 
           # Copy .tekton files (add/update only)
           mkdir -p .tekton
-          rsync -av ../extracted/.tekton/ .tekton/
-          git add -f .tekton
+
+          # Copy ONLY newly created release pipelines
+          for file in "${release_files[@]}"; do
+            cp "$file" ".tekton/$(basename "$file")"
+            git add -f ".tekton/$(basename "$file")"
+          done
 
           # Conditionally copy workflows if available
           workflow_src="../extracted/.github/workflows"
