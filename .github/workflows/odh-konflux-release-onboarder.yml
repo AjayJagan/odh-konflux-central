@@ -105,8 +105,9 @@ jobs:
           fi
       
           mkdir -p extracted/.tekton
+          release_files=()
       
-          # Copy only *push.yaml files (filename-based)
+          # Copy only *push.yaml files (no modification)
           find "$repo_folder" -type f -name "*push.yaml" -exec cp {} extracted/.tekton/ \;
       
           if [ -z "$(ls -A extracted/.tekton)" ]; then
@@ -114,19 +115,17 @@ jobs:
             exit 1
           fi
       
-          echo "Creating release pipelines based on metadata.name..."
+          echo "Creating release pipelines (without touching originals)..."
       
           for file in extracted/.tekton/*push.yaml; do
             pipeline_name=$(yq e '.metadata.name' "$file")
       
-            if [ -z "$pipeline_name" ] || [ "$pipeline_name" = "null" ]; then
-              echo "Skipping $file (no metadata.name)"
+            if [[ -z "$pipeline_name" || "$pipeline_name" == "null" ]]; then
               continue
             fi
       
-            # Only act on pipelines named *-on-push
+            # Only derive release pipelines from *-on-push
             if [[ "$pipeline_name" != *"-on-push" ]]; then
-              echo "Skipping $file (pipeline name '$pipeline_name' is not -on-push)"
               continue
             fi
       
@@ -138,18 +137,18 @@ jobs:
             yq e -i ".metadata.name = \"$release_pipeline_name\"" \
               "extracted/.tekton/$release_file"
       
-            echo "Created release pipeline:"
-            echo "  Source file : $(basename "$file")"
-            echo "  Release file: $release_file"
-            echo "  Name        : $release_pipeline_name"
+            release_files+=("extracted/.tekton/$release_file")
+      
+            echo "Created release pipeline: $release_pipeline_name"
           done
       
-          echo "Applying substitutions to Tekton files..."
+          echo "Applying substitutions ONLY to release pipelines..."
       
-          find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
+          for file in "${release_files[@]}"; do
             sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${{ inputs.version }}"'|g' "$file"
             sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
           done
+
 
       - name: Prepare GitHub workflow files (if applicable)
         run: |
