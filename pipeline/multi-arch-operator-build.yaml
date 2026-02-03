@@ -129,6 +129,10 @@ spec:
     type: string
     default: push
     description: Type of pipeline execution (push)
+  - name: build-type
+    type: string
+    default: CI
+    description: Type of build CI/nightly
   results:
   - description: ""
     name: IMAGE_URL
