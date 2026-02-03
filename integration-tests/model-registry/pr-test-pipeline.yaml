@@ -150,7 +150,7 @@ spec:
         - input: "$(tasks.check-prerequisites.results.event-type)"
           operator: in
           values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
-    - name: e2e-maas-api-openshift
+    - name: e2e-model-registry
       runAfter:
         - provision-cluster
       params:
@@ -256,7 +256,10 @@ spec:
               oc delete pod -n "${POD_NAMESPACE_NAME}" "${POD_NAME}"
               # Exit with return code of tests
               exit $EXIT_STATUS
-
+      when:
+        - input: "$(tasks.check-prerequisites.results.event-type)"
+          operator: in
+          values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
 
 
 
