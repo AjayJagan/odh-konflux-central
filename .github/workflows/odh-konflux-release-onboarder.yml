@@ -106,41 +106,42 @@ jobs:
       
           mkdir -p extracted/.tekton
       
-          # Copy only *on-push.yaml files
-          find "$repo_folder" -type f -name "*on-push.yaml" -exec cp {} extracted/.tekton/ \;
+          # Copy only *push.yaml files (filename-based)
+          find "$repo_folder" -type f -name "*push.yaml" -exec cp {} extracted/.tekton/ \;
       
           if [ -z "$(ls -A extracted/.tekton)" ]; then
-            echo "ERROR: No *on-push.yaml files found in $repo_folder"
+            echo "ERROR: No *push.yaml files found in $repo_folder"
             exit 1
           fi
       
-          echo "Creating release pipelines from on-push pipelines..."
+          echo "Creating release pipelines based on metadata.name..."
       
-          for file in extracted/.tekton/*on-push.yaml; do
-            base_name="$(basename "$file")"
-            release_file="${base_name/-on-push.yaml/-on-release-push.yaml}"
-      
-            # Copy as release pipeline
-            cp "$file" "extracted/.tekton/$release_file"
-      
-            # Read pipeline name
+          for file in extracted/.tekton/*push.yaml; do
             pipeline_name=$(yq e '.metadata.name' "$file")
       
             if [ -z "$pipeline_name" ] || [ "$pipeline_name" = "null" ]; then
-              echo "ERROR: metadata.name not found in $file"
-              exit 1
+              echo "Skipping $file (no metadata.name)"
+              continue
             fi
       
-            # Transform name
-            release_pipeline_name="${pipeline_name/-on-push/-on-release-push}"
+            # Only act on pipelines named *-on-push
+            if [[ "$pipeline_name" != *"-on-push" ]]; then
+              echo "Skipping $file (pipeline name '$pipeline_name' is not -on-push)"
+              continue
+            fi
       
-            # Update metadata.name
+            release_pipeline_name="${pipeline_name/-on-push/-on-release-push}"
+            release_file="$(basename "$file" | sed 's|push.yaml|on-release-push.yaml|')"
+      
+            cp "$file" "extracted/.tekton/$release_file"
+      
             yq e -i ".metadata.name = \"$release_pipeline_name\"" \
               "extracted/.tekton/$release_file"
       
             echo "Created release pipeline:"
-            echo "  File : $release_file"
-            echo "  Name : $release_pipeline_name"
+            echo "  Source file : $(basename "$file")"
+            echo "  Release file: $release_file"
+            echo "  Name        : $release_pipeline_name"
           done
       
           echo "Applying substitutions to Tekton files..."
@@ -149,8 +150,6 @@ jobs:
             sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${{ inputs.version }}"'|g' "$file"
             sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
           done
-
-
 
       - name: Prepare GitHub workflow files (if applicable)
         run: |
