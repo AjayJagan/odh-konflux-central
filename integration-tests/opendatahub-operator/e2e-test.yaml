@@ -97,7 +97,7 @@ spec:
       when:
         - input: "$(tasks.check-prerequisites.results.event-type)"
           operator: in
-          values: ["pull_request", "retest-all-comment", "on-comment"]
+          values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
 
     - name: provision-cluster
       runAfter:
@@ -153,7 +153,7 @@ spec:
       when:
         - input: "$(tasks.check-prerequisites.results.event-type)"
           operator: in
-          values: ["pull_request", "retest-all-comment", "on-comment"]
+          values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
     - name: deploy-and-test
       runAfter:
         - provision-cluster
@@ -230,4 +230,4 @@ spec:
       when:
         - input: "$(tasks.check-prerequisites.results.event-type)"
           operator: in
-          values: ["pull_request", "retest-all-comment", "on-comment"]
+          values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
