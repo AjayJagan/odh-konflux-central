@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/kserve?rev={{revision}}
+    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/data-science-pipelines?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: kserve-agent
+    appstudio.openshift.io/component: odh-ml-pipelines-api-server-v2
     pipelines.appstudio.openshift.io/type: build
-  name: kserve-agent-on-push
+  name: odh-ml-pipelines-api-server-v2-release-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -23,9 +23,9 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/kserve-agent:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/ds-pipelines-api-server:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
-    value: agent.Dockerfile
+    value: backend/Dockerfile
   - name: path-context
     value: .
   pipelineSpec:
@@ -652,7 +652,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-kserve-agent
+    serviceAccountName: build-pipeline-odh-ml-pipelines-api-server-v2
   workspaces:
   - name: git-auth
     secret:

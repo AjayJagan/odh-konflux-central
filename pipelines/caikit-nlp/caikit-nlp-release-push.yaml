@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/data-science-pipelines?rev={{revision}}
+    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/caikit-nlp?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: odh-ml-pipelines-driver
+    appstudio.openshift.io/component: caikit-nlp
     pipelines.appstudio.openshift.io/type: build
-  name: odh-ml-pipelines-driver-on-push
+  name: caikit-nlp-release-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -23,9 +23,9 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/ds-pipelines-driver:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/caikit-nlp:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
-    value: backend/Dockerfile.driver
+    value: Dockerfile
   - name: path-context
     value: .
   pipelineSpec:
@@ -218,7 +218,7 @@ spec:
         - name: name
           value: git-clone-oci-ta
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-git-clone-oci-ta:0.1@sha256:8ecf57d5a6697ce709bee65b62781efe79a10b0c2b95e05576442b67fbd61744
+          value: quay.io/konflux-ci/tekton-catalog/task-git-clone-oci-ta:0.1@sha256:3e171c1f3a9487a5764ebef629f93b3d2fc01cc8bad382dd8065cdfe42214148
         - name: kind
           value: task
         resolver: bundles
@@ -652,7 +652,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-ml-pipelines-driver
+    serviceAccountName: build-pipeline-caikit-nlp
   workspaces:
   - name: git-auth
     secret:

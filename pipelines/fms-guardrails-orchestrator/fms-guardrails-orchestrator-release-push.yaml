@@ -14,7 +14,7 @@ metadata:
     appstudio.openshift.io/application: opendatahub-release
     appstudio.openshift.io/component: fms-guardrails-orchestrator
     pipelines.appstudio.openshift.io/type: build
-  name: fms-guardrails-orchestrator-on-push
+  name: fms-guardrails-orchestrator-release-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
