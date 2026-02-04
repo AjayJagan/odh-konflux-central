@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: odh-kf-notebook-controller
+    appstudio.openshift.io/component: odh-notebook-controller
     pipelines.appstudio.openshift.io/type: build
-  name: odh-kf-notebook-controller-on-push
+  name: odh-notebook-controller-release-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -23,9 +23,9 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/kubeflow-notebook-controller:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/odh-notebook-controller:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
-    value: notebook-controller/Dockerfile
+    value: odh-notebook-controller/Dockerfile
   - name: path-context
     value: components
   pipelineSpec:
@@ -652,7 +652,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-kf-notebook-controller
+    serviceAccountName: build-pipeline-odh-notebook-controller
   workspaces:
   - name: git-auth
     secret:

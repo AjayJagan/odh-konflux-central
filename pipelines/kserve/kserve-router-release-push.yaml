@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/caikit-nlp?rev={{revision}}
+    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/kserve?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: caikit-nlp
+    appstudio.openshift.io/component: kserve-router
     pipelines.appstudio.openshift.io/type: build
-  name: caikit-nlp-on-push
+  name: kserve-router-release-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -23,10 +23,9 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/caikit-nlp:$$OUTPUT_IMAGE_TAG$$
-
+    value: quay.io/opendatahub/kserve-router:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
-    value: Dockerfile
+    value: router.Dockerfile
   - name: path-context
     value: .
   pipelineSpec:
@@ -219,7 +218,7 @@ spec:
         - name: name
           value: git-clone-oci-ta
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-git-clone-oci-ta:0.1@sha256:3e171c1f3a9487a5764ebef629f93b3d2fc01cc8bad382dd8065cdfe42214148
+          value: quay.io/konflux-ci/tekton-catalog/task-git-clone-oci-ta:0.1@sha256:8ecf57d5a6697ce709bee65b62781efe79a10b0c2b95e05576442b67fbd61744
         - name: kind
           value: task
         resolver: bundles
@@ -653,7 +652,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-caikit-nlp
+    serviceAccountName: build-pipeline-kserve-router
   workspaces:
   - name: git-auth
     secret:

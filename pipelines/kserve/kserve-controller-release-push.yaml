@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/kubeflow?rev={{revision}}
+    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/kserve?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: odh-notebook-controller
+    appstudio.openshift.io/component: kserve-controller
     pipelines.appstudio.openshift.io/type: build
-  name: odh-notebook-controller-on-push
+  name: kserve-controller-release-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -23,11 +23,11 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/odh-notebook-controller:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/kserve-controller:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
-    value: odh-notebook-controller/Dockerfile
+    value: Dockerfile
   - name: path-context
-    value: components
+    value: .
   pipelineSpec:
     description: |
       This pipeline is ideal for building container images from a Containerfile while maintaining trust after pipeline customization.
@@ -652,7 +652,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-notebook-controller
+    serviceAccountName: build-pipeline-kserve-controller
   workspaces:
   - name: git-auth
     secret:
