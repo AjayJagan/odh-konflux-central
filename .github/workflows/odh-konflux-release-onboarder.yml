@@ -52,7 +52,6 @@ on:
           - mlflow
           - mlflow-operator
           - eval-hub
-          - spark-operator
           # Add all valid components here
       pr_target_branch:
         description: 'Branch to open the PR against (e.g. master).'
@@ -96,57 +95,28 @@ jobs:
 
       - name: Prepare Tekton files
         run: |
-          set -euo pipefail
-      
           repo_folder="okc-repo/pipelines/${OKC_FOLDER}"
           echo "Using pipeline path: $repo_folder"
-      
-          [ -d "$repo_folder" ] || { echo "ERROR: $repo_folder does not exist"; exit 1; }
-      
-          mkdir -p extracted/.tekton
-          prepared_files=()
-      
-          shopt -s nullglob
-          for src in "$repo_folder"/*push.yaml; do
-            base="$(basename "$src")"
-      
-            # Copy first
-            cp "$src" "extracted/.tekton/$base"
-            dest="extracted/.tekton/$base"
-      
-            pipeline_name=$(yq e '.metadata.name' "$dest")
-      
-            if [[ "$pipeline_name" == *"-on-push" ]]; then
-              release_name="${pipeline_name/-on-push/-on-release-push}"
-              release_file="${base/-on-push.yaml/-release.yaml}"
-      
-              mv "$dest" "extracted/.tekton/$release_file"
-              dest="extracted/.tekton/$release_file"
-      
-              yq e -i ".metadata.name = \"$release_name\"" "$dest"
-      
-              echo "Prepared release pipeline:"
-              echo "  File : $release_file"
-              echo "  Name : $release_name"
-            else
-              echo "Skipping (not -on-push): $base"
-              rm -f "$dest"
-              continue
-            fi
-      
-            sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${{ inputs.version }}"'|g' "$dest"
-            sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$dest"
-      
-            prepared_files+=("$dest")
-          done
-      
-          if [ "${#prepared_files[@]}" -eq 0 ]; then
-            echo "ERROR: No pipelines prepared"
+
+          if [ ! -d "$repo_folder" ]; then
+            echo "ERROR: $repo_folder does not exist!"
             exit 1
           fi
-      
-          printf "%s\n" "${prepared_files[@]}" > /tmp/prepared_tekton_files
 
+          mkdir -p extracted/.tekton
+          find "$repo_folder" -type f -name "*push.yaml" -exec cp {} extracted/.tekton/ \;
+
+          if [ -z "$(ls -A extracted/.tekton)" ]; then
+            echo "ERROR: No *push.yaml files found in $repo_folder"
+            exit 1
+          fi
+
+          find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
+            # Replace $$OUTPUT_IMAGE_TAG$$ with version (preserves 'v' prefix and handles all occurrences including build-args)
+            sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${{ inputs.version }}"'|g' "$file"
+            # Replace $$TARGET_BRANCH$$ with build branch (the branch images are built from)
+            sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
+          done
 
       - name: Prepare GitHub workflow files (if applicable)
         run: |
@@ -169,41 +139,52 @@ jobs:
 
       - name: Clone and push Tekton changes
         run: |
-          git clone https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${REPOSITORY} repo
-          cd repo
-      
+          git clone https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${REPOSITORY} repo-workspace
+          cd repo-workspace
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-      
-          git checkout -B "${{ inputs.pr_target_branch }}" "origin/${{ inputs.pr_target_branch }}"
-      
-          branch="appstudio-${{ inputs.component }}-${{ inputs.version }}-$(date +%s)"
-          echo "BRANCH_NAME=$branch" >> $GITHUB_ENV
-          git checkout -b "$branch"
-      
+          git fetch origin ${{ inputs.pr_target_branch }}
+          git checkout -B ${{ inputs.pr_target_branch }} origin/${{ inputs.pr_target_branch }}
+
+          #branch_name="appstudio-${{ inputs.component }}-konflux-replicator"
+          #branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}"
+          branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}-$(date +%s)"
+          echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
+
+          git checkout -B "$branch_name" ${{ inputs.pr_target_branch }}
+
+          # Copy .tekton files
           mkdir -p .tekton
-      
-          while read file; do
-            f="$(basename "$file")"
-            cp "../$file" ".tekton/$f"
-            git add ".tekton/$f"
-          done < /tmp/prepared_tekton_files
-      
+
+          for file in ../extracted/.tekton/*.yaml; do
+            target=".tekton/$(basename "$file")"
+            cp "$file" "$target"
+            git add "$target"
+          done
+
+
+          # Conditionally copy workflows if available
+          workflow_src="../extracted/.github/workflows"
+          workflow_dest=".github/workflows"
+
+          if [ -d "$workflow_src" ]; then
+            echo "Copying workflow files from $workflow_src to $workflow_dest"
+            mkdir -p "$workflow_dest"
+            rsync -av "$workflow_src/" "$workflow_dest/"
+            git add -f "$workflow_dest"
+          else
+            echo "No workflow files found for component '${{ inputs.component }}'. Skipping workflow update."
+          fi
+
+          # Commit if there are changes
           if git diff --cached --quiet; then
-            echo "No changes detected."
+            echo "No changes to commit."
             echo "commit=false" >> $GITHUB_ENV
             exit 0
           fi
-      
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            echo "DRY RUN ENABLED — showing diff only"
-            git diff --cached
-            echo "commit=false" >> $GITHUB_ENV
-            exit 0
-          fi
-      
-          git commit -m "Prepare release Tekton pipelines for ${{ inputs.version }}"
-          git push --set-upstream origin "$branch"
+
+          git commit -m "Update Tekton output-image tags to version ${{ inputs.version }}"
+          git push --set-upstream origin "$branch_name"
           echo "commit=true" >> $GITHUB_ENV
 
 
