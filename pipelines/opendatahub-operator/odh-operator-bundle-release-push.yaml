@@ -2,19 +2,19 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/feast?rev={{revision}}
+    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/opendatahub-operator?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
-      == "$$TARGET_BRANCH$$"
+      == "$$TARGET_BRANCH$$" && ("bundle/**".pathChanged() || "Dockerfiles/bundle.Dockerfile".pathChanged() || ".tekton/odh-operator-bundle-release-push.yaml".pathChanged())
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: odh-feature-server
+    appstudio.openshift.io/component: odh-operator-bundle
     pipelines.appstudio.openshift.io/type: build
-  name: odh-feature-server-release-on-push
+  name: odh-operator-bundle-release-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -23,11 +23,16 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/feature-server:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/opendatahub-operator-bundle:v$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
-    value: Dockerfile
-  - name: path-context
-    value: sdk/python/feast/infra/feature_servers/multicloud
+    value: Dockerfiles/bundle.Dockerfile
+  - name: rebuild
+    value: true
+  - name: target_branch
+    value: '{{target_branch}}'
+  - name: build-args
+    value:
+    - OPERATOR_VERSION=$$OUTPUT_IMAGE_TAG$$
   pipelineSpec:
     description: |
       This pipeline is ideal for building container images from a Containerfile while maintaining trust after pipeline customization.
@@ -111,6 +116,7 @@ spec:
       description: Image tag expiration time, time values could be something like
         1h, 2d, 3w for hours, days, and weeks, respectively.
       name: image-expires-after
+      type: string
     - default: "false"
       description: Build a source image.
       name: build-source-image
@@ -290,7 +296,7 @@ spec:
         - name: name
           value: buildah-oci-ta
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-buildah-oci-ta:0.4@sha256:b91b634c32b7fd98dbfc4cdbc0a97d7694997fd49ceebabf34c2535fd47f84a2
+          value: quay.io/konflux-ci/tekton-catalog/task-buildah-oci-ta:0.4@sha256:6ac9d16f598c14a4b56e662eccda0a438e94aa8f87dd27a3ea0ff1abc6e00c66
         - name: kind
           value: task
         resolver: bundles
@@ -504,7 +510,7 @@ spec:
         - name: name
           value: sast-coverity-check-oci-ta
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-sast-coverity-check-oci-ta:0.3@sha256:c8eb622d59019582f6f11ed656c0f04f388737f7dd6e47cd780ad0f34bb38bb2
+          value: quay.io/konflux-ci/tekton-catalog/task-sast-coverity-check-oci-ta:0.3@sha256:87af64576088ba68f2a5b89998b7ae9e92d7e4f039274e4be6000eff6ce0d95d
         - name: kind
           value: task
         resolver: bundles
@@ -637,7 +643,7 @@ spec:
         - name: name
           value: rpms-signature-scan
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-rpms-signature-scan:0.2@sha256:2366b2f394610192736dd8edac1a702964daeb961603dfc9ceb6b8188e39a009
+          value: quay.io/konflux-ci/tekton-catalog/task-rpms-signature-scan:0.2@sha256:297c2d8928aa3b114fcb1ba5d9da8b10226b68fed30706e78a6a5089c6cd30e3
         - name: kind
           value: task
         resolver: bundles
@@ -652,7 +658,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-feature-server
+    serviceAccountName: build-pipeline-odh-operator-bundle
   workspaces:
   - name: git-auth
     secret:

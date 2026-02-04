@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/feast?rev={{revision}}
+    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/data-science-pipelines-operator?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: odh-feature-server
+    appstudio.openshift.io/component: odh-data-science-pipelines-operator-controller
     pipelines.appstudio.openshift.io/type: build
-  name: odh-feature-server-release-on-push
+  name: odh-data-science-pipelines-operator-controller-release-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -23,11 +23,11 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/feature-server:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/data-science-pipelines-operator:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
     value: Dockerfile
   - name: path-context
-    value: sdk/python/feast/infra/feature_servers/multicloud
+    value: .
   pipelineSpec:
     description: |
       This pipeline is ideal for building container images from a Containerfile while maintaining trust after pipeline customization.
@@ -652,7 +652,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-feature-server
+    serviceAccountName: build-pipeline-odh-data-science-pipelines-operator-controller
   workspaces:
   - name: git-auth
     secret:

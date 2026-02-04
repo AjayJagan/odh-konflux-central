@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/feast?rev={{revision}}
+    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/MLServer?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: odh-feature-server
+    appstudio.openshift.io/component: mlserver
     pipelines.appstudio.openshift.io/type: build
-  name: odh-feature-server-release-on-push
+  name: mlserver-release-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -23,16 +23,21 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/feature-server:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/mlserver:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
     value: Dockerfile
   - name: path-context
-    value: sdk/python/feast/infra/feature_servers/multicloud
+    value: .
+  - name: build-args
+    value:
+    - RUNTIMES=lightgbm sklearn xgboost
+    - BUILDER_BASE_IMAGE=python:3.12-slim
+    - RUNTIME_BASE_IMAGE=registry.access.redhat.com/ubi9/ubi-minimal
   pipelineSpec:
     description: |
       This pipeline is ideal for building container images from a Containerfile while maintaining trust after pipeline customization.
 
-      _Uses `buildah` to create a container image leveraging [trusted artifacts](https://konflux-ci.dev/architecture/ADR/0036-trusted-artifacts.html). It also optionally creates a source image and runs some build-time tests. Information is shared between tasks using OCI artifacts instead of PVCs. EC will pass the [`trusted_task.trusted`](https://enterprisecontract.dev/docs/ec-policies/release_policy.html#trusted_task__trusted) policy as long as all data used to build the artifact is generated from trusted tasks.
+      _Uses `buildah` to create a container image leveraging [trusted artifacts](https://konflux-ci.dev/architecture/ADR/0036-trusted-artifacts.html). It also optionally creates a source image and runs some build-time tests. Information is shared between tasks using OCI artifacts instead of PVCs. EC will pass the [`trusted_task.trusted`](https://conforma.dev/docs/policy/packages/release_trusted_task.html#trusted_task__trusted) policy as long as all data used to build the artifact is generated from trusted tasks.
       This pipeline is pushed as a Tekton bundle to [quay.io](https://quay.io/repository/konflux-ci/tekton-catalog/pipeline-docker-build-oci-ta?tab=tags)_
     finally:
     - name: show-sbom
@@ -91,7 +96,7 @@ spec:
         path-context
       name: dockerfile
       type: string
-    - default: "true"
+    - default: "false"
       description: Force rebuild image
       name: rebuild
       type: string
@@ -104,13 +109,14 @@ spec:
       name: hermetic
       type: string
     - default: ""
-      description: Build dependencies to be prefetched by Cachi2
+      description: Build dependencies to be prefetched
       name: prefetch-input
       type: string
     - default: ""
       description: Image tag expiration time, time values could be something like
         1h, 2d, 3w for hours, days, and weeks, respectively.
       name: image-expires-after
+      type: string
     - default: "false"
       description: Build a source image.
       name: build-source-image
@@ -247,7 +253,7 @@ spec:
         - name: name
           value: prefetch-dependencies-oci-ta
         - name: bundle
-          value: quay.io/konflux-ci/tekton-catalog/task-prefetch-dependencies-oci-ta:0.2@sha256:d48c621ae828a3cbca162e12ec166210d2d77a7ba23b0e5d60c4a1b94491adeb
+          value: quay.io/konflux-ci/tekton-catalog/task-prefetch-dependencies-oci-ta:0.2@sha256:022032b9c5e1c0c91dbb89f0e89692f5cd463e953851a883b750a3e6700ea6f3
         - name: kind
           value: task
         resolver: bundles
@@ -652,7 +658,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-feature-server
+    serviceAccountName: build-pipeline-mlserver
   workspaces:
   - name: git-auth
     secret:
