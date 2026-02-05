@@ -219,7 +219,7 @@ spec:
               SCRIPT="""
               # Print last commit of current code
               git config --global --add safe.directory /workspace/source
-              git show
+              # git show
               # Install Robot Framework tests requirements
               pip3.9 install -r test/robot/requirements.txt
               # Install Python client for model-registry
@@ -232,8 +232,8 @@ spec:
 
               ### RUN TEST CODE ###
               # Print last commit of current code
-              git config --global --add safe.directory /workspace/source
-              git show
+              # git config --global --add safe.directory /workspace/source
+              # git show
               # Check state of ODH operator source
               oc describe catalogsource -n openshift-marketplace community-operators
               # Deploy ODH operator and other necessary resources
