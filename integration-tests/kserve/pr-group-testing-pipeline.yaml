@@ -539,14 +539,14 @@ spec:
           image: quay.io/konflux-ci/konflux-test:stable
           workingDir: /workspace
           env:
-            - name: IMAGE_DIGEST
-              value: $(tasks.build-llmisvc-controller.results.IMAGE_DIGEST)
-            - name: IMAGE_URL
-              value: $(tasks.build-llmisvc-controller.results.IMAGE_URL)
+#            - name: IMAGE_DIGEST
+#              value: $(tasks.build-llmisvc-controller.results.IMAGE_DIGEST)
+#            - name: IMAGE_URL
+#              value: $(tasks.build-llmisvc-controller.results.IMAGE_URL)
             - name: PR_TAG
               value: $(tasks.rhoai-init.results.mandatory-tag)
-            - name: LLMISVC_CONTROLLER_IMAGE_REF
-              value: $(tasks.build-llmisvc-controller.results.IMAGE_REF)
+#            - name: LLMISVC_CONTROLLER_IMAGE_REF
+#              value: $(tasks.build-llmisvc-controller.results.IMAGE_REF)
             - name: SKLEARN_SERVING_RUNTIME_IMAGE_REF
               value: $(tasks.build-sklearn-serving-runtime.results.IMAGE_REF)
             - name: CUSTOM_TRANSFORMER_IMAGE_REF
@@ -560,16 +560,16 @@ spec:
           script: |
             #!/bin/bash
             set -e
-            echo "**** llmisvc-controller image details ****"
-            echo "IMAGE_DIGEST = ${IMAGE_DIGEST}"
-            echo "IMAGE_URL = ${IMAGE_URL}"
+            # echo "**** llmisvc-controller image details ****"
+            # echo "IMAGE_DIGEST = ${IMAGE_DIGEST}"
+            # echo "IMAGE_URL = ${IMAGE_URL}"
             # skopeo inspect docker://quay.io/opendatahub/llmisvc-controller:${PR_TAG}
-            echo "LLMISVC_CONTROLLER_IMAGE_REF = ${LLMISVC_CONTROLLER_IMAGE_REF}"
+            # echo "LLMISVC_CONTROLLER_IMAGE_REF = ${LLMISVC_CONTROLLER_IMAGE_REF}"
             echo "SKLEARN_SERVING_RUNTIME_IMAGE_REF = ${SKLEARN_SERVING_RUNTIME_IMAGE_REF}"
             echo "CUSTOM_TRANSFORMER_IMAGE_REF = ${CUSTOM_TRANSFORMER_IMAGE_REF}"
             echo "CUSTOM_MODEL_GRPC_IMAGE_REF = ${CUSTOM_MODEL_GRPC_IMAGE_REF}"
             echo "SUCCESS_200_ISVC_IMAGE_REF = ${SUCCESS_200_ISVC_IMAGE_REF}"
-            echo "LLMISVC_CONTROLLER_IMAGE_REF = ${LLMISVC_CONTROLLER_IMAGE_REF}"
+            # echo "ERROR_404_ISVC_IMAGE_REF = ${ERROR_404_ISVC_IMAGE_REF}"
 
 
 
