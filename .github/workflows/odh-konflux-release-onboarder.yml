@@ -160,7 +160,7 @@ jobs:
           for file in ../extracted/.tekton/*.yaml; do
             target=".tekton/$(basename "$file")"
             cp "$file" "$target"
-            git add "$target"
+            git add -f "$target"
           done
 
 
