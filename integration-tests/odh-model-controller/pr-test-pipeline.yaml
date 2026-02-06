@@ -416,8 +416,7 @@ spec:
               git clone https://github.com/opendatahub-io/kserve.git /tmp/kserve
               pushd /tmp/kserve
                 git fetch --all --tags
-                # git checkout release-v0.15
-                git checkout konflux-its
+                git checkout release-v0.15
                 export GITHUB_SHA="${PULL_BASE_SHA:-stable}"
                 export ODH_MODEL_CONTROLLER_IMAGE="${ODH_MODEL_CONTROLLER_IMAGE}"
 
