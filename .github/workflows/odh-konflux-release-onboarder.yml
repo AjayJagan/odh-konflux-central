@@ -53,6 +53,7 @@ on:
           - mlflow-operator
           - eval-hub
           - spark-operator
+          - llama-stack-provider-trustyai-garak
           # Add all valid components here
       pr_target_branch:
         description: 'Branch to open the PR against (e.g. master).'
