@@ -82,6 +82,7 @@ spec:
             #!/bin/bash
             set -e
             echo "EVENT_TYPE=${EVENT_TYPE}"
+            echo "PR_NUMBER=${PR_NUMBER}"
             echo -n "${EVENT_TYPE}" > $(results.event-type.path)
             echo -n "${PR_NUMBER}" > $(results.pr-number.path)
 
