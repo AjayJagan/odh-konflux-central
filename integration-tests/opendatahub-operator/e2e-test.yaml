@@ -65,6 +65,8 @@ spec:
         results:
         - name: event-type
           description: "stores info about event type"
+        - name: pr-number
+          description: "stores info about pr number"
         steps:
         - image: quay.io/konflux-ci/konflux-test:stable
           env:
@@ -72,11 +74,17 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.labels['pac.test.appstudio.openshift.io/event-type']
+            - name: PR_NUMBER
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['pac.test.appstudio.openshift.io/pull-request']
           script: |
             #!/bin/bash
             set -e
             echo "EVENT_TYPE=${EVENT_TYPE}"
             echo -n "${EVENT_TYPE}" > $(results.event-type.path)
+            echo -n "${PR_NUMBER}" > $(results.pr-number.path)
+
     - name: provision-eaas-space
       runAfter:
         - check-prerequisites
@@ -95,9 +103,12 @@ spec:
         - name: ownerUid
           value: $(context.pipelineRun.uid)
       when:
-        - input: "$(tasks.check-prerequisites.results.event-type)"
-          operator: in
-          values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
+#        - input: "$(tasks.check-prerequisites.results.event-type)"
+#          operator: in
+#          values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
+        - input: "$(tasks.check-prerequisites.results.pr-number)"
+          operator: notin
+          values: [""]
 
     - name: provision-cluster
       runAfter:
@@ -151,9 +162,12 @@ spec:
               - name: instanceType
                 value: m5.2xlarge
       when:
-        - input: "$(tasks.check-prerequisites.results.event-type)"
-          operator: in
-          values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
+#        - input: "$(tasks.check-prerequisites.results.event-type)"
+#          operator: in
+#          values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
+        - input: "$(tasks.check-prerequisites.results.pr-number)"
+          operator: notin
+          values: [""]
     - name: deploy-and-test
       runAfter:
         - provision-cluster
@@ -228,6 +242,9 @@ spec:
               # Run e2e tests
               make e2e-test -e E2E_TEST_OPERATOR_NAMESPACE=$(params.namespace)
       when:
-        - input: "$(tasks.check-prerequisites.results.event-type)"
-          operator: in
-          values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
+#        - input: "$(tasks.check-prerequisites.results.event-type)"
+#          operator: in
+#          values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
+        - input: "$(tasks.check-prerequisites.results.pr-number)"
+          operator: notin
+          values: [""]
