@@ -15,6 +15,9 @@ spec:
     - name: NAMESPACE
       type: string
       default: opendatahub-operator-system
+    - name: BUILD_TYPE
+      type: string
+      default: "CI"
   tasks:
     - name: parse-metadata
       taskRef:
@@ -61,14 +64,22 @@ spec:
       description: check prerequisites if the ITS needs to execute
       runAfter:
         - find-component-image
+      params:
+        - name: BUILD_TYPE
+          value: $(params.BUILD_TYPE)
       taskSpec:
+        params:
+        - name: BUILD_TYPE
         results:
         - name: event-type
           description: "stores info about event type"
         - name: pr-number
           description: "stores info about pr number"
+        - name: prerequisites-met
+          description: "whether prerequisites are met to run the tests"
         steps:
         - image: quay.io/konflux-ci/konflux-test:stable
+          name: check-prerequisites
           env:
             - name: EVENT_TYPE
               valueFrom:
@@ -78,13 +89,24 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.labels['pac.test.appstudio.openshift.io/pull-request']
+            - name: BUILD_TYPE
+              value: $(params.BUILD_TYPE)
           script: |
             #!/bin/bash
             set -e
             echo "EVENT_TYPE=${EVENT_TYPE}"
             echo "PR_NUMBER=${PR_NUMBER}"
+            echo "BUILD_TYPE=${BUILD_TYPE}"
             echo -n "${EVENT_TYPE}" > $(results.event-type.path)
             echo -n "${PR_NUMBER}" > $(results.pr-number.path)
+
+            if [ -n "${PR_NUMBER}" ] || [ "${BUILD_TYPE}" = "RELEASE" ]; then
+              echo "Prerequisites met: PR_NUMBER is set or BUILD_TYPE is RELEASE"
+              echo -n "true" > $(results.prerequisites-met.path)
+            else
+              echo "Prerequisites not met: PR_NUMBER is empty and BUILD_TYPE is not RELEASE"
+              echo -n "false" > $(results.prerequisites-met.path)
+            fi
 
     - name: provision-eaas-space
       runAfter:
@@ -104,12 +126,9 @@ spec:
         - name: ownerUid
           value: $(context.pipelineRun.uid)
       when:
-#        - input: "$(tasks.check-prerequisites.results.event-type)"
-#          operator: in
-#          values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
-        - input: "$(tasks.check-prerequisites.results.pr-number)"
-          operator: notin
-          values: [""]
+        - input: "$(tasks.check-prerequisites.results.prerequisites-met)"
+          operator: in
+          values: ["true"]
 
     - name: provision-cluster
       runAfter:
@@ -163,12 +182,9 @@ spec:
               - name: instanceType
                 value: m5.2xlarge
       when:
-#        - input: "$(tasks.check-prerequisites.results.event-type)"
-#          operator: in
-#          values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
-        - input: "$(tasks.check-prerequisites.results.pr-number)"
-          operator: notin
-          values: [""]
+        - input: "$(tasks.check-prerequisites.results.prerequisites-met)"
+          operator: in
+          values: ["true"]
     - name: deploy-and-test
       runAfter:
         - provision-cluster
@@ -243,9 +259,6 @@ spec:
               # Run e2e tests
               make e2e-test -e E2E_TEST_OPERATOR_NAMESPACE=$(params.namespace)
       when:
-#        - input: "$(tasks.check-prerequisites.results.event-type)"
-#          operator: in
-#          values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
-        - input: "$(tasks.check-prerequisites.results.pr-number)"
-          operator: notin
-          values: [""]
+        - input: "$(tasks.check-prerequisites.results.prerequisites-met)"
+          operator: in
+          values: ["true"]
