@@ -172,19 +172,19 @@ spec:
               oc whoami
 
               echo "SNAPSHOT=${SNAPSHOT}"
-              COMPONENT_NAME=odh-feast-operator-ci
-              FEAST_OPERATOR_CONTROLLER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
+              COMPONENT_NAME=odh-notebook-controller-ci
+              ODH_NOTEBOOK_CONTROLLER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
               GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
               GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
-              echo "  FEAST_OPERATOR_CONTROLLER_IMAGE: ${FEAST_OPERATOR_CONTROLLER_IMAGE}"
+              echo "  ODH_NOTEBOOK_CONTROLLER_IMAGE: ${ODH_NOTEBOOK_CONTROLLER_IMAGE}"
               echo "GIT_COMMIT=${GIT_COMMIT}"
               echo "GIT_URL=${GIT_URL}"
 
-              COMPONENT_NAME=odh-feature-server-ci
-              FEAST_FEATURE_SERVER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
+              COMPONENT_NAME=odh-kf-notebook-controller-ci
+              KF_NOTEBOOK_CONTROLLER=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
               GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
               GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
-              echo "  FEAST_FEATURE_SERVER_IMAGE: ${FEAST_FEATURE_SERVER_IMAGE}"
+              echo "  KF_NOTEBOOK_CONTROLLER_IMAGE: ${KF_NOTEBOOK_CONTROLLER}"
               echo "GIT_COMMIT=${GIT_COMMIT}"
               echo "GIT_URL=${GIT_URL}"
 
@@ -197,17 +197,9 @@ spec:
               cd src_code
               git checkout ${REVISION}
 
-              export RUN_ON_OPENSHIFT_CI=true
-              cd infra/feast-operator
-              make install && make deploy IMG=${FEAST_OPERATOR_CONTROLLER_IMAGE} FS_IMG=${FEAST_FEATURE_SERVER_IMAGE}
-              oc wait --for condition=Available -n feast-operator-system deployment feast-operator-controller-manager
-              make test-e2e
-              make undeploy IMG=${FEAST_OPERATOR_CONTROLLER_IMAGE} FS_IMG=${FEAST_FEATURE_SERVER_IMAGE}
-
-              make test-previous-version
-              oc delete deployment feast-operator-controller-manager -n feast-operator-system
-
-              make test-upgrade
+              nset GOFLAGS
+              pushd components/odh-notebook-controller
+              make run-ci-e2e-tests
   workspaces:
   - name: git-auth
     optional: true
