@@ -197,7 +197,7 @@ spec:
               cd src_code
               git checkout ${REVISION}
 
-              nset GOFLAGS
+              unset GOFLAGS
               pushd components/odh-notebook-controller
               make run-ci-e2e-tests
   workspaces:
