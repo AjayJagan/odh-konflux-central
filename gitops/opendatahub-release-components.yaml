@@ -1963,3 +1963,22 @@ spec:
       dockerfileUrl: Dockerfile
       revision: odh-release
       url: https://github.com/opendatahub-io/spark-operator.git
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+  name: odh-trustyai-nemo-guardrails-serve
+spec:
+  application: opendatahub-release
+  componentName: odh-trustyai-nemo-guardrails-serve
+  containerImage: quay.io/opendatahub/odh-trustyai-nemo-guardrails-server
+  source:
+    git:
+      context: .
+      dockerfileUrl: Dockerfile.server
+      revision: develop
+      url: https://github.com/opendatahub-io/NeMo-Guardrails.git

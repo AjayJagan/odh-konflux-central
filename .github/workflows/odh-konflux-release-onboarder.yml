@@ -54,6 +54,8 @@ on:
           - eval-hub
           - spark-operator
           - llama-stack-provider-trustyai-garak
+          - NeMo-Guardrails
+
           # Add all valid components here
       pr_target_branch:
         description: 'Branch to open the PR against (e.g. master).'
