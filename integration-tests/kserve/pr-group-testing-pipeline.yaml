@@ -1267,6 +1267,13 @@ spec:
 
         - name: e2e-llm-inference-service
           image: quay.io/rhoai/rhoai-task-toolset:kserve
+          computeResources:
+            requests:
+              memory: "12Gi"
+              cpu: "4"
+            limits:
+              memory: "16Gi"
+              cpu: "8"
           env:
             - name: KUBECONFIG
               value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
