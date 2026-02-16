@@ -309,6 +309,9 @@ spec:
 #                value: odh-registry-secret
   finally:
   - name: pull-request-status-message
+    workspaces:
+    - name: basic-auth
+      workspace: git-auth
     taskRef:
       resolver: git
       params:
