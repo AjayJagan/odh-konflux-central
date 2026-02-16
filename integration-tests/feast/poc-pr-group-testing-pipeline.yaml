@@ -180,7 +180,7 @@ spec:
 #        volumes:
 #          - name: credentials
 #            emptyDir: {}
-#          - name: odh-registry-secret
+#          - name: odh-registry-secret-volume
 #            secret:
 #              secretName: odh-registry-secret
 #        params:
@@ -268,45 +268,45 @@ spec:
 #              oc adm must-gather --dest-dir "${ARTIFACT_DIR}/gather-openshift"
 #
 
-#    - name: generate-artifacts
-#      runAfter:
-#        - audit-snapshot
-#      taskSpec:
-#        volumes:
-#          - name: odh-registry-secret
-#            secret:
-#              secretName: odh-registry-secret
-#        steps:
-#          - name: generate-snapshot
-#            image: quay.io/konflux-ci/konflux-test:stable
-#            workingDir: /workspace
-#            env:
-#              - name: ARTIFACT_DIR
-#                value: /workspace/artifact-dir
-#            script: |
-#              #!/bin/bash
-#              set -e
-#              mkdir -p ${ARTIFACT_DIR}
-#              echo "generating the dummy test logs 1" > ${ARTIFACT_DIR}/logs1.txt
-#              echo "generating the dummy test logs 2" > ${ARTIFACT_DIR}/logs2.txt
-#
-#          - name: secure-push-oci
-#            ref:
-#              resolver: git
-#              params:
-#                - name: url
-#                  value: https://github.com/konflux-ci/tekton-integration-catalog.git
-#                - name: revision
-#                  value: main
-#                - name: pathInRepo
-#                  value: stepactions/secure-push-oci/0.1/secure-push-oci.yaml
-#            params:
-#              - name: workdir-path
-#                value: /workspace/artifact-dir
-#              - name: oci-ref
-#                value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
-#              - name: credentials-volume-name
-#                value: odh-registry-secret
+    - name: generate-artifacts
+      runAfter:
+        - audit-snapshot
+      taskSpec:
+        volumes:
+          - name: odh-registry-secret-volume
+            secret:
+              secretName: odh-registry-secret
+        steps:
+          - name: generate-artifacts
+            image: quay.io/konflux-ci/konflux-test:stable
+            workingDir: /workspace
+            env:
+              - name: ARTIFACT_DIR
+                value: /workspace/artifact-dir
+            script: |
+              #!/bin/bash
+              set -e
+              mkdir -p ${ARTIFACT_DIR}
+              echo "generating the dummy test logs 1" > ${ARTIFACT_DIR}/logs1.txt
+              echo "generating the dummy test logs 2" > ${ARTIFACT_DIR}/logs2.txt
+
+          - name: secure-push-oci
+            ref:
+              resolver: git
+              params:
+                - name: url
+                  value: https://github.com/konflux-ci/tekton-integration-catalog.git
+                - name: revision
+                  value: main
+                - name: pathInRepo
+                  value: stepactions/secure-push-oci/0.1/secure-push-oci.yaml
+            params:
+              - name: workdir-path
+                value: /workspace/artifact-dir
+              - name: oci-ref
+                value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
+              - name: credentials-volume-name
+                value: odh-registry-secret-volume
   finally:
   - name: pull-request-status-message
     workspaces:
