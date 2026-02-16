@@ -1,0 +1,9 @@
+FROM registry.access.redhat.com/ubi9/python-312
+
+USER root
+
+RUN microdnf install -y wget tar \
+    && microdnf clean all
+
+RUN wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz && \
+    tar xvf openshift-client-linux.tar.gz && chmod +x oc && mv oc /usr/local/bin/ && chmod +x kubectl && mv kubectl /usr/local/bin/
