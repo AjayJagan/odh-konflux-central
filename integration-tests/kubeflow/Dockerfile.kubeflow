@@ -1,0 +1,10 @@
+FROM registry.ci.openshift.org/ocp/builder:rhel-9-golang-1.25-openshift-4.21 AS builder
+
+FROM registry.access.redhat.com/ubi9/ubi-minimal
+
+# Install wget only if really needed
+RUN microdnf install -y wget \
+    && microdnf clean all
+
+RUN wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz && \
+    tar xvf openshift-client-linux.tar.gz && chmod +x oc && mv oc /usr/local/bin/
