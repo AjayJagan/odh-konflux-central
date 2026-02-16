@@ -272,6 +272,10 @@ spec:
       runAfter:
         - audit-snapshot
       taskSpec:
+        volumes:
+          - name: odh-registry-secret
+            secret:
+              secretName: odh-registry-secret
         steps:
           - name: generate-snapshot
             image: quay.io/konflux-ci/konflux-test:stable
