@@ -8,8 +8,8 @@ spec:
     An integration test which provisions an ephemeral Hypershift cluster, deploys opendatahub-operator
     from a Konflux snapshot and runs the e2e tests against it.
   params:
-    - description: Snapshot of the application
-      name: SNAPSHOT
+    - description: List of components in the group
+      name: group-components
       type: string
   tasks:
     - name: parse-metadata
@@ -23,9 +23,8 @@ spec:
           - name: pathInRepo
             value: tasks/test_metadata.yaml
       params:
-        - description: List of components in the group
-          name: group-components
-          type: string
+        - name: SNAPSHOT
+          value: $(params.SNAPSHOT)
     - name: find-component-image
       description: Placeholder task that prints the Snapshot and outputs standard TEST_OUTPUT
       runAfter:
