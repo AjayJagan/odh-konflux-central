@@ -132,25 +132,10 @@ spec:
               - name: instanceType
                 value: m5.2xlarge
 
-
-    - name: e2e-jupyter-minimal-ubi9-python-3-12
+    - name: deploy-and-test
       runAfter:
         - provision-cluster
-      params:
-      - name: git-url
-        value: "$(tasks.parse-metadata.results.source-git-url)"
-      - name: git-rev
-        value: "$(tasks.parse-metadata.results.target-git-branch)"
-      - name: component-image
-        value: "$(tasks.parse-metadata.results.component-container-image)"
       taskSpec:
-        params:
-          - name: git-url
-            type: string
-          - name: git-rev
-            type: string
-          - name: component-image
-            type: string
         volumes:
           - name: credentials
             emptyDir: {}
@@ -167,31 +152,43 @@ spec:
                   value: stepactions/eaas-get-ephemeral-cluster-credentials/0.1/eaas-get-ephemeral-cluster-credentials.yaml
             params:
               - name: eaasSpaceSecretRef
-                value: $(tasks.provision-eaas-space-kserve.results.secretRef)
+                value: $(tasks.provision-eaas-space.results.secretRef)
               - name: clusterName
-                value: "$(tasks.provision-cluster-kserve.results.clusterName)"
+                value: "$(tasks.provision-cluster.results.clusterName)"
               - name: credentials
                 value: credentials
-
-          - name: clone-repo
-            image: alpine/git
-            script: |
-              echo $(params.git-url)
-              echo $(params.git-rev)
-              git clone --depth 1 --branch $(params.git-rev) $(params.git-url) /workspace/source
-              git config --global --add safe.directory /workspace/source
-              cd /workspace/source
-
-          - name: jupyter-ds-ubi9-python-3-12-test-e2e
-            image: quay.io/rhoai/rhoai-task-toolset:notebooks
+          - name: e2e-jupyter-minimal-ubi9-python-3-12
+            image: quay.io/rhoai/rhoai-task-toolset:go-its
             env:
               - name: KUBECONFIG
                 value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+              - name: SNAPSHOT
+                value: $(tasks.generate-snapshot.results.SNAPSHOT)
             workingDir: /workspace/source
             volumeMounts:
               - name: credentials
                 mountPath: /credentials
             script: |
+              oc get pods
+              oc whoami
+              
+              COMPONENT_NAME=odh-workbench-jupyter-datascience-cpu-py312-ubi9-ci
+              JUPYTER_DATA_SCIENCE_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
+              GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
+              GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
+              echo "  JUPYTER_DATA_SCIENCE_IMAGE: ${JUPYTER_DATA_SCIENCE_IMAGE"
+              echo "GIT_COMMIT=${GIT_COMMIT}"
+              echo "GIT_URL=${GIT_URL}"
+
+              REPO_URL=${GIT_URL}
+              REVISION=${GIT_COMMIT}
+
+              echo "REPO_URL=${REPO_URL}"
+              echo "REVISION=${REVISION}"
+              git clone "${REPO_URL}" src_code
+              cd src_code
+              git checkout ${REVISION}
+              
               oc new-project jupyter-datascience-ubi9-python-3-12
               IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_DATA_SCIENCE_IMAGE}"
               make deploy9-jupyter-datascience-ubi9-python-3.12 \
@@ -199,158 +196,159 @@ spec:
               make test-jupyter-datascience-ubi9-python-3.12
               make undeploy9-jupyter-datascience-ubi9-python-3.12
 
-          - name: cuda-jupyter-pt-ubi9-python-3-12-test-e2e
-            image: quay.io/rhoai/rhoai-task-toolset:notebooks
-            env:
-              - name: KUBECONFIG
-                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
-            workingDir: /workspace/source
-            volumeMounts:
-              - name: credentials
-                mountPath: /credentials
-            script: |
-              oc new-project jupyter-pytorch-ubi9-python-3-12
-              IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_PYTORCH_IMAGE}"
-              make deploy9-jupyter-pytorch-ubi9-python-3.12 \
-                  -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
-              make test-jupyter-pytorch-ubi9-python-3.12
-              make undeploy9-jupyter-pytorch-ubi9-python-3.12
 
-          - name: cuda-jupyter-ubi9-python-3-12-test-e2e
-            image: quay.io/rhoai/rhoai-task-toolset:notebooks
-            env:
-              - name: KUBECONFIG
-                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
-            workingDir: /workspace/source
-            volumeMounts:
-              - name: credentials
-                mountPath: /credentials
-            script: |
-              oc new-project cuda-jupyter-minimal-ubi9-python-3-12
-              IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_MINIMAL_IMAGE}"
-              make deploy9-cuda-jupyter-minimal-ubi9-python-3.12 \
-                  -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
-              make test-cuda-jupyter-minimal-ubi9-python-3.12
-              make undeploy9-cuda-jupyter-minimal-ubi9-python-3.12
+    #       - name: cuda-jupyter-pt-ubi9-python-3-12-test-e2e
+    #         image: quay.io/rhoai/rhoai-task-toolset:notebooks
+    #         env:
+    #           - name: KUBECONFIG
+    #             value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+    #         workingDir: /workspace/source
+    #         volumeMounts:
+    #           - name: credentials
+    #             mountPath: /credentials
+    #         script: |
+    #           oc new-project jupyter-pytorch-ubi9-python-3-12
+    #           IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_PYTORCH_IMAGE}"
+    #           make deploy9-jupyter-pytorch-ubi9-python-3.12 \
+    #               -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
+    #           make test-jupyter-pytorch-ubi9-python-3.12
+    #           make undeploy9-jupyter-pytorch-ubi9-python-3.12
 
-          - name: cuda-jupyter-tf-ubi9-python-3-12-test-e2e
-            image: quay.io/rhoai/rhoai-task-toolset:notebooks
-            env:
-              - name: KUBECONFIG
-                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
-            workingDir: /workspace/source
-            volumeMounts:
-              - name: credentials
-                mountPath: /credentials
-            script: |
-              oc new-project cuda-jupyter-tensorflow-ubi9-python-3-12
-              IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_TENSORFLOW_IMAGE}"
-              make deploy9-cuda-jupyter-tensorflow-ubi9-python-3.12 \
-                  -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
-              make test-cuda-jupyter-tensorflow-ubi9-python-3.12
-              make undeploy9-cuda-jupyter-tensorflow-ubi9-python-3.12
+    #       - name: cuda-jupyter-ubi9-python-3-12-test-e2e
+    #         image: quay.io/rhoai/rhoai-task-toolset:notebooks
+    #         env:
+    #           - name: KUBECONFIG
+    #             value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+    #         workingDir: /workspace/source
+    #         volumeMounts:
+    #           - name: credentials
+    #             mountPath: /credentials
+    #         script: |
+    #           oc new-project cuda-jupyter-minimal-ubi9-python-3-12
+    #           IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_MINIMAL_IMAGE}"
+    #           make deploy9-cuda-jupyter-minimal-ubi9-python-3.12 \
+    #               -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
+    #           make test-cuda-jupyter-minimal-ubi9-python-3.12
+    #           make undeploy9-cuda-jupyter-minimal-ubi9-python-3.12
 
-          - name: jupyter-tai-ubi9-python-3-12-test-e2e
-            image: quay.io/rhoai/rhoai-task-toolset:notebooks
-            env:
-              - name: KUBECONFIG
-                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
-            workingDir: /workspace/source
-            volumeMounts:
-              - name: credentials
-                mountPath: /credentials
-            script: |
-              oc new-project jupyter-trustyai-ubi9-python-3-12
-              IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_TRUSTYAI_IMAGE}"
-              make deploy9-jupyter-trustyai-ubi9-python-3.12 \
-                  -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
-              make test-jupyter-trustyai-ubi9-python-3.12
-              make undeploy9-jupyter-trustyai-ubi9-python-3.12
+    #       - name: cuda-jupyter-tf-ubi9-python-3-12-test-e2e
+    #         image: quay.io/rhoai/rhoai-task-toolset:notebooks
+    #         env:
+    #           - name: KUBECONFIG
+    #             value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+    #         workingDir: /workspace/source
+    #         volumeMounts:
+    #           - name: credentials
+    #             mountPath: /credentials
+    #         script: |
+    #           oc new-project cuda-jupyter-tensorflow-ubi9-python-3-12
+    #           IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_TENSORFLOW_IMAGE}"
+    #           make deploy9-cuda-jupyter-tensorflow-ubi9-python-3.12 \
+    #               -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
+    #           make test-cuda-jupyter-tensorflow-ubi9-python-3.12
+    #           make undeploy9-cuda-jupyter-tensorflow-ubi9-python-3.12
+
+    #       - name: jupyter-tai-ubi9-python-3-12-test-e2e
+    #         image: quay.io/rhoai/rhoai-task-toolset:notebooks
+    #         env:
+    #           - name: KUBECONFIG
+    #             value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+    #         workingDir: /workspace/source
+    #         volumeMounts:
+    #           - name: credentials
+    #             mountPath: /credentials
+    #         script: |
+    #           oc new-project jupyter-trustyai-ubi9-python-3-12
+    #           IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_TRUSTYAI_IMAGE}"
+    #           make deploy9-jupyter-trustyai-ubi9-python-3.12 \
+    #               -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
+    #           make test-jupyter-trustyai-ubi9-python-3.12
+    #           make undeploy9-jupyter-trustyai-ubi9-python-3.12
 
     
-          - name: create-cluster
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-create-ephemeral-cluster-hypershift-aws/0.1/eaas-create-ephemeral-cluster-hypershift-aws.yaml
-            params:
-              - name: eaasSpaceSecretRef
-                value: $(tasks.provision-eaas-space-llmisvc.results.secretRef)
-              - name: version
-                value: "$(steps.pick-version.results.version)"
-              - name: instanceType
-                value: m5.2xlarge
+    #       - name: create-cluster
+    #         ref:
+    #           resolver: git
+    #           params:
+    #             - name: url
+    #               value: https://github.com/konflux-ci/build-definitions.git
+    #             - name: revision
+    #               value: main
+    #             - name: pathInRepo
+    #               value: stepactions/eaas-create-ephemeral-cluster-hypershift-aws/0.1/eaas-create-ephemeral-cluster-hypershift-aws.yaml
+    #         params:
+    #           - name: eaasSpaceSecretRef
+    #             value: $(tasks.provision-eaas-space-llmisvc.results.secretRef)
+    #           - name: version
+    #             value: "$(steps.pick-version.results.version)"
+    #           - name: instanceType
+    #             value: m5.2xlarge
 
-    - name: rocm-notebooks-py312-e2e-tests
-      runAfter:
-        - provision-cluster-llmisvc
-      params:
-      - name: git-url
-        value: "$(tasks.parse-metadata.results.source-git-url)"
-      - name: git-rev
-        value: "$(tasks.parse-metadata.results.target-git-branch)"
-      - name: component-image
-        value: "$(tasks.parse-metadata.results.component-container-image)"
-      taskSpec:
-        params:
-          - name: git-url
-            type: string
-          - name: git-rev
-            type: string
-          - name: component-image
-            type: string
-        volumes:
-          - name: credentials
-            emptyDir: {}
-        steps:
-          - name: get-kubeconfig
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-get-ephemeral-cluster-credentials/0.1/eaas-get-ephemeral-cluster-credentials.yaml
-            params:
-              - name: eaasSpaceSecretRef
-                value: $(tasks.provision-eaas-space-llmisvc.results.secretRef)
-              - name: clusterName
-                value: "$(tasks.provision-cluster-llmisvc.results.clusterName)"
-              - name: credentials
-                value: credentials
+    # - name: rocm-notebooks-py312-e2e-tests
+    #   runAfter:
+    #     - provision-cluster-llmisvc
+    #   params:
+    #   - name: git-url
+    #     value: "$(tasks.parse-metadata.results.source-git-url)"
+    #   - name: git-rev
+    #     value: "$(tasks.parse-metadata.results.target-git-branch)"
+    #   - name: component-image
+    #     value: "$(tasks.parse-metadata.results.component-container-image)"
+    #   taskSpec:
+    #     params:
+    #       - name: git-url
+    #         type: string
+    #       - name: git-rev
+    #         type: string
+    #       - name: component-image
+    #         type: string
+    #     volumes:
+    #       - name: credentials
+    #         emptyDir: {}
+    #     steps:
+    #       - name: get-kubeconfig
+    #         ref:
+    #           resolver: git
+    #           params:
+    #             - name: url
+    #               value: https://github.com/konflux-ci/build-definitions.git
+    #             - name: revision
+    #               value: main
+    #             - name: pathInRepo
+    #               value: stepactions/eaas-get-ephemeral-cluster-credentials/0.1/eaas-get-ephemeral-cluster-credentials.yaml
+    #         params:
+    #           - name: eaasSpaceSecretRef
+    #             value: $(tasks.provision-eaas-space-llmisvc.results.secretRef)
+    #           - name: clusterName
+    #             value: "$(tasks.provision-cluster-llmisvc.results.clusterName)"
+    #           - name: credentials
+    #             value: credentials
 
-          - name: clone-repo
-            image: alpine/git
-            script: |
-              echo $(params.git-url)
-              echo $(params.git-rev)
-              git clone --depth 1 --branch $(params.git-rev) $(params.git-url) /workspace/source
-              git config --global --add safe.directory /workspace/source
-              cd /workspace/source
+    #       - name: clone-repo
+    #         image: alpine/git
+    #         script: |
+    #           echo $(params.git-url)
+    #           echo $(params.git-rev)
+    #           git clone --depth 1 --branch $(params.git-rev) $(params.git-url) /workspace/source
+    #           git config --global --add safe.directory /workspace/source
+    #           cd /workspace/source
               
-          - name: rocm-jupyter-pt-ubi9-python-3-12-test-e2e
-            image: quay.io/rhoai/rhoai-task-toolset:notebooks
-            env:
-              - name: KUBECONFIG
-                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
-            workingDir: /workspace/source
-            volumeMounts:
-              - name: credentials
-                mountPath: /credentials
-            script: |
-              oc new-project rocm-jupyter-pytorch-python-3-12
-              IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_rocm__PYTORCH_IMAGE}"
-              make deploy9-jupyter-rocm-pytorch-ubi9-python-3.12 \
-                  -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
-              make test-jupyter-rocm-pytorch-ubi9-python-3.12
-              make undeploy9-jupyter-rocm-pytorch-ubi9-python-3.12
+    #       - name: rocm-jupyter-pt-ubi9-python-3-12-test-e2e
+    #         image: quay.io/rhoai/rhoai-task-toolset:notebooks
+    #         env:
+    #           - name: KUBECONFIG
+    #             value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+    #         workingDir: /workspace/source
+    #         volumeMounts:
+    #           - name: credentials
+    #             mountPath: /credentials
+    #         script: |
+    #           oc new-project rocm-jupyter-pytorch-python-3-12
+    #           IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_rocm__PYTORCH_IMAGE}"
+    #           make deploy9-jupyter-rocm-pytorch-ubi9-python-3.12 \
+    #               -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
+    #           make test-jupyter-rocm-pytorch-ubi9-python-3.12
+    #           make undeploy9-jupyter-rocm-pytorch-ubi9-python-3.12
   workspaces:
   - name: git-auth
     optional: true
