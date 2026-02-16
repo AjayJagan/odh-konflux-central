@@ -23,8 +23,9 @@ spec:
           - name: pathInRepo
             value: tasks/test_metadata.yaml
       params:
-        - name: SNAPSHOT
-          value: $(params.SNAPSHOT)
+        - description: List of components in the group
+          name: group-components
+          type: string
     - name: find-component-image
       description: Placeholder task that prints the Snapshot and outputs standard TEST_OUTPUT
       runAfter:
