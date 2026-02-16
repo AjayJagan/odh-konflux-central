@@ -276,6 +276,9 @@ spec:
           - name: odh-registry-secret-volume
             secret:
               secretName: odh-registry-secret
+              items:
+              - key: .dockerconfigjson
+                path: config.json
         steps:
           - name: generate-artifacts
             image: quay.io/konflux-ci/konflux-test:stable
