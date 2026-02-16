@@ -152,7 +152,7 @@ spec:
           values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
 
 
-    - name: jupyter-minimal-ubi9-python-3.12
+    - name: e2e-jupyter-minimal-ubi9-python-3-12
       runAfter:
         - provision-cluster-jupyter-ubi9-python-3-12-test-e2e
       params:
