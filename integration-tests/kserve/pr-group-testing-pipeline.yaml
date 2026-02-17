@@ -85,6 +85,12 @@ spec:
       type: string
       default: pull-request
       description: Type of pipeline execution (push)
+    - name: oci-artifacts-repo
+      default: 'quay.io/opendatahub/odh-ci-artifacts'
+      description: The OCI container used to store all test artifacts.
+    - name: artifact-browser-url
+      default: 'https://app-artifact-browser.apps.rosa.konflux-qe.zmr9.p3.openshiftapps.com/'
+      description: The OCI container used to store all test artifacts.
   tasks:
   - name: rhoai-init
     params:
@@ -598,6 +604,12 @@ spec:
     params:
       - name: COMPONENTS
         value: $(params.group-components)
+    results:
+      - name: pull-request-author
+      - name: pull-request-number
+      - name: git-repo
+      - name: git-org
+      - name: git-revision
     taskSpec:
       params:
         - name: COMPONENTS
@@ -611,6 +623,26 @@ spec:
               value: $(tasks.generate-snapshot.results.SNAPSHOT)
             - name: COMPONENTS
               value: $(params.COMPONENTS)
+            - name: PR_AUTHOR
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['pipelinesascode.tekton.dev/sender']
+            - name: PR_NUMBER
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['pipelinesascode.tekton.dev/pull-request']
+            - name: GIT_REPO
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['pipelinesascode.tekton.dev/url-repository']
+            - name: GIT_ORG
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['pipelinesascode.tekton.dev/url-org']
+            - name: GIT_REVISION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['pipelinesascode.tekton.dev/sha']
           script: |
             #!/bin/bash
             set -e
@@ -627,7 +659,11 @@ spec:
                 echo "GIT_URL=${GIT_URL}"
             done < <(echo "$COMPONENTS" | jq -r 'to_entries[] | @base64')
 
-
+            echo -n "${PR_AUTHOR}" > "$(results.pull-request-author.path)"
+            echo -n "${PR_NUMBER}" > "$(results.pull-request-number.path)"
+            echo -n "${GIT_REPO}" > "$(results.git-repo.path)"
+            echo -n "${GIT_ORG}" > "$(results.git-org.path)"
+            echo -n "${GIT_REVISION}" > "$(results.git-revision.path)"
 
   - name: provision-eaas-space-graph
     runAfter:
@@ -701,19 +737,21 @@ spec:
     runAfter:
       - provision-cluster-graph
     params:
-    - name: git-url
-      value: "$(params.git-url)"
-    - name: git-rev
-      value: "$(params.revision)"
+      - name: oci-artifacts-repo
+        value: $(params.oci-artifacts-repo)
     taskSpec:
       params:
-        - name: git-url
-          type: string
-        - name: git-rev
-          type: string
+        - name: oci-artifacts-repo
+          description: oci-artifacts-repo
       volumes:
-        - name: credentials
-          emptyDir: {}
+          - name: odh-registry-secret-volume
+            secret:
+              secretName: odh-registry-secret
+              items:
+              - key: .dockerconfigjson
+                path: oci-storage-dockerconfigjson
+          - name: credentials
+            emptyDir: {}
       steps:
         - name: get-kubeconfig
           ref:
@@ -770,6 +808,8 @@ spec:
               value: quay.io/opendatahub/success-200-isvc:$(tasks.rhoai-init.results.mandatory-tag) #$(tasks.build-success-200-isvc.results.IMAGE_REF)
             - name: ERROR_404_ISVC_IMAGE
               value: quay.io/opendatahub/error-404-isvc:$(tasks.rhoai-init.results.mandatory-tag) #$(tasks.build-error-404-isvc.results.IMAGE_REF)
+            - name: ARTIFACT_DIR
+              value: /workspace/artifact-dir
           workingDir: /workspace/source
           volumeMounts:
             - name: credentials
@@ -797,7 +837,15 @@ spec:
             export GITHUB_SHA=stable
             ./test/scripts/openshift-ci/run-e2e-tests.sh graph 2 raw
 
+            # kserve-must-gather
+            DEST_DIR="${ARTIFACT_DIR}/e2e-graph/gather-kserve"
+            mkdir -p ${DEST_DIR}
+            oc adm must-gather --image=quay.io/modh/must-gather:rhoai-2.24 --dest-dir "${DEST_DIR}" -- "export COMPONENT=kserve; /usr/bin/gather"
 
+            # openshift-must-gather
+            DEST_DIR="${ARTIFACT_DIR}/e2e-graph/gather-openshift"
+            mkdir -p ${DEST_DIR}
+            oc adm must-gather --dest-dir "${DEST_DIR}"
 
 
 
@@ -874,19 +922,21 @@ spec:
     runAfter:
       - provision-cluster-raw
     params:
-    - name: git-url
-      value: "$(params.git-url)"
-    - name: git-rev
-      value: "$(params.revision)"
+      - name: oci-artifacts-repo
+        value: $(params.oci-artifacts-repo)
     taskSpec:
       params:
-        - name: git-url
-          type: string
-        - name: git-rev
-          type: string
+        - name: oci-artifacts-repo
+          description: oci-artifacts-repo
       volumes:
-        - name: credentials
-          emptyDir: {}
+          - name: odh-registry-secret-volume
+            secret:
+              secretName: odh-registry-secret
+              items:
+              - key: .dockerconfigjson
+                path: oci-storage-dockerconfigjson
+          - name: credentials
+            emptyDir: {}
       steps:
         - name: get-kubeconfig
           ref:
@@ -943,6 +993,8 @@ spec:
               value: quay.io/opendatahub/success-200-isvc:$(tasks.rhoai-init.results.mandatory-tag) #$(tasks.build-success-200-isvc.results.IMAGE_REF)
             - name: ERROR_404_ISVC_IMAGE
               value: quay.io/opendatahub/error-404-isvc:$(tasks.rhoai-init.results.mandatory-tag) #$(tasks.build-error-404-isvc.results.IMAGE_REF)
+            - name: ARTIFACT_DIR
+              value: /workspace/artifact-dir
           workingDir: /workspace/source
           volumeMounts:
             - name: credentials
@@ -969,9 +1021,15 @@ spec:
 
             ./test/scripts/openshift-ci/run-e2e-tests.sh raw
 
+            # kserve-must-gather
+            DEST_DIR="${ARTIFACT_DIR}/e2e-raw/gather-kserve"
+            mkdir -p ${DEST_DIR}
+            oc adm must-gather --image=quay.io/modh/must-gather:rhoai-2.24 --dest-dir "${DEST_DIR}" -- "export COMPONENT=kserve; /usr/bin/gather"
 
-
-
+            # openshift-must-gather
+            DEST_DIR="${ARTIFACT_DIR}/e2e-raw/gather-openshift"
+            mkdir -p ${DEST_DIR}
+            oc adm must-gather --dest-dir "${DEST_DIR}"
 
 
 
@@ -1047,19 +1105,21 @@ spec:
     runAfter:
       - provision-cluster-predictor
     params:
-    - name: git-url
-      value: "$(params.git-url)"
-    - name: git-rev
-      value: "$(params.revision)"
+      - name: oci-artifacts-repo
+        value: $(params.oci-artifacts-repo)
     taskSpec:
       params:
-        - name: git-url
-          type: string
-        - name: git-rev
-          type: string
+        - name: oci-artifacts-repo
+          description: oci-artifacts-repo
       volumes:
-        - name: credentials
-          emptyDir: {}
+          - name: odh-registry-secret-volume
+            secret:
+              secretName: odh-registry-secret
+              items:
+              - key: .dockerconfigjson
+                path: oci-storage-dockerconfigjson
+          - name: credentials
+            emptyDir: {}
       steps:
         - name: get-kubeconfig
           ref:
@@ -1116,6 +1176,8 @@ spec:
               value: quay.io/opendatahub/success-200-isvc:$(tasks.rhoai-init.results.mandatory-tag) #$(tasks.build-success-200-isvc.results.IMAGE_REF)
             - name: ERROR_404_ISVC_IMAGE
               value: quay.io/opendatahub/error-404-isvc:$(tasks.rhoai-init.results.mandatory-tag) #$(tasks.build-error-404-isvc.results.IMAGE_REF)
+            - name: ARTIFACT_DIR
+              value: /workspace/artifact-dir
           workingDir: /workspace/source
           volumeMounts:
             - name: credentials
@@ -1142,6 +1204,15 @@ spec:
 
             ./test/scripts/openshift-ci/run-e2e-tests.sh "predictor or kserve_on_openshift"
 
+            # kserve-must-gather
+            DEST_DIR="${ARTIFACT_DIR}/e2e-predictor/gather-kserve"
+            mkdir -p ${DEST_DIR}
+            oc adm must-gather --image=quay.io/modh/must-gather:rhoai-2.24 --dest-dir "${DEST_DIR}" -- "export COMPONENT=kserve; /usr/bin/gather"
+
+            # openshift-must-gather
+            DEST_DIR="${ARTIFACT_DIR}/e2e-predictor/gather-openshift"
+            mkdir -p ${DEST_DIR}
+            oc adm must-gather --dest-dir "${DEST_DIR}"
 
   - name: provision-eaas-space-llm-inference-service
     runAfter:
@@ -1215,19 +1286,21 @@ spec:
     runAfter:
       - provision-cluster-llm-inference-service
     params:
-    - name: git-url
-      value: "$(params.git-url)"
-    - name: git-rev
-      value: "$(params.revision)"
+      - name: oci-artifacts-repo
+        value: $(params.oci-artifacts-repo)
     taskSpec:
       params:
-        - name: git-url
-          type: string
-        - name: git-rev
-          type: string
+        - name: oci-artifacts-repo
+          description: oci-artifacts-repo
       volumes:
-        - name: credentials
-          emptyDir: {}
+          - name: odh-registry-secret-volume
+            secret:
+              secretName: odh-registry-secret
+              items:
+              - key: .dockerconfigjson
+                path: oci-storage-dockerconfigjson
+          - name: credentials
+            emptyDir: {}
       steps:
         - name: get-kubeconfig
           ref:
@@ -1291,6 +1364,8 @@ spec:
               value: quay.io/opendatahub/success-200-isvc:$(tasks.rhoai-init.results.mandatory-tag) #$(tasks.build-success-200-isvc.results.IMAGE_REF)
             - name: ERROR_404_ISVC_IMAGE
               value: quay.io/opendatahub/error-404-isvc:$(tasks.rhoai-init.results.mandatory-tag) #$(tasks.build-error-404-isvc.results.IMAGE_REF)
+            - name: ARTIFACT_DIR
+              value: /workspace/artifact-dir
           workingDir: /workspace/source
           volumeMounts:
             - name: credentials
@@ -1317,8 +1392,48 @@ spec:
 
             ./test/scripts/openshift-ci/run-e2e-tests.sh "llminferenceservice and cluster_cpu" 2 "llm-d"
 
+            # kserve-must-gather
+            DEST_DIR="${ARTIFACT_DIR}/e2e-llm-inference-service/gather-kserve"
+            mkdir -p ${DEST_DIR}
+            oc adm must-gather --image=quay.io/modh/must-gather:rhoai-2.24 --dest-dir "${DEST_DIR}" -- "export COMPONENT=kserve; /usr/bin/gather"
 
-
+            # openshift-must-gather
+            DEST_DIR="${ARTIFACT_DIR}/e2e-llm-inference-service/gather-openshift"
+            mkdir -p ${DEST_DIR}
+            oc adm must-gather --dest-dir "${DEST_DIR}"
+  finally:
+  - name: pull-request-status-message
+    workspaces:
+    - name: basic-auth
+      workspace: git-auth
+    taskRef:
+      resolver: git
+      params:
+        - name: url
+          value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
+        - name: revision
+          value: odh
+        - name: pathInRepo
+          value: konflux-tekton-tasks/pull-request-comment/0.1/pull-request-comment.yaml
+    params:
+      - name: test-name
+        value: $(context.pipelineRun.name)
+      - name: oci-container
+        value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
+      - name: pipeline-aggregate-status
+        value: $(tasks.status)
+      - name: pull-request-author
+        value: $(tasks.audit-snapshot.results.pull-request-author)
+      - name: pull-request-number
+        value: $(tasks.audit-snapshot.results.pull-request-number)
+      - name: git-repo
+        value: $(tasks.audit-snapshot.results.git-repo)
+      - name: git-org
+        value: $(tasks.audit-snapshot.results.git-org)
+      - name: git-revision
+        value: $(tasks.audit-snapshot.results.git-revision)
+      - name: artifact-browser-url
+        value: $(params.artifact-browser-url)
   workspaces:
   - name: git-auth
     optional: true
