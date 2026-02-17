@@ -12,7 +12,7 @@ spec:
       name: group-components
       type: string
     - name: oci-artifacts-repo
-      default: 'quay.io/opendatahub/kserve'
+      default: 'quay.io/opendatahub/odh-ci-artifacts'
       description: The OCI container used to store all test artifacts.
     - name: artifact-browser-url
       default: 'https://app-artifact-browser.apps.rosa.konflux-qe.zmr9.p3.openshiftapps.com/'
