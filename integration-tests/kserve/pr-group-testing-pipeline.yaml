@@ -604,16 +604,16 @@ spec:
     params:
       - name: COMPONENTS
         value: $(params.group-components)
-    results:
-      - name: pull-request-author
-      - name: pull-request-number
-      - name: git-repo
-      - name: git-org
-      - name: git-revision
     taskSpec:
       params:
         - name: COMPONENTS
           description: List of components in the group
+      results:
+        - name: pull-request-author
+        - name: pull-request-number
+        - name: git-repo
+        - name: git-org
+        - name: git-revision
       steps:
         - name: audit-snapshot
           image: quay.io/konflux-ci/konflux-test:stable
