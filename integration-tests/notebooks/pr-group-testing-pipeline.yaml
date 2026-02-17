@@ -158,7 +158,7 @@ spec:
               - name: credentials
                 value: credentials
           - name: e2e-jupyter-minimal-ubi9-python-3-12
-            image: quay.io/rhoai/rhoai-task-toolset:go-its
+            image: quay.io/rhoai/rhoai-task-toolset:notebooks
             env:
               - name: KUBECONFIG
                 value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
