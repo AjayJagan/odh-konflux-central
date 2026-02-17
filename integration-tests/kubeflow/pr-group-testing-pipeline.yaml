@@ -157,7 +157,7 @@ spec:
               - name: credentials
                 value: credentials
           - name: deploy-and-e2e
-            image: registry.ci.openshift.org/ocp/4.21:cli
+            image: quay.io/openshift/origin-cli:4.21
             env:
               - name: KUBECONFIG
                 value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
