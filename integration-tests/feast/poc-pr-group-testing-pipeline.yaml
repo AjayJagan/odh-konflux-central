@@ -184,6 +184,8 @@ spec:
               items:
               - key: .dockerconfigjson
                 path: oci-storage-dockerconfigjson
+          - name: credentials
+            emptyDir: {}
         params:
           - name: oci-artifacts-repo
             description: oci-artifacts-repo
