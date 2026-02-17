@@ -1982,3 +1982,76 @@ spec:
       dockerfileUrl: Dockerfile.server
       revision: develop
       url: https://github.com/opendatahub-io/NeMo-Guardrails.git
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+  name: workload-variant-autoscaler
+spec:
+  application: opendatahub-release
+  componentName: workload-variant-autoscaler
+  containerImage: quay.io/opendatahub/workload-variant-autoscaler
+  source:
+    git:
+      context: .
+      dockerfileUrl: Dockerfile
+      revision: release-v0.5
+      url: https://github.com/opendatahub-io/workload-variant-autoscaler
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+  name: llm-d-kv-cache
+spec:
+  application: opendatahub-release
+  componentName: llm-d-kv-cache
+  containerImage: quay.io/opendatahub/llm-d-kv-cache
+  source:
+    git:
+      context: services/uds_tokenizer
+      dockerfileUrl: Dockerfile
+      revision: release-v0.5
+      url: https://github.com/opendatahub-io/llm-d-kv-cache
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+  name: batch-gateway-apiserver
+spec:
+  application: opendatahub-release
+  componentName: batch-gateway-apiserver
+  containerImage: quay.io/opendatahub/batch-gateway-apiserver
+  source:
+    git:
+      context: .
+      dockerfileUrl: dockerfile/Dockerfile.apiserver.konflux
+      revision: release-v0.5
+      url: https://github.com/opendatahub-io/batch-gateway
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+  name: batch-gateway-processor
+spec:
+  application: opendatahub-release
+  componentName: batch-gateway-apiserver
+  containerImage: quay.io/opendatahub/batch-gateway-processor
+  source:
+    git:
+      context: .
+      dockerfileUrl: dockerfile/Dockerfile.processor.konflux
+      revision: release-v0.5
+      url: https://github.com/opendatahub-io/batch-gateway
+---

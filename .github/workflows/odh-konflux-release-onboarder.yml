@@ -55,6 +55,9 @@ on:
           - spark-operator
           - llama-stack-provider-trustyai-garak
           - NeMo-Guardrails
+          - workload-variant-autoscaler
+          - batch-gateway
+          - llm-d-kv-cache
 
           # Add all valid components here
       pr_target_branch:
