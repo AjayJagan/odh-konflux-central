@@ -89,3 +89,7 @@ mlflow-operator,quay.io/opendatahub/mlflow-operator
 eval-hub,quay.io/opendatahub/eval-hub
 spark-operator,quay.io/opendatahub/spark-operator
 odh-trustyai-nemo-guardrails-serve,quay.io/opendatahub/odh-trustyai-nemo-guardrails-server
+workload-variant-autoscaler,quay.io/opendatahub/workload-variant-autoscaler
+batch-gateway-apiserver,quay.io/opendatahub/batch-gateway-apiserver
+batch-gateway-processor,quay.io/opendatahub/batch-gateway-processor
+llm-d-kv-cache,quay.io/opendatahub/llm-d-kv-cache
