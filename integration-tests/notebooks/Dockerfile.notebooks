@@ -2,7 +2,7 @@ FROM registry.access.redhat.com/ubi9/python-312
 
 USER root
 
-RUN microdnf install -y wget tar \
+RUN microdnf install -y wget jq tar \
     && microdnf clean all
 
 RUN wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz && \
