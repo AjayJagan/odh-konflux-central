@@ -20,6 +20,8 @@ spec:
       workspaces:
       - name: basic-auth
         workspace: git-auth
+      - name: shared-data
+        workspace: shared-data
       taskRef:
         resolver: git
         params:
@@ -32,6 +34,9 @@ spec:
     - name: audit-snapshot
       runAfter:
         - generate-snapshot
+      workspaces:
+        - name: shared-data
+          workspace: shared-data
       params:
         - name: COMPONENTS
           value: $(params.group-components)
@@ -52,6 +57,10 @@ spec:
               #!/bin/bash
               set -e
               echo "SNAPSHOT=${SNAPSHOT}"
+              if [[ -e "$(workspaces.shared-data.path)/group-snapshot.json" ]]; then
+                  echo "Reading the snapshot from $(workspaces.shared-data.path)/group-snapshot.json"
+                  SNAPSHOT=$(cat "$(workspaces.shared-data.path)/group-snapshot.json")
+              fi
 
               # Parse JSON and iterate through each component
               while IFS= read -r row; do
@@ -63,138 +72,144 @@ spec:
                   echo "GIT_COMMIT=${GIT_COMMIT}"
                   echo "GIT_URL=${GIT_URL}"
               done < <(echo "$COMPONENTS" | jq -r 'to_entries[] | @base64')
-    - name: provision-eaas-space
-      runAfter:
-        - audit-snapshot
-      taskRef:
-        resolver: git
-        params:
-          - name: url
-            value: https://github.com/konflux-ci/build-definitions.git
-          - name: revision
-            value: main
-          - name: pathInRepo
-            value: task/eaas-provision-space/0.1/eaas-provision-space.yaml
-      params:
-        - name: ownerName
-          value: $(context.pipelineRun.name)
-        - name: ownerUid
-          value: $(context.pipelineRun.uid)
-    - name: provision-cluster
-      runAfter:
-        - provision-eaas-space
-      taskSpec:
-        results:
-          - name: clusterName
-            value: "$(steps.create-cluster.results.clusterName)"
-        steps:
-          - name: get-supported-versions
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-get-supported-ephemeral-cluster-versions/0.1/eaas-get-supported-ephemeral-cluster-versions.yaml
-            params:
-              - name: eaasSpaceSecretRef
-                value: $(tasks.provision-eaas-space.results.secretRef)
-          - name: pick-version
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-get-latest-openshift-version-by-prefix/0.1/eaas-get-latest-openshift-version-by-prefix.yaml
-            params:
-              - name: prefix
-                value: "$(steps.get-supported-versions.results.versions[0])."
-          - name: create-cluster
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-create-ephemeral-cluster-hypershift-aws/0.1/eaas-create-ephemeral-cluster-hypershift-aws.yaml
-            params:
-              - name: eaasSpaceSecretRef
-                value: $(tasks.provision-eaas-space.results.secretRef)
-              - name: version
-                value: "$(steps.pick-version.results.version)"
-              - name: instanceType
-                value: m5.2xlarge
+#    - name: provision-eaas-space
+#      runAfter:
+#        - audit-snapshot
+#      taskRef:
+#        resolver: git
+#        params:
+#          - name: url
+#            value: https://github.com/konflux-ci/build-definitions.git
+#          - name: revision
+#            value: main
+#          - name: pathInRepo
+#            value: task/eaas-provision-space/0.1/eaas-provision-space.yaml
+#      params:
+#        - name: ownerName
+#          value: $(context.pipelineRun.name)
+#        - name: ownerUid
+#          value: $(context.pipelineRun.uid)
+#    - name: provision-cluster
+#      runAfter:
+#        - provision-eaas-space
+#      taskSpec:
+#        results:
+#          - name: clusterName
+#            value: "$(steps.create-cluster.results.clusterName)"
+#        steps:
+#          - name: get-supported-versions
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-get-supported-ephemeral-cluster-versions/0.1/eaas-get-supported-ephemeral-cluster-versions.yaml
+#            params:
+#              - name: eaasSpaceSecretRef
+#                value: $(tasks.provision-eaas-space.results.secretRef)
+#          - name: pick-version
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-get-latest-openshift-version-by-prefix/0.1/eaas-get-latest-openshift-version-by-prefix.yaml
+#            params:
+#              - name: prefix
+#                value: "$(steps.get-supported-versions.results.versions[0])."
+#          - name: create-cluster
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-create-ephemeral-cluster-hypershift-aws/0.1/eaas-create-ephemeral-cluster-hypershift-aws.yaml
+#            params:
+#              - name: eaasSpaceSecretRef
+#                value: $(tasks.provision-eaas-space.results.secretRef)
+#              - name: version
+#                value: "$(steps.pick-version.results.version)"
+#              - name: instanceType
+#                value: m5.2xlarge
+#
+#    - name: deploy-and-test
+#      runAfter:
+#        - provision-cluster
+#      workspaces:
+#        - name: shared-data
+#          workspace: shared-data
+#      taskSpec:
+#        volumes:
+#          - name: credentials
+#            emptyDir: {}
+#        steps:
+#          - name: get-kubeconfig
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-get-ephemeral-cluster-credentials/0.1/eaas-get-ephemeral-cluster-credentials.yaml
+#            params:
+#              - name: eaasSpaceSecretRef
+#                value: $(tasks.provision-eaas-space.results.secretRef)
+#              - name: clusterName
+#                value: "$(tasks.provision-cluster.results.clusterName)"
+#              - name: credentials
+#                value: credentials
+#          - name: e2e-jupyter-minimal-ubi9-python-3-12
+#            image: quay.io/rhoai/rhoai-task-toolset:notebooks
+#            env:
+#              - name: KUBECONFIG
+#                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+#              - name: SNAPSHOT
+#                value: $(tasks.generate-snapshot.results.SNAPSHOT)
+#            workingDir: /workspace/source
+#            volumeMounts:
+#              - name: credentials
+#                mountPath: /credentials
+#            script: |
+#              oc get pods
+#              oc whoami
+#
+#              COMPONENT_NAME=odh-workbench-jupyter-datascience-cpu-py312-ubi9-ci
+#              JUPYTER_DATA_SCIENCE_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
+#              GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
+#              GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
+#              echo "  JUPYTER_DATA_SCIENCE_IMAGE: ${JUPYTER_DATA_SCIENCE_IMAGE"
+#              echo "GIT_COMMIT=${GIT_COMMIT}"
+#              echo "GIT_URL=${GIT_URL}"
+#
+#              REPO_URL=${GIT_URL}
+#              REVISION=${GIT_COMMIT}
+#
+#              echo "REPO_URL=${REPO_URL}"
+#              echo "REVISION=${REVISION}"
+#              git clone "${REPO_URL}" src_code
+#              cd src_code
+#              git checkout ${REVISION}
+#
+#              oc new-project jupyter-datascience-ubi9-python-3-12
+#              IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_DATA_SCIENCE_IMAGE}"
+#              make deploy9-jupyter-datascience-ubi9-python-3.12 \
+#                  -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
+#              make test-jupyter-datascience-ubi9-python-3.12
+#              make undeploy9-jupyter-datascience-ubi9-python-3.12
+#
 
-    - name: deploy-and-test
-      runAfter:
-        - provision-cluster
-      taskSpec:
-        volumes:
-          - name: credentials
-            emptyDir: {}
-        steps:
-          - name: get-kubeconfig
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-get-ephemeral-cluster-credentials/0.1/eaas-get-ephemeral-cluster-credentials.yaml
-            params:
-              - name: eaasSpaceSecretRef
-                value: $(tasks.provision-eaas-space.results.secretRef)
-              - name: clusterName
-                value: "$(tasks.provision-cluster.results.clusterName)"
-              - name: credentials
-                value: credentials
-          - name: e2e-jupyter-minimal-ubi9-python-3-12
-            image: quay.io/rhoai/rhoai-task-toolset:notebooks
-            env:
-              - name: KUBECONFIG
-                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
-              - name: SNAPSHOT
-                value: $(tasks.generate-snapshot.results.SNAPSHOT)
-            workingDir: /workspace/source
-            volumeMounts:
-              - name: credentials
-                mountPath: /credentials
-            script: |
-              oc get pods
-              oc whoami
-              
-              COMPONENT_NAME=odh-workbench-jupyter-datascience-cpu-py312-ubi9-ci
-              JUPYTER_DATA_SCIENCE_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
-              GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
-              GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
-              echo "  JUPYTER_DATA_SCIENCE_IMAGE: ${JUPYTER_DATA_SCIENCE_IMAGE"
-              echo "GIT_COMMIT=${GIT_COMMIT}"
-              echo "GIT_URL=${GIT_URL}"
 
-              REPO_URL=${GIT_URL}
-              REVISION=${GIT_COMMIT}
-
-              echo "REPO_URL=${REPO_URL}"
-              echo "REVISION=${REVISION}"
-              git clone "${REPO_URL}" src_code
-              cd src_code
-              git checkout ${REVISION}
-              
-              oc new-project jupyter-datascience-ubi9-python-3-12
-              IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_DATA_SCIENCE_IMAGE}"
-              make deploy9-jupyter-datascience-ubi9-python-3.12 \
-                  -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
-              make test-jupyter-datascience-ubi9-python-3.12
-              make undeploy9-jupyter-datascience-ubi9-python-3.12
 
 
     #       - name: cuda-jupyter-pt-ubi9-python-3-12-test-e2e
@@ -265,7 +280,7 @@ spec:
     #           make test-jupyter-trustyai-ubi9-python-3.12
     #           make undeploy9-jupyter-trustyai-ubi9-python-3.12
 
-    
+
     #       - name: create-cluster
     #         ref:
     #           resolver: git
@@ -332,7 +347,7 @@ spec:
     #           git clone --depth 1 --branch $(params.git-rev) $(params.git-url) /workspace/source
     #           git config --global --add safe.directory /workspace/source
     #           cd /workspace/source
-              
+
     #       - name: rocm-jupyter-pt-ubi9-python-3-12-test-e2e
     #         image: quay.io/rhoai/rhoai-task-toolset:notebooks
     #         env:
@@ -352,3 +367,4 @@ spec:
   workspaces:
   - name: git-auth
     optional: true
+  - name: shared-data
