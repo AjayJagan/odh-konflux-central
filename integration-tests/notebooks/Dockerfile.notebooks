@@ -1,8 +1,15 @@
 FROM registry.access.redhat.com/ubi9/python-312
 
-USER root
+USER 0
 
-RUN yum install -y wget jq tar \
+RUN yum install -y \
+        wget \
+        jq \
+        tar \
+        podman \
+        fuse-overlayfs \
+        slirp4netns \
+        shadow-utils \
     && yum clean all
 
 # Install oc + kubectl
@@ -11,7 +18,9 @@ RUN wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable
     chmod +x oc kubectl && \
     mv oc kubectl /usr/local/bin/
 
-# Install correct yq (v4)
+# Install yq v4
 RUN wget -O /usr/local/bin/yq \
     https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && \
     chmod +x /usr/local/bin/yq
+
+USER 1001
