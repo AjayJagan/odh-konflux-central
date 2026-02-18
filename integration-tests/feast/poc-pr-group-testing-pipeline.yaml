@@ -289,12 +289,13 @@ spec:
           - name: generate-artifacts
             image: quay.io/konflux-ci/konflux-test:stable
             workingDir: /workspace
-            env:
-              - name: ARTIFACT_DIR
-                value: $(workspaces.shared-data.path)/artifact-dir
+#            env:
+#              - name: ARTIFACT_DIR
+#                value: $(workspaces.shared-data.path)/artifact-dir
             script: |
               #!/bin/bash
               set -e
+              ARTIFACT_DIR="$(workspaces.shared-data.path)/artifact-dir"
               mkdir -p ${ARTIFACT_DIR}
               echo "generating the dummy test logs 1" > ${ARTIFACT_DIR}/logs1.txt
               echo "generating the dummy test logs 2" > ${ARTIFACT_DIR}/logs2.txt
