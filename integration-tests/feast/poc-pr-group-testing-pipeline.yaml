@@ -318,9 +318,6 @@ spec:
             items:
             - key: .dockerconfigjson
               path: oci-storage-dockerconfigjson
-        - name: konflux-test-infra-volume
-          secret:
-            secretName: konflux-test-infra
       workspaces:
         - name: shared-data
           optional: true
