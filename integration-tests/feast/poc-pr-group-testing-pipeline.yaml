@@ -276,9 +276,9 @@ spec:
 #              oc adm must-gather --dest-dir "${ARTIFACT_DIR}/gather-openshift"
 
     - name: generate-artifacts
-      workspaces:
-      - name: shared-data
-        workspace: shared-data
+#      workspaces:
+#      - name: shared-data
+#        workspace: shared-data
       runAfter:
         - audit-snapshot
       taskSpec:
@@ -295,7 +295,7 @@ spec:
             script: |
               #!/bin/bash
               set -e
-              ARTIFACT_DIR="$(workspaces.shared-data.path)/artifact-dir"
+              ARTIFACT_DIR="/workspace/artifact-dir"
               mkdir -p ${ARTIFACT_DIR}
               echo "generating the dummy test logs 1" > ${ARTIFACT_DIR}/logs1.txt
               echo "generating the dummy test logs 2" > ${ARTIFACT_DIR}/logs2.txt
