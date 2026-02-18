@@ -297,79 +297,79 @@ spec:
               echo "generating the dummy test logs 1" > ${ARTIFACT_DIR}/logs1.txt
               echo "generating the dummy test logs 2" > ${ARTIFACT_DIR}/logs2.txt
 
-  finally:
-  - name: push-ci-artifacts-and-update-pr
-    workspaces:
-    - name: shared-data
-      workspace: shared-data
-    - name: basic-auth
-      workspace: git-auth
-    params:
-      - name: oci-artifacts-repo
-        value: $(params.oci-artifacts-repo)
-    taskSpec:
-      volumes:
-        - name: odh-registry-secret-volume
-          secret:
-            secretName: odh-registry-secret
-            items:
-            - key: .dockerconfigjson
-              path: oci-storage-dockerconfigjson
-      workspaces:
-        - name: shared-data
-          optional: true
-        - name: basic-auth
-          optional: true
-      params:
-        - name: oci-artifacts-repo
-          description: oci-artifacts-repo
-      steps:
-        - name: secure-push-oci
-          ref:
-            resolver: git
-            params:
-              - name: url
-                value: https://github.com/konflux-ci/tekton-integration-catalog.git
-              - name: revision
-                value: main
-              - name: pathInRepo
-                value: stepactions/secure-push-oci/0.1/secure-push-oci.yaml
-          params:
-            - name: workdir-path
-              value: $(workspaces.shared-data.path)/artifact-dir
-            - name: oci-ref
-              value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
-            - name: credentials-volume-name
-              value: odh-registry-secret-volume
-        - name: pull-request-status-message
-          ref:
-            resolver: git
-            params:
-              - name: url
-                value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
-              - name: revision
-                value: odh
-              - name: pathInRepo
-                value: stepactions/pull-request-comment/0.1/pull-request-comment.yaml
-          params:
-            - name: test-name
-              value: $(context.pipelineRun.name)
-            - name: oci-container
-              value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
-            - name: pipeline-aggregate-status
-              value: $(tasks.status)
-            - name: pull-request-author
-              value: $(tasks.audit-snapshot.results.pull-request-author)
-            - name: pull-request-number
-              value: $(tasks.audit-snapshot.results.pull-request-number)
-            - name: git-repo
-              value: $(tasks.audit-snapshot.results.git-repo)
-            - name: git-org
-              value: $(tasks.audit-snapshot.results.git-org)
-            - name: git-revision
-              value: $(tasks.audit-snapshot.results.git-revision)
-            - name: artifact-browser-url
-              value: $(params.artifact-browser-url)
+#  finally:
+#  - name: push-ci-artifacts-and-update-pr
+#    workspaces:
+#    - name: shared-data
+#      workspace: shared-data
+#    - name: basic-auth
+#      workspace: git-auth
+#    params:
+#      - name: oci-artifacts-repo
+#        value: $(params.oci-artifacts-repo)
+#    taskSpec:
+#      volumes:
+#        - name: odh-registry-secret-volume
+#          secret:
+#            secretName: odh-registry-secret
+#            items:
+#            - key: .dockerconfigjson
+#              path: oci-storage-dockerconfigjson
+#      workspaces:
+#        - name: shared-data
+#          optional: true
+#        - name: basic-auth
+#          optional: true
+#      params:
+#        - name: oci-artifacts-repo
+#          description: oci-artifacts-repo
+#      steps:
+#        - name: secure-push-oci
+#          ref:
+#            resolver: git
+#            params:
+#              - name: url
+#                value: https://github.com/konflux-ci/tekton-integration-catalog.git
+#              - name: revision
+#                value: main
+#              - name: pathInRepo
+#                value: stepactions/secure-push-oci/0.1/secure-push-oci.yaml
+#          params:
+#            - name: workdir-path
+#              value: $(workspaces.shared-data.path)/artifact-dir
+#            - name: oci-ref
+#              value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
+#            - name: credentials-volume-name
+#              value: odh-registry-secret-volume
+#        - name: pull-request-status-message
+#          ref:
+#            resolver: git
+#            params:
+#              - name: url
+#                value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
+#              - name: revision
+#                value: odh
+#              - name: pathInRepo
+#                value: stepactions/pull-request-comment/0.1/pull-request-comment.yaml
+#          params:
+#            - name: test-name
+#              value: $(context.pipelineRun.name)
+#            - name: oci-container
+#              value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
+#            - name: pipeline-aggregate-status
+#              value: $(tasks.status)
+#            - name: pull-request-author
+#              value: $(tasks.audit-snapshot.results.pull-request-author)
+#            - name: pull-request-number
+#              value: $(tasks.audit-snapshot.results.pull-request-number)
+#            - name: git-repo
+#              value: $(tasks.audit-snapshot.results.git-repo)
+#            - name: git-org
+#              value: $(tasks.audit-snapshot.results.git-org)
+#            - name: git-revision
+#              value: $(tasks.audit-snapshot.results.git-revision)
+#            - name: artifact-browser-url
+#              value: $(params.artifact-browser-url)
 
 
 
