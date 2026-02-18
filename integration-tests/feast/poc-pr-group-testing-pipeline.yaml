@@ -102,81 +102,189 @@ spec:
               echo -n "${GIT_ORG}" > "$(results.git-org.path)"
               echo -n "${GIT_REVISION}" > "$(results.git-revision.path)"
 
-    - name: provision-eaas-space
+#    - name: provision-eaas-space
+#      runAfter:
+#        - audit-snapshot
+#      taskRef:
+#        resolver: git
+#        params:
+#          - name: url
+#            value: https://github.com/konflux-ci/build-definitions.git
+#          - name: revision
+#            value: main
+#          - name: pathInRepo
+#            value: task/eaas-provision-space/0.1/eaas-provision-space.yaml
+#      params:
+#        - name: ownerName
+#          value: $(context.pipelineRun.name)
+#        - name: ownerUid
+#          value: $(context.pipelineRun.uid)
+#    - name: provision-cluster
+#      runAfter:
+#        - provision-eaas-space
+#      taskSpec:
+#        results:
+#          - name: clusterName
+#            value: "$(steps.create-cluster.results.clusterName)"
+#        steps:
+#          - name: get-supported-versions
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-get-supported-ephemeral-cluster-versions/0.1/eaas-get-supported-ephemeral-cluster-versions.yaml
+#            params:
+#              - name: eaasSpaceSecretRef
+#                value: $(tasks.provision-eaas-space.results.secretRef)
+#          - name: pick-version
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-get-latest-openshift-version-by-prefix/0.1/eaas-get-latest-openshift-version-by-prefix.yaml
+#            params:
+#              - name: prefix
+#                value: "$(steps.get-supported-versions.results.versions[0])."
+#          - name: create-cluster
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-create-ephemeral-cluster-hypershift-aws/0.1/eaas-create-ephemeral-cluster-hypershift-aws.yaml
+#            params:
+#              - name: eaasSpaceSecretRef
+#                value: $(tasks.provision-eaas-space.results.secretRef)
+#              - name: version
+#                value: "$(steps.pick-version.results.version)"
+#              - name: instanceType
+#                value: m5.2xlarge
+#    - name: deploy-and-test
+#      workspaces:
+#      - name: shared-data
+#        workspace: shared-data
+#      runAfter:
+#        - provision-cluster
+#      taskSpec:
+#        volumes:
+#          - name: credentials
+#            emptyDir: {}
+#        workspaces:
+#          - name: shared-data
+#            optional: true
+#        steps:
+#          - name: get-kubeconfig
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-get-ephemeral-cluster-credentials/0.1/eaas-get-ephemeral-cluster-credentials.yaml
+#            params:
+#              - name: eaasSpaceSecretRef
+#                value: $(tasks.provision-eaas-space.results.secretRef)
+#              - name: clusterName
+#                value: "$(tasks.provision-cluster.results.clusterName)"
+#              - name: credentials
+#                value: credentials
+#          - name: deploy-and-e2e
+#            image: quay.io/rhoai/rhoai-task-toolset:go-its
+#            onError: continue
+#            env:
+#              - name: KUBECONFIG
+#                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+#              - name: SNAPSHOT
+#                value: $(tasks.generate-snapshot.results.SNAPSHOT)
+#            workingDir: /workspace/source
+#            volumeMounts:
+#              - name: credentials
+#                mountPath: /credentials
+#            script: |
+#              oc get pods
+#              oc whoami
+#
+#              echo "SNAPSHOT=${SNAPSHOT}"
+#              COMPONENT_NAME=odh-feast-operator-ci
+#              FEAST_OPERATOR_CONTROLLER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
+#              GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
+#              GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
+#              echo "  FEAST_OPERATOR_CONTROLLER_IMAGE: ${FEAST_OPERATOR_CONTROLLER_IMAGE}"
+#              echo "GIT_COMMIT=${GIT_COMMIT}"
+#              echo "GIT_URL=${GIT_URL}"
+#
+#              COMPONENT_NAME=odh-feature-server-ci
+#              FEAST_FEATURE_SERVER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
+#              GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
+#              GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
+#              echo "  FEAST_FEATURE_SERVER_IMAGE: ${FEAST_FEATURE_SERVER_IMAGE}"
+#              echo "GIT_COMMIT=${GIT_COMMIT}"
+#              echo "GIT_URL=${GIT_URL}"
+#
+#              REPO_URL=${GIT_URL}
+#              REVISION=${GIT_COMMIT}
+#
+#              echo "REPO_URL=${REPO_URL}"
+#              echo "REVISION=${REVISION}"
+#              git clone "${REPO_URL}" src_code
+#              cd src_code
+#              git checkout ${REVISION}
+#
+#              export RUN_ON_OPENSHIFT_CI=true
+#              cd infra/feast-operator
+#              make install && make deploy IMG=${FEAST_OPERATOR_CONTROLLER_IMAGE} FS_IMG=${FEAST_FEATURE_SERVER_IMAGE}
+#              oc wait --for condition=Available -n feast-operator-system deployment feast-operator-controller-manager
+#              make test-e2e
+#              make undeploy IMG=${FEAST_OPERATOR_CONTROLLER_IMAGE} FS_IMG=${FEAST_FEATURE_SERVER_IMAGE}
+#
+#              make test-previous-version
+#              oc delete deployment feast-operator-controller-manager -n feast-operator-system
+#
+#              make test-upgrade
+#
+#          - name: must-gather
+#            image: quay.io/rhoai/rhoai-task-toolset:go-its
+#            env:
+#              - name: KUBECONFIG
+#                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+#              - name: ARTIFACT_DIR
+#                value: $(workspaces.shared-data.path)/artifact-dir
+#            workingDir: /workspace/source
+#            volumeMounts:
+#              - name: credentials
+#                mountPath: /credentials
+#            script: |
+#              # feast-must-gather
+#              mkdir -p "${ARTIFACT_DIR}/gather-feast"
+#              oc adm must-gather --image=quay.io/modh/must-gather:rhoai-2.24 --dest-dir "${ARTIFACT_DIR}/gather-feast" -- "export COMPONENT=feastoperator; /usr/bin/gather"
+#
+#              # openshift-must-gather
+#              mkdir -p "${ARTIFACT_DIR}/gather-openshift"
+#              oc adm must-gather --dest-dir "${ARTIFACT_DIR}/gather-openshift"
+
+    - name: generate-artifacts
+      workspaces:
+      - name: shared-data
+        workspace: shared-data
       runAfter:
         - audit-snapshot
-      taskRef:
-        resolver: git
-        params:
-          - name: url
-            value: https://github.com/konflux-ci/build-definitions.git
-          - name: revision
-            value: main
-          - name: pathInRepo
-            value: task/eaas-provision-space/0.1/eaas-provision-space.yaml
-      params:
-        - name: ownerName
-          value: $(context.pipelineRun.name)
-        - name: ownerUid
-          value: $(context.pipelineRun.uid)
-    - name: provision-cluster
-      runAfter:
-        - provision-eaas-space
       taskSpec:
-        results:
-          - name: clusterName
-            value: "$(steps.create-cluster.results.clusterName)"
-        steps:
-          - name: get-supported-versions
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-get-supported-ephemeral-cluster-versions/0.1/eaas-get-supported-ephemeral-cluster-versions.yaml
-            params:
-              - name: eaasSpaceSecretRef
-                value: $(tasks.provision-eaas-space.results.secretRef)
-          - name: pick-version
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-get-latest-openshift-version-by-prefix/0.1/eaas-get-latest-openshift-version-by-prefix.yaml
-            params:
-              - name: prefix
-                value: "$(steps.get-supported-versions.results.versions[0])."
-          - name: create-cluster
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-create-ephemeral-cluster-hypershift-aws/0.1/eaas-create-ephemeral-cluster-hypershift-aws.yaml
-            params:
-              - name: eaasSpaceSecretRef
-                value: $(tasks.provision-eaas-space.results.secretRef)
-              - name: version
-                value: "$(steps.pick-version.results.version)"
-              - name: instanceType
-                value: m5.2xlarge
-    - name: deploy-and-test
-      runAfter:
-        - provision-cluster
-      params:
-        - name: oci-artifacts-repo
-          value: $(params.oci-artifacts-repo)
-      taskSpec:
+        workspaces:
+          - name: shared-data
+            optional: true
         volumes:
           - name: odh-registry-secret-volume
             secret:
@@ -184,155 +292,63 @@ spec:
               items:
               - key: .dockerconfigjson
                 path: oci-storage-dockerconfigjson
-          - name: credentials
-            emptyDir: {}
-        params:
-          - name: oci-artifacts-repo
-            description: oci-artifacts-repo
         steps:
-          - name: get-kubeconfig
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-get-ephemeral-cluster-credentials/0.1/eaas-get-ephemeral-cluster-credentials.yaml
-            params:
-              - name: eaasSpaceSecretRef
-                value: $(tasks.provision-eaas-space.results.secretRef)
-              - name: clusterName
-                value: "$(tasks.provision-cluster.results.clusterName)"
-              - name: credentials
-                value: credentials
-          - name: deploy-and-e2e
-            image: quay.io/rhoai/rhoai-task-toolset:go-its
+          - name: generate-artifacts
+            image: quay.io/konflux-ci/konflux-test:stable
+            workingDir: /workspace
             env:
-              - name: KUBECONFIG
-                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
-              - name: SNAPSHOT
-                value: $(tasks.generate-snapshot.results.SNAPSHOT)
               - name: ARTIFACT_DIR
-                value: /workspace/artifact-dir
-            workingDir: /workspace/source
-            volumeMounts:
-              - name: credentials
-                mountPath: /credentials
+                value: $(workspaces.shared-data.path)/artifact-dir
             script: |
-              oc get pods
-              oc whoami
+              #!/bin/bash
+              set -e
+              mkdir -p ${ARTIFACT_DIR}
+              echo "generating the dummy test logs 1" > ${ARTIFACT_DIR}/logs1.txt
+              echo "generating the dummy test logs 2" > ${ARTIFACT_DIR}/logs2.txt
 
-              echo "SNAPSHOT=${SNAPSHOT}"
-              COMPONENT_NAME=odh-feast-operator-ci
-              FEAST_OPERATOR_CONTROLLER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
-              GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
-              GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
-              echo "  FEAST_OPERATOR_CONTROLLER_IMAGE: ${FEAST_OPERATOR_CONTROLLER_IMAGE}"
-              echo "GIT_COMMIT=${GIT_COMMIT}"
-              echo "GIT_URL=${GIT_URL}"
-
-              COMPONENT_NAME=odh-feature-server-ci
-              FEAST_FEATURE_SERVER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
-              GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
-              GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
-              echo "  FEAST_FEATURE_SERVER_IMAGE: ${FEAST_FEATURE_SERVER_IMAGE}"
-              echo "GIT_COMMIT=${GIT_COMMIT}"
-              echo "GIT_URL=${GIT_URL}"
-
-              REPO_URL=${GIT_URL}
-              REVISION=${GIT_COMMIT}
-
-              echo "REPO_URL=${REPO_URL}"
-              echo "REVISION=${REVISION}"
-              git clone "${REPO_URL}" src_code
-              cd src_code
-              git checkout ${REVISION}
-
-              export RUN_ON_OPENSHIFT_CI=true
-              cd infra/feast-operator
-              make install && make deploy IMG=${FEAST_OPERATOR_CONTROLLER_IMAGE} FS_IMG=${FEAST_FEATURE_SERVER_IMAGE}
-              oc wait --for condition=Available -n feast-operator-system deployment feast-operator-controller-manager
-              make test-e2e
-              make undeploy IMG=${FEAST_OPERATOR_CONTROLLER_IMAGE} FS_IMG=${FEAST_FEATURE_SERVER_IMAGE}
-
-              make test-previous-version
-              oc delete deployment feast-operator-controller-manager -n feast-operator-system
-
-              make test-upgrade
-
-              # cd ${ARTIFACT_DIR}
-
-              # feast-must-gather
-              mkdir -p "${ARTIFACT_DIR}/gather-feast"
-              oc adm must-gather --image=quay.io/modh/must-gather:rhoai-2.24 --dest-dir "${ARTIFACT_DIR}/gather-feast" -- "export COMPONENT=feastoperator; /usr/bin/gather"
-
-              # openshift-must-gather
-              mkdir -p "${ARTIFACT_DIR}/gather-openshift"
-              oc adm must-gather --dest-dir "${ARTIFACT_DIR}/gather-openshift"
-          - name: secure-push-oci
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/tekton-integration-catalog.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/secure-push-oci/0.1/secure-push-oci.yaml
-            params:
-              - name: workdir-path
-                value: /workspace/artifact-dir
-              - name: oci-ref
-                value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
-              - name: credentials-volume-name
-                value: odh-registry-secret-volume
-
-#    - name: generate-artifacts
-#      runAfter:
-#        - audit-snapshot
-#      taskSpec:
-#        volumes:
-#          - name: odh-registry-secret-volume
-#            secret:
-#              secretName: odh-registry-secret
-#              items:
-#              - key: .dockerconfigjson
-#                path: oci-storage-dockerconfigjson
-#        steps:
-#          - name: generate-artifacts
-#            image: quay.io/konflux-ci/konflux-test:stable
-#            workingDir: /workspace
-#            env:
-#              - name: ARTIFACT_DIR
-#                value: /workspace/artifact-dir
-#            script: |
-#              #!/bin/bash
-#              set -e
-#              mkdir -p ${ARTIFACT_DIR}
-#              echo "generating the dummy test logs 1" > ${ARTIFACT_DIR}/logs1.txt
-#              echo "generating the dummy test logs 2" > ${ARTIFACT_DIR}/logs2.txt
-#
-#          - name: secure-push-oci
-#            ref:
-#              resolver: git
-#              params:
-#                - name: url
-#                  value: https://github.com/konflux-ci/tekton-integration-catalog.git
-#                - name: revision
-#                  value: main
-#                - name: pathInRepo
-#                  value: stepactions/secure-push-oci/0.1/secure-push-oci.yaml
-#            params:
-#              - name: workdir-path
-#                value: /workspace/artifact-dir
-#              - name: oci-ref
-#                value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
-#              - name: credentials-volume-name
-#                value: odh-registry-secret-volume
   finally:
+  - name: push-ci-artifacts
+    workspaces:
+    - name: shared-data
+      workspace: shared-data
+    params:
+      - name: oci-artifacts-repo
+        value: $(params.oci-artifacts-repo)
+    taskSpec:
+      volumes:
+        - name: odh-registry-secret-volume
+          secret:
+            secretName: odh-registry-secret
+            items:
+            - key: .dockerconfigjson
+              path: oci-storage-dockerconfigjson
+      workspaces:
+        - name: shared-data
+          optional: true
+      params:
+        - name: oci-artifacts-repo
+          description: oci-artifacts-repo
+      steps:
+        - name: secure-push-oci
+          ref:
+            resolver: git
+            params:
+              - name: url
+                value: https://github.com/konflux-ci/tekton-integration-catalog.git
+              - name: revision
+                value: main
+              - name: pathInRepo
+                value: stepactions/secure-push-oci/0.1/secure-push-oci.yaml
+          params:
+            - name: workdir-path
+              value: $(workspaces.shared-data.path)/artifact-dir
+            - name: oci-ref
+              value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
+            - name: credentials-volume-name
+              value: odh-registry-secret-volume
   - name: pull-request-status-message
+    runAfter:
+      - push-ci-artifacts
     workspaces:
     - name: basic-auth
       workspace: git-auth
@@ -366,4 +382,6 @@ spec:
         value: $(params.artifact-browser-url)
   workspaces:
   - name: git-auth
+    optional: true
+  - name: shared-data
     optional: true
