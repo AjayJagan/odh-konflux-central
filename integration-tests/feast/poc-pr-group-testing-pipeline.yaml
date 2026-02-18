@@ -282,9 +282,9 @@ spec:
       runAfter:
         - audit-snapshot
       taskSpec:
-        workspaces:
-          - name: shared-data
-            optional: true
+#        workspaces:
+#          - name: shared-data
+#            optional: true
         steps:
           - name: generate-artifacts
             image: quay.io/konflux-ci/konflux-test:stable
