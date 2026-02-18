@@ -2,8 +2,16 @@ FROM registry.access.redhat.com/ubi9/python-312
 
 USER root
 
-RUN microdnf install -y wget podman jq tar \
-    && microdnf clean all
+RUN yum install -y wget jq tar \
+    && yum clean all
 
+# Install oc + kubectl
 RUN wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz && \
-    tar xvf openshift-client-linux.tar.gz && chmod +x oc && mv oc /usr/local/bin/ && chmod +x kubectl && mv kubectl /usr/local/bin/
+    tar xvf openshift-client-linux.tar.gz && \
+    chmod +x oc kubectl && \
+    mv oc kubectl /usr/local/bin/
+
+# Install correct yq (v4)
+RUN wget -O /usr/local/bin/yq \
+    https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && \
+    chmod +x /usr/local/bin/yq
