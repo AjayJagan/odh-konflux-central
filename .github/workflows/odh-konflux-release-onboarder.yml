@@ -72,6 +72,11 @@ on:
         description: 'New version'
         required: true
         type: string
+      build_type:
+        description: 'Build type: Release or CI'
+        required: true
+        type: string
+
 
 jobs:
   update-tekton-pipelines-and-create-pr:
@@ -100,6 +105,12 @@ jobs:
           echo "REPOSITORY=opendatahub-io/${{ inputs.component }}" >> $GITHUB_ENV
           echo "OKC_FOLDER=${{ inputs.component }}" >> $GITHUB_ENV
 
+          if [ "${{ inputs.build_type }}" = "CI" ]; then
+            echo "EFFECTIVE_TAG=odh-stable" >> $GITHUB_ENV
+          else
+            echo "EFFECTIVE_TAG=${{ inputs.version }}" >> $GITHUB_ENV
+          fi
+
       - name: Prepare Tekton files
         run: |
           repo_folder="okc-repo/pipelines/${OKC_FOLDER}"
@@ -120,7 +131,7 @@ jobs:
 
           find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
             # Replace $$OUTPUT_IMAGE_TAG$$ with version (preserves 'v' prefix and handles all occurrences including build-args)
-            sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${{ inputs.version }}"'|g' "$file"
+            sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$file"
             # Replace $$TARGET_BRANCH$$ with build branch (the branch images are built from)
             sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
           done
