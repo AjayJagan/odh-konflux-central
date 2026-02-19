@@ -158,6 +158,13 @@ spec:
                 value: credentials
           - name: deploy-and-e2e
             image: quay.io/rhoai/rhoai-task-toolset:kubeflow
+            computeResources:
+              requests:
+                memory: "4Gi"
+                cpu: "2"
+              limits:
+                memory: "8Gi"
+                cpu: "4"
             env:
               - name: KUBECONFIG
                 value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
