@@ -73,9 +73,13 @@ on:
         required: true
         type: string
       build_type:
-        description: 'Build type: Release or CI'
+        description: 'Build type'
         required: true
-        type: string
+        type: choice
+        options:
+          - Release
+          - CI
+        default: Release
 
 
 jobs:
@@ -104,12 +108,13 @@ jobs:
         run: |
           echo "REPOSITORY=opendatahub-io/${{ inputs.component }}" >> $GITHUB_ENV
           echo "OKC_FOLDER=${{ inputs.component }}" >> $GITHUB_ENV
-
+      
           if [ "${{ inputs.build_type }}" = "CI" ]; then
             echo "EFFECTIVE_TAG=odh-stable" >> $GITHUB_ENV
           else
-            echo "EFFECTIVE_TAG=${{ inputs.version }}" >> $GITHUB_ENV
+            echo "EFFECTIVE_TAG=${EFFECTIVE_TAG}" >> $GITHUB_ENV
           fi
+
 
       - name: Prepare Tekton files
         run: |
@@ -165,8 +170,8 @@ jobs:
           git checkout -B ${{ inputs.pr_target_branch }} origin/${{ inputs.pr_target_branch }}
 
           #branch_name="appstudio-${{ inputs.component }}-konflux-replicator"
-          #branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}"
-          branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}-$(date +%s)"
+          #branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${EFFECTIVE_TAG}"
+          branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${EFFECTIVE_TAG}-$(date +%s)"
           echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
 
           git checkout -B "$branch_name" ${{ inputs.pr_target_branch }}
@@ -201,7 +206,7 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Update Tekton output-image tags to version ${{ inputs.version }}"
+          git commit -m "Update Tekton output-image tags to version ${EFFECTIVE_TAG}"
           git push --set-upstream origin "$branch_name"
           echo "commit=true" >> $GITHUB_ENV
 
@@ -215,8 +220,8 @@ jobs:
             --repo "${REPOSITORY}" \
             --base "${{ inputs.pr_target_branch }}" \
             --head "${BRANCH_NAME}" \
-            --title "Update Tekton files to version ${{ inputs.version }}" \
-            --body "This PR updates the \`output-image\` tags and CEL expressions in \`.tekton/\` to version \`${{ inputs.version }}\`.
+            --title "Update Tekton files to version ${EFFECTIVE_TAG}" \
+            --body "This PR updates the \`output-image\` tags and CEL expressions in \`.tekton/\` to version \`${EFFECTIVE_TAG}\`.
 
           - **PR target branch:** \`${{ inputs.pr_target_branch }}\` (changes land here first)
           - **Build branch:** \`${{ inputs.build_branch }}\` (branch that images are built from)"
