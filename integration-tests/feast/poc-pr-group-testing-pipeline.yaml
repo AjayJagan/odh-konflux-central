@@ -412,8 +412,23 @@ spec:
               value: $(tasks.audit-snapshot.results.git-revision)
             - name: artifact-browser-url
               value: $(params.artifact-browser-url)
-
-
+        - name: pull-request-status-message
+          ref:
+            resolver: git
+            params:
+              - name: url
+                value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
+              - name: revision
+                value: odh
+              - name: pathInRepo
+                value: stepactions/pull-request-comment/0.1/pull-request-comment.yaml
+          params:
+            - name: work-dir
+              value: '/workspace/odh-ci-artifacts'
+            - name: artifacts-dir-path
+              value: 'test-artifacts'
+            - name: dir-to-be-deleted
+              value: '$(context.pipelineRun.name)'
 
 #  - name: pull-request-status-message
 #    runAfter:
