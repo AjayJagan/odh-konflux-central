@@ -330,6 +330,8 @@ spec:
     params:
       - name: oci-artifacts-repo
         value: $(params.oci-artifacts-repo)
+      - name: pipeline-status
+        value: $(tasks.status)
     taskSpec:
       volumes:
         - name: odh-registry-secret-volume
@@ -344,6 +346,8 @@ spec:
       params:
         - name: oci-artifacts-repo
           description: oci-artifacts-repo
+        - name: pipeline-status
+          type: string
       steps:
         - name: pull-ci-artifacts
           ref:
@@ -399,7 +403,7 @@ spec:
             - name: oci-container
               value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
             - name: pipeline-aggregate-status
-              value: $(tasks.status)
+              value: $(params.pipeline-status)
             - name: pull-request-author
               value: $(tasks.audit-snapshot.results.pull-request-author)
             - name: pull-request-number
