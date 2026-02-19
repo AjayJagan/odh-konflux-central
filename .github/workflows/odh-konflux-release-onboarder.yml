@@ -68,10 +68,6 @@ on:
         description: 'Branch that images are built from (e.g. stable).'
         required: true
         type: string
-      version:
-        description: 'New version'
-        required: true
-        type: string
       build_type:
         description: 'Build type'
         required: true
@@ -80,6 +76,10 @@ on:
           - Release
           - CI
         default: Release
+      version:
+        description: 'New version (Required only for Release builds)'
+        required: false
+        type: string
 
 
 jobs:
@@ -104,16 +104,24 @@ jobs:
           app_id: ${{ secrets.ODH_DEVOPS_APP_ID }}
           private_key: ${{ secrets.ODH_DEVOPS_APP_PRIVATE_KEY }}
 
+      - name: Validate and set tag
+        run: |
+          if [ "${{ inputs.build_type }}" = "CI" ]; then
+            echo "EFFECTIVE_TAG=odh-stable" >> $GITHUB_ENV
+          else
+            if [ -z "${{ inputs.version }}" ]; then
+              echo "ERROR: Version must be provided for Release builds"
+              exit 1
+            fi
+            echo "EFFECTIVE_TAG=${{ inputs.version }}" >> $GITHUB_ENV
+          fi
+
+
       - name: Set environment variables
         run: |
           echo "REPOSITORY=opendatahub-io/${{ inputs.component }}" >> $GITHUB_ENV
           echo "OKC_FOLDER=${{ inputs.component }}" >> $GITHUB_ENV
-      
-          if [ "${{ inputs.build_type }}" = "CI" ]; then
-            echo "EFFECTIVE_TAG=odh-stable" >> $GITHUB_ENV
-          else
-            echo "EFFECTIVE_TAG=${EFFECTIVE_TAG}" >> $GITHUB_ENV
-          fi
+
 
 
       - name: Prepare Tekton files
