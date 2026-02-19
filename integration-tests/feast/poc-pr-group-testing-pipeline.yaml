@@ -364,6 +364,8 @@ spec:
               value: 'test-artifacts/$(context.pipelineRun.name)'
             - name: dest-path
               value: /workspace/odh-ci-artifacts
+            - name: artifacts-dir-path
+              value: 'test-artifacts/$(context.pipelineRun.name)'
         - name: secure-push-oci
           ref:
             resolver: git
