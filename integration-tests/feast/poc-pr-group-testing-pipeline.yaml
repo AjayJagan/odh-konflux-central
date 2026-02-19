@@ -383,7 +383,7 @@ spec:
               value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
             - name: credentials-volume-name
               value: odh-registry-secret-volume
-        - name: pull-request-status-message
+        - name: share-status-on-pull-request
           ref:
             resolver: git
             params:
@@ -412,7 +412,7 @@ spec:
               value: $(tasks.audit-snapshot.results.git-revision)
             - name: artifact-browser-url
               value: $(params.artifact-browser-url)
-        - name: pull-request-status-message
+        - name: cleanup-artifacts-from-git
           ref:
             resolver: git
             params:
@@ -421,7 +421,7 @@ spec:
               - name: revision
                 value: odh
               - name: pathInRepo
-                value: stepactions/pull-request-comment/0.1/pull-request-comment.yaml
+                value: stepactions/cleanup-git-repo/0.1/cleanup-git-repo.yaml
           params:
             - name: work-dir
               value: '/workspace/odh-ci-artifacts'
