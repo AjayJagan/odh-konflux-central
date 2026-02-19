@@ -276,9 +276,6 @@ spec:
 #              oc adm must-gather --dest-dir "${ARTIFACT_DIR}/gather-openshift"
 
     - name: generate-artifacts
-      workspaces:
-      - name: shared-data
-        workspace: shared-data
       runAfter:
         - audit-snapshot
       taskSpec:
@@ -288,14 +285,34 @@ spec:
             workingDir: /workspace
             env:
               - name: ARTIFACT_DIR
-                value: $(workspaces.shared-data.path)/artifact-dir
+                value: /workspace/artifact-dir
             script: |
               #!/bin/bash
               set -e
-              # ARTIFACT_DIR="/workspace/artifact-dir"
               mkdir -p ${ARTIFACT_DIR}
               echo "generating the dummy test logs 1" > ${ARTIFACT_DIR}/logs1.txt
               echo "generating the dummy test logs 2" > ${ARTIFACT_DIR}/logs2.txt
+          - name: secure-git-push
+            ref:
+              resolver: git
+              params:
+                - name: url
+                  value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
+                - name: revision
+                  value: odh
+                - name: pathInRepo
+                  value: stepactions/secure-git-push/0.1/secure-git-push.yaml
+            params:
+              - name: source-path
+                value: /workspace/artifact-dir
+              - name: repo-path
+                value: 'opendatahub-io/odh-build-metadata'
+              - name: repo-branch
+                value: 'ci-artifacts'
+              - name: sparse-file-path
+                value: 'test-artifacts/docs'
+              - name: dest-path
+                value: 'test-artifacts/$(context.pipelineRun.name)'
 
 #  finally:
 #  - name: push-ci-artifacts-and-update-pr
