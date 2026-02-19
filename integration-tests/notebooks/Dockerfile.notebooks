@@ -1,6 +1,17 @@
+#1 get Go from official UBI toolset
+FROM registry.access.redhat.com/ubi9/go-toolset:1.22 as go-builder
+
+#2 python image
 FROM registry.access.redhat.com/ubi9/python-312
 
 USER 0
+
+# Copy Go from builder image
+COPY --from=go-builder /usr/lib/golang /usr/lib/golang
+COPY --from=go-builder /usr/bin/go /usr/bin/go
+COPY --from=go-builder /usr/bin/gofmt /usr/bin/gofmt
+
+ENV PATH="/usr/lib/golang/bin:${PATH}"
 
 RUN yum install -y \
         wget \
@@ -18,17 +29,3 @@ RUN wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable
     tar xvf openshift-client-linux.tar.gz && \
     chmod +x oc kubectl && \
     mv oc kubectl /usr/local/bin/
-
-# Install yq v4 directly into project bin directory
-ENV YQ_VERSION=v4.44.1
-
-RUN curl -L https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 \
-    -o /tmp/yq && \
-    chmod +x /tmp/yq
-
-WORKDIR /opt/app-root/src
-
-RUN mkdir -p bin && \
-    cp /tmp/yq bin/yq
-
-
