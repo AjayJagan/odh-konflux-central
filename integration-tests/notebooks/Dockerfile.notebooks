@@ -6,6 +6,7 @@ RUN yum install -y \
         wget \
         jq \
         tar \
+        make \
         podman \
         fuse-overlayfs \
         slirp4netns \
@@ -18,9 +19,16 @@ RUN wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable
     chmod +x oc kubectl && \
     mv oc kubectl /usr/local/bin/
 
-# Install yq v4
-RUN wget -O /usr/local/bin/yq \
-    https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && \
-    chmod +x /usr/local/bin/yq
+# Install yq v4 directly into project bin directory
+ENV YQ_VERSION=v4.44.1
 
-USER 1001
+RUN curl -L https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 \
+    -o /tmp/yq && \
+    chmod +x /tmp/yq
+
+WORKDIR /opt/app-root/src
+
+RUN mkdir -p bin && \
+    cp /tmp/yq bin/yq
+
+
