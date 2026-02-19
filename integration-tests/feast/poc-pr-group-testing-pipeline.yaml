@@ -261,7 +261,7 @@ spec:
               - name: KUBECONFIG
                 value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
               - name: ARTIFACT_DIR
-                value: /workspace/odh-ci-artifacts
+                value: /workspace/artifacts-dir
             workingDir: /workspace/source
             volumeMounts:
               - name: credentials

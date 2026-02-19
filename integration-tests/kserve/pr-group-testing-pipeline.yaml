@@ -837,6 +837,18 @@ spec:
             export GITHUB_SHA=stable
             ./test/scripts/openshift-ci/run-e2e-tests.sh graph 2 raw
 
+        - name: must-gather
+          image: quay.io/rhoai/rhoai-task-toolset:go-its
+          env:
+            - name: KUBECONFIG
+              value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+            - name: ARTIFACT_DIR
+              value: /workspace/odh-ci-artifacts
+          workingDir: /workspace/source
+          volumeMounts:
+            - name: credentials
+              mountPath: /credentials
+          script: |
             # kserve-must-gather
             DEST_DIR="${ARTIFACT_DIR}/e2e-graph/gather-kserve"
             mkdir -p ${DEST_DIR}
