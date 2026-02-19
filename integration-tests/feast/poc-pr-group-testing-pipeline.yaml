@@ -319,6 +319,8 @@ spec:
                 value: 'test-artifacts/docs'
               - name: dest-path
                 value: 'test-artifacts/$(context.pipelineRun.name)'
+              - name: pipelinerun-name
+                value: $(context.pipelineRun.name)
 
 #  finally:
 #  - name: push-ci-artifacts-and-update-pr
