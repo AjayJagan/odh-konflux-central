@@ -278,7 +278,13 @@ spec:
     - name: generate-artifacts
       runAfter:
         - audit-snapshot
+      workspaces:
+      - name: basic-auth
+        workspace: git-auth
       taskSpec:
+        workspaces:
+          - name: basic-auth
+            optional: true
         steps:
           - name: generate-artifacts
             image: quay.io/konflux-ci/konflux-test:stable
