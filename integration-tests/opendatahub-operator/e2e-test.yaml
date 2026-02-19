@@ -242,16 +242,16 @@ spec:
             image: golang:1.25-alpine
             computeResources:
               requests:
-                memory: "4Gi"
+                memory: "8Gi"
                 cpu: "2"
               limits:
-                memory: "8Gi"
+                memory: "12Gi"
                 cpu: "4"
             env:
               - name: KUBECONFIG
                 value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
               - name: GOMEMLIMIT
-                value: "7GiB"
+                value: "10GiB"
             workingDir: /workspace/source
             volumeMounts:
               - name: credentials
