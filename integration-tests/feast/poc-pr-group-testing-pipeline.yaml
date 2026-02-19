@@ -256,6 +256,7 @@ spec:
               make test-upgrade
 
           - name: must-gather
+            onError: continue
             image: quay.io/rhoai/rhoai-task-toolset:go-its
             env:
               - name: KUBECONFIG
