@@ -843,7 +843,7 @@ spec:
             - name: KUBECONFIG
               value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
             - name: ARTIFACT_DIR
-              value: /workspace/odh-ci-artifacts
+              value: /workspace/artifacts-dir
           workingDir: /workspace/source
           volumeMounts:
             - name: credentials
@@ -858,7 +858,29 @@ spec:
             DEST_DIR="${ARTIFACT_DIR}/e2e-graph/gather-openshift"
             mkdir -p ${DEST_DIR}
             oc adm must-gather --dest-dir "${DEST_DIR}"
-
+        - name: git-push-artifacts
+          ref:
+            resolver: git
+            params:
+              - name: url
+                value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
+              - name: revision
+                value: odh
+              - name: pathInRepo
+                value: stepactions/secure-git-push/0.1/secure-git-push.yaml
+          params:
+            - name: source-path
+              value: /workspace/odh-ci-artifacts
+            - name: repo-path
+              value: 'opendatahub-io/odh-build-metadata'
+            - name: repo-branch
+              value: 'ci-artifacts'
+            - name: sparse-file-path
+              value: 'test-artifacts/docs'
+            - name: dest-path
+              value: 'test-artifacts/$(context.pipelineRun.name)'
+            - name: pipelinerun-name
+              value: $(context.pipelineRun.name)
 
 
 

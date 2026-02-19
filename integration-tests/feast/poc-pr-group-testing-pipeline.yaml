@@ -286,7 +286,7 @@ spec:
                   value: stepactions/secure-git-push/0.1/secure-git-push.yaml
             params:
               - name: source-path
-                value: /workspace/odh-ci-artifacts
+                value: /workspace/artifacts-dir
               - name: repo-path
                 value: 'opendatahub-io/odh-build-metadata'
               - name: repo-branch
