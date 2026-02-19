@@ -1,4 +1,4 @@
-name: ODH Konflux Release Onboarder
+name: ODH Konflux Onboarder
 
 on:
   workflow_dispatch:
@@ -55,9 +55,6 @@ on:
           - spark-operator
           - llama-stack-provider-trustyai-garak
           - NeMo-Guardrails
-          - workload-variant-autoscaler
-          - batch-gateway
-          - llm-d-kv-cache
 
           # Add all valid components here
       pr_target_branch:
@@ -68,19 +65,10 @@ on:
         description: 'Branch that images are built from (e.g. stable).'
         required: true
         type: string
-      build_type:
-        description: 'Build type'
-        required: true
-        type: choice
-        options:
-          - Release
-          - CI
-        default: Release
       version:
-        description: 'New version (Required only for Release builds)'
-        required: false
+        description: 'New version'
+        required: true
         type: string
-
 
 jobs:
   update-tekton-pipelines-and-create-pr:
@@ -104,59 +92,65 @@ jobs:
           app_id: ${{ secrets.ODH_DEVOPS_APP_ID }}
           private_key: ${{ secrets.ODH_DEVOPS_APP_PRIVATE_KEY }}
 
-      - name: Validate and set tag
-        run: |
-          if [ "${{ inputs.build_type }}" = "CI" ]; then
-            echo "EFFECTIVE_TAG=odh-stable" >> $GITHUB_ENV
-          else
-            if [ -z "${{ inputs.version }}" ]; then
-              echo "ERROR: Version must be provided for Release builds"
-              exit 1
-            fi
-            echo "EFFECTIVE_TAG=${{ inputs.version }}" >> $GITHUB_ENV
-          fi
-
-
       - name: Set environment variables
         run: |
           echo "REPOSITORY=opendatahub-io/${{ inputs.component }}" >> $GITHUB_ENV
           echo "OKC_FOLDER=${{ inputs.component }}" >> $GITHUB_ENV
+
+      - name: Validate and set tag
+        run: |
+          BUILD_TYPE="${{ inputs.build_type }}"
+          VERSION="${{ inputs.version }}"
+
+          if [ "$BUILD_TYPE" = "CI" ]; then
+            echo "EFFECTIVE_TAG=odh-stable" >> $GITHUB_ENV
+            echo "APPLICATION_NAME=opendatahub-builds" >> $GITHUB_ENV
+          else
+            if [ -z "$VERSION" ]; then
+              echo "ERROR: Version must be provided for Release builds"
+              exit 1
+            fi
+            echo "EFFECTIVE_TAG=$VERSION" >> $GITHUB_ENV
+            echo "APPLICATION_NAME=opendatahub-release" >> $GITHUB_ENV
+          fi
 
 
       - name: Prepare Tekton files
         run: |
           repo_folder="okc-repo/pipelineruns/${OKC_FOLDER}"
           echo "Using pipelinerun path: $repo_folder"
-      
+
           if [ ! -d "$repo_folder" ]; then
             echo "ERROR: $repo_folder does not exist!"
             exit 1
           fi
-      
+
           mkdir -p extracted/.tekton
-      
+
           if [ "${{ inputs.build_type }}" = "Release" ]; then
             echo "Release build → copying only push pipelineruns"
-      
+
             find "$repo_folder" -type f -name "*push.yaml" | while read file; do
               base=$(basename "$file" .yaml)
               new_name="${base}-release.yaml"
               cp "$file" "extracted/.tekton/$new_name"
             done
-      
+
           else
             echo "CI build → copying all pipelinerun yaml files"
             find "$repo_folder" -type f -name "*.yaml" -exec cp {} extracted/.tekton/ \;
           fi
-      
+
           if [ -z "$(ls -A extracted/.tekton)" ]; then
             echo "ERROR: No pipelinerun files found"
             exit 1
           fi
-      
+
           find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
             sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$file"
             sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
+
+            sed -i -E 's|(appstudio\.openshift\.io/application:).*|\1 '"${APPLICATION_NAME}"'|g' "$file"
           done
 
 
@@ -189,7 +183,7 @@ jobs:
           git checkout -B ${{ inputs.pr_target_branch }} origin/${{ inputs.pr_target_branch }}
 
           #branch_name="appstudio-${{ inputs.component }}-konflux-replicator"
-          #branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${EFFECTIVE_TAG}"
+          #branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}"
           branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${EFFECTIVE_TAG}-$(date +%s)"
           echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
 
@@ -225,7 +219,7 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Update Tekton output-image tags to version ${EFFECTIVE_TAG}"
+          git commit -m "Update Tekton output-image tags to ${EFFECTIVE_TAG}"
           git push --set-upstream origin "$branch_name"
           echo "commit=true" >> $GITHUB_ENV
 
@@ -239,8 +233,9 @@ jobs:
             --repo "${REPOSITORY}" \
             --base "${{ inputs.pr_target_branch }}" \
             --head "${BRANCH_NAME}" \
-            --title "Update Tekton files to version ${EFFECTIVE_TAG}" \
-            --body "This PR updates the \`output-image\` tags and CEL expressions in \`.tekton/\` to version \`${EFFECTIVE_TAG}\`.
+            --title "Update Tekton files to ${EFFECTIVE_TAG}" \
+            --body "This PR updates the \`output-image\` tags and CEL expressions in \`.tekton/\` to \`${EFFECTIVE_TAG}\`.
 
-          - **PR target branch:** \`${{ inputs.pr_target_branch }}\` (changes land here first)
-          - **Build branch:** \`${{ inputs.build_branch }}\` (branch that images are built from)"
+          - **PR target branch:** \`${{ inputs.pr_target_branch }}\`
+          - **Build branch:** \`${{ inputs.build_branch }}\`"
+
