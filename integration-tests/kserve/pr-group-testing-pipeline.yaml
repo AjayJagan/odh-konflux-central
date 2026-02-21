@@ -1554,11 +1554,6 @@ spec:
 
   finally:
   - name: push-ci-artifacts-and-update-pr
-#    when:
-#    - input: $(tasks.status)
-#      operator: in
-#      values:
-#      - "Failed"
     workspaces:
     - name: basic-auth
       workspace: git-auth

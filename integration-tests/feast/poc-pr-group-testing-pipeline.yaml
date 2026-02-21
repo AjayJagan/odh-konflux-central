@@ -268,8 +268,6 @@ spec:
               - name: credentials
                 mountPath: /credentials
             script: |
-              EXIT_CODE=$(cat /tekton/steps/step-deploy-and-e2e/exitCode)
-              if [[ ! "$EXIT_CODE" -eq 0 ]]; then
                   # feast-must-gather
                   mkdir -p "${ARTIFACT_DIR}/gather-feast"
                   oc adm must-gather --image=quay.io/modh/must-gather:rhoai-2.24 --dest-dir "${ARTIFACT_DIR}/gather-feast" -- "export COMPONENT=feastoperator; /usr/bin/gather"
@@ -277,9 +275,6 @@ spec:
                   # openshift-must-gather
                   mkdir -p "${ARTIFACT_DIR}/gather-openshift"
                   oc adm must-gather --dest-dir "${ARTIFACT_DIR}/gather-openshift"
-              else
-                  echo "skipping since everything green.."
-              fi
           - name: git-push-artifacts
             ref:
               resolver: git
@@ -354,11 +349,6 @@ spec:
 
   finally:
   - name: push-ci-artifacts-and-update-pr
-    when:
-    - input: $(tasks.status)
-      operator: in
-      values:
-      - "Failed"
     workspaces:
     - name: basic-auth
       workspace: git-auth
