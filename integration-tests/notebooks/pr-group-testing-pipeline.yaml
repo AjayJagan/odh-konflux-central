@@ -189,6 +189,8 @@ spec:
                   SNAPSHOT=$(cat "$(workspaces.shared-data.path)/group-snapshot.json")
               fi
 
+              #odh-workbench-jupyter-datascience-cpu-py312-ubi9
+              
               COMPONENT_NAME=odh-workbench-jupyter-datascience-cpu-py312-ubi9-ci
               JUPYTER_DATA_SCIENCE_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
               GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
@@ -205,16 +207,65 @@ spec:
               git clone "${REPO_URL}" src_code
               cd src_code
               git checkout ${REVISION}
-
+              
               oc new-project jupyter-datascience-ubi9-python-3-12
               IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_DATA_SCIENCE_IMAGE}"
               make deploy9-jupyter-datascience-ubi9-python-3.12 \
                   -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
               make test-jupyter-datascience-ubi9-python-3.12
               make undeploy9-jupyter-datascience-ubi9-python-3.12
-#
 
+              #odh-workbench-jupyter-pytorch-cuda-py312-ubi9
+              
+              COMPONENT_NAME=odh-workbench-jupyter-pytorch-cuda-py312-ubi9-ci
+              JUPYTER_PYTORCH_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
+              GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
+              GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
+              echo " JUPYTER_PYTORCH_IMAGE: ${JUPYTER_PYTORCH_IMAGE}"
+              echo "GIT_COMMIT=${GIT_COMMIT}"
+              echo "GIT_URL=${GIT_URL}"
 
+              REPO_URL=${GIT_URL}
+              REVISION=${GIT_COMMIT}
+
+              echo "REPO_URL=${REPO_URL}"
+              echo "REVISION=${REVISION}"
+              git clone "${REPO_URL}" src_code
+              cd src_code
+              git checkout ${REVISION}
+
+              oc new-project jupyter-pytorch-ubi9-python-3-12
+              IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_PYTORCH_IMAGE}"
+              make deploy9-jupyter-pytorch-ubi9-python-3.12 \
+                  -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
+              make test-jupyter-pytorch-ubi9-python-3.12
+              make undeploy9-jupyter-pytorch-ubi9-python-3.12
+
+              #odh-workbench-jupyter-minimal-cuda-py312-ubi9
+
+              COMPONENT_NAME=odh-workbench-jupyter-minimal-cuda-py312-ubi9-ci
+              JUPYTER_MINIMAL_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
+              GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
+              GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
+              echo " JUPYTER_MINIMAL_IMAGE: ${JUPYTER_MINIMAL_IMAGE}"
+              echo "GIT_COMMIT=${GIT_COMMIT}"
+              echo "GIT_URL=${GIT_URL}"
+
+              REPO_URL=${GIT_URL}
+              REVISION=${GIT_COMMIT}
+
+              echo "REPO_URL=${REPO_URL}"
+              echo "REVISION=${REVISION}"
+              git clone "${REPO_URL}" src_code
+              cd src_code
+              git checkout ${REVISION}
+
+              oc new-project cuda-jupyter-minimal-ubi9-python-3-12
+              IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_MINIMAL_IMAGE}"
+              make deploy9-cuda-jupyter-minimal-ubi9-python-3.12 \
+                  -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
+              make test-cuda-jupyter-minimal-ubi9-python-3.12
+              make undeploy9-cuda-jupyter-minimal-ubi9-python-3.12
 
 
     #       - name: cuda-jupyter-pt-ubi9-python-3-12-test-e2e
