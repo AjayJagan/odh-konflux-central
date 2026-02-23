@@ -85,23 +85,23 @@ spec:
               - name: PR_AUTHOR
                 valueFrom:
                   fieldRef:
-                    fieldPath: metadata.annotations['pipelinesascode.tekton.dev/sender']
+                    fieldPath: metadata.annotations['pac.test.appstudio.openshift.io/sender']
               - name: PR_NUMBER
                 valueFrom:
                   fieldRef:
-                    fieldPath: metadata.labels['pipelinesascode.tekton.dev/pull-request']
+                    fieldPath: metadata.labels['pac.test.appstudio.openshift.io/pull-request']
               - name: GIT_REPO
                 valueFrom:
                   fieldRef:
-                    fieldPath: metadata.annotations['pipelinesascode.tekton.dev/url-repository']
+                    fieldPath: metadata.annotations['pac.test.appstudio.openshift.io/url-repository']
               - name: GIT_ORG
                 valueFrom:
                   fieldRef:
-                    fieldPath: metadata.annotations['pipelinesascode.tekton.dev/url-org']
+                    fieldPath: metadata.annotations['pac.test.appstudio.openshift.io/url-org']
               - name: GIT_REVISION
                 valueFrom:
                   fieldRef:
-                    fieldPath: metadata.annotations['pipelinesascode.tekton.dev/sha']
+                    fieldPath: metadata.annotations['pac.test.appstudio.openshift.io/sha']
             script: |
               #!/bin/bash
               set -e
