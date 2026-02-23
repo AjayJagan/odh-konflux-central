@@ -97,6 +97,9 @@ spec:
                   fieldRef:
                     fieldPath: metadata.annotations['pipelinesascode.tekton.dev/url-org']
               - name: GIT_REVISION
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.annotations['pipelinesascode.tekton.dev/sha']
             script: |
               #!/bin/bash
               set -e
