@@ -137,40 +137,59 @@ jobs:
 
       - name: Prepare Tekton files
         run: |
+          BUILD_TYPE="${{ inputs.build_type }}"
           repo_folder="okc-repo/pipelineruns/${OKC_FOLDER}"
+      
           echo "Using pipelinerun path: $repo_folder"
-
+          echo "Build type: $BUILD_TYPE"
+      
           if [ ! -d "$repo_folder" ]; then
             echo "ERROR: $repo_folder does not exist!"
             exit 1
           fi
-
+      
           mkdir -p extracted/.tekton
-
-          if [ "${{ inputs.build_type }}" = "Release" ]; then
+      
+          if [ "$BUILD_TYPE" = "Release" ]; then
             echo "Release build → copying only push pipelineruns"
-
+      
             find "$repo_folder" -type f -name "*push.yaml" | while read file; do
               base=$(basename "$file" .yaml)
               new_name="${base}-release.yaml"
               cp "$file" "extracted/.tekton/$new_name"
             done
-
+      
           else
             echo "CI build → copying all pipelinerun yaml files"
             find "$repo_folder" -type f -name "*.yaml" -exec cp {} extracted/.tekton/ \;
           fi
-
+      
           if [ -z "$(ls -A extracted/.tekton)" ]; then
             echo "ERROR: No pipelinerun files found"
             exit 1
           fi
-
+      
+          # ---- MODIFY FILES ----
           find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
+      
+            echo "Processing $file"
+      
+            # Replace image tag
             sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$file"
+      
+            # Replace target branch
             sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
-
-            sed -i -E 's|\$\$COMPONENT_NAME\$\$|'"${COMPONENT_NAME}"'|g' "$file"
+      
+            # ---- Component Suffix Logic ----
+            if [ "$BUILD_TYPE" = "CI" ]; then
+              # Ensure -ci exists
+              sed -i -E 's|(appstudio\.openshift\.io/component: .*)(-ci)?$|\1-ci|' "$file"
+      
+            elif [ "$BUILD_TYPE" = "Release" ]; then
+              # Remove -ci if present
+              sed -i -E 's|(appstudio\.openshift\.io/component: .*)-ci$|\1|' "$file"
+            fi
+      
           done
 
 
