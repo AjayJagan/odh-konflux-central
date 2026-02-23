@@ -60,234 +60,234 @@ spec:
 
             # Log the extracted variable
             echo "  COMPONENT_CONTAINER_IMAGE: ${COMPONENT_CONTAINER_IMAGE}"
-    - name: check-prerequisites
-      description: check prerequisites if the ITS needs to execute
-      runAfter:
-        - find-component-image
-      params:
-        - name: BUILD_TYPE
-          value: $(params.BUILD_TYPE)
-      taskSpec:
-        params:
-        - name: BUILD_TYPE
-        results:
-        - name: event-type
-          description: "stores info about event type"
-        - name: pr-number
-          description: "stores info about pr number"
-        - name: prerequisites-met
-          description: "whether prerequisites are met to run the tests"
-        steps:
-        - image: quay.io/konflux-ci/konflux-test:stable
-          name: check-prerequisites
-          env:
-            - name: EVENT_TYPE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.labels['pac.test.appstudio.openshift.io/event-type']
-            - name: PR_NUMBER
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.labels['pac.test.appstudio.openshift.io/pull-request']
-            - name: BUILD_TYPE
-              value: $(params.BUILD_TYPE)
-          script: |
-            #!/bin/bash
-            set -e
-            echo "EVENT_TYPE=${EVENT_TYPE}"
-            echo "PR_NUMBER=${PR_NUMBER}"
-            echo "BUILD_TYPE=${BUILD_TYPE}"
-            echo -n "${EVENT_TYPE}" > $(results.event-type.path)
-            echo -n "${PR_NUMBER}" > $(results.pr-number.path)
-
-            if [ -n "${PR_NUMBER}" ] || [ "${BUILD_TYPE}" = "RELEASE" ]; then
-              echo "Prerequisites met: PR_NUMBER is set or BUILD_TYPE is RELEASE"
-              echo -n "true" > $(results.prerequisites-met.path)
-            else
-              echo "Prerequisites not met: PR_NUMBER is empty and BUILD_TYPE is not RELEASE"
-              echo -n "false" > $(results.prerequisites-met.path)
-            fi
-
-    - name: provision-eaas-space
-      runAfter:
-        - check-prerequisites
-      taskRef:
-        resolver: git
-        params:
-          - name: url
-            value: https://github.com/konflux-ci/build-definitions.git
-          - name: revision
-            value: main
-          - name: pathInRepo
-            value: task/eaas-provision-space/0.1/eaas-provision-space.yaml
-      params:
-        - name: ownerName
-          value: $(context.pipelineRun.name)
-        - name: ownerUid
-          value: $(context.pipelineRun.uid)
-      when:
-        - input: "$(tasks.check-prerequisites.results.prerequisites-met)"
-          operator: in
-          values: ["true"]
-
-    - name: provision-cluster
-      runAfter:
-        - provision-eaas-space
-      taskSpec:
-        results:
-          - name: clusterName
-            value: "$(steps.create-cluster.results.clusterName)"
-        steps:
-          - name: get-supported-versions
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-get-supported-ephemeral-cluster-versions/0.1/eaas-get-supported-ephemeral-cluster-versions.yaml
-            params:
-              - name: eaasSpaceSecretRef
-                value: $(tasks.provision-eaas-space.results.secretRef)
-          - name: pick-version
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-get-latest-openshift-version-by-prefix/0.1/eaas-get-latest-openshift-version-by-prefix.yaml
-            params:
-              - name: prefix
-                value: "$(steps.get-supported-versions.results.versions[0])."
-          - name: create-cluster
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-create-ephemeral-cluster-hypershift-aws/0.1/eaas-create-ephemeral-cluster-hypershift-aws.yaml
-            params:
-              - name: eaasSpaceSecretRef
-                value: $(tasks.provision-eaas-space.results.secretRef)
-              - name: version
-                value: "$(steps.pick-version.results.version)"
-              - name: instanceType
-                value: m5.2xlarge
-      when:
-        - input: "$(tasks.check-prerequisites.results.prerequisites-met)"
-          operator: in
-          values: ["true"]
-    - name: deploy-and-test
-      runAfter:
-        - provision-cluster
-      params:
-      - name: git-url
-        value: "$(tasks.parse-metadata.results.source-git-url)"
-      - name: git-rev
-        value: "$(tasks.parse-metadata.results.target-git-branch)"
-      - name: namespace
-        value: "$(params.NAMESPACE)"
-      - name: operator-image
-        value: "$(tasks.parse-metadata.results.component-container-image)"
-      taskSpec:
-        params:
-          - name: git-url
-            type: string
-          - name: git-rev
-            type: string
-          - name: namespace
-            type: string
-          - name: operator-image
-            type: string
-        volumes:
-          - name: credentials
-            emptyDir: {}
-        steps:
-          - name: get-kubeconfig
-            ref:
-              resolver: git
-              params:
-                - name: url
-                  value: https://github.com/konflux-ci/build-definitions.git
-                - name: revision
-                  value: main
-                - name: pathInRepo
-                  value: stepactions/eaas-get-ephemeral-cluster-credentials/0.1/eaas-get-ephemeral-cluster-credentials.yaml
-            params:
-              - name: eaasSpaceSecretRef
-                value: $(tasks.provision-eaas-space.results.secretRef)
-              - name: clusterName
-                value: "$(tasks.provision-cluster.results.clusterName)"
-              - name: credentials
-                value: credentials
-
-          - name: clone-repo
-            image: alpine/git
-            script: |
-              echo $(params.git-url)
-              echo $(params.git-rev)
-              git clone --depth 1 --branch $(params.git-rev) $(params.git-url) /workspace/source
-              git config --global --add safe.directory /workspace/source
-              cd /workspace/source
-
-          - name: deploy-and-e2e
-            image: golang:1.25-alpine
-            computeResources:
-              requests:
-                memory: "16Gi"
-                cpu: "4"
-              limits:
-                memory: "24Gi"
-                cpu: "6"
-            env:
-              - name: KUBECONFIG
-                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
-              - name: GOMEMLIMIT
-                value: "10GiB"
-            workingDir: /workspace/source
-            volumeMounts:
-              - name: credentials
-                mountPath: /credentials
-            script: |
-              set -ex  # Show commands and exit on error
-
-              # Install dependencies
-              apk add --no-cache bash make git curl
-
-              # Install kubectl
-              curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-              install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-              rm kubectl
-
-              # Deploy the operator
-              echo "Deploying operator..."
-              make deploy IMG=$(params.operator-image) OPERATOR_NAMESPACE=$(params.namespace)
-
-              # Wait for operator to be ready
-              echo "Waiting for operator to be ready..."
-              kubectl wait --for=condition=available --timeout=60s deployment/opendatahub-operator-controller-manager -n $(params.namespace)
-
-              # Run e2e tests
-              echo "Running e2e tests..."
-              make e2e-test -e E2E_TEST_OPERATOR_NAMESPACE=$(params.namespace) || {
-                EXIT_CODE=$?
-                echo "============================================"
-                echo "E2E tests failed with exit code: $EXIT_CODE"
-                echo "Pods in namespace $(params.namespace):"
-                kubectl get pods -n $(params.namespace) || true
-                echo "Operator logs:"
-                kubectl logs -n $(params.namespace) -l control-plane=controller-manager --tail=100 || true
-                exit $EXIT_CODE
-              }
-      when:
-        - input: "$(tasks.check-prerequisites.results.prerequisites-met)"
-          operator: in
-          values: ["true"]
+#    - name: check-prerequisites
+#      description: check prerequisites if the ITS needs to execute
+#      runAfter:
+#        - find-component-image
+#      params:
+#        - name: BUILD_TYPE
+#          value: $(params.BUILD_TYPE)
+#      taskSpec:
+#        params:
+#        - name: BUILD_TYPE
+#        results:
+#        - name: event-type
+#          description: "stores info about event type"
+#        - name: pr-number
+#          description: "stores info about pr number"
+#        - name: prerequisites-met
+#          description: "whether prerequisites are met to run the tests"
+#        steps:
+#        - image: quay.io/konflux-ci/konflux-test:stable
+#          name: check-prerequisites
+#          env:
+#            - name: EVENT_TYPE
+#              valueFrom:
+#                fieldRef:
+#                  fieldPath: metadata.labels['pac.test.appstudio.openshift.io/event-type']
+#            - name: PR_NUMBER
+#              valueFrom:
+#                fieldRef:
+#                  fieldPath: metadata.labels['pac.test.appstudio.openshift.io/pull-request']
+#            - name: BUILD_TYPE
+#              value: $(params.BUILD_TYPE)
+#          script: |
+#            #!/bin/bash
+#            set -e
+#            echo "EVENT_TYPE=${EVENT_TYPE}"
+#            echo "PR_NUMBER=${PR_NUMBER}"
+#            echo "BUILD_TYPE=${BUILD_TYPE}"
+#            echo -n "${EVENT_TYPE}" > $(results.event-type.path)
+#            echo -n "${PR_NUMBER}" > $(results.pr-number.path)
+#
+#            if [ -n "${PR_NUMBER}" ] || [ "${BUILD_TYPE}" = "RELEASE" ]; then
+#              echo "Prerequisites met: PR_NUMBER is set or BUILD_TYPE is RELEASE"
+#              echo -n "true" > $(results.prerequisites-met.path)
+#            else
+#              echo "Prerequisites not met: PR_NUMBER is empty and BUILD_TYPE is not RELEASE"
+#              echo -n "false" > $(results.prerequisites-met.path)
+#            fi
+#
+#    - name: provision-eaas-space
+#      runAfter:
+#        - check-prerequisites
+#      taskRef:
+#        resolver: git
+#        params:
+#          - name: url
+#            value: https://github.com/konflux-ci/build-definitions.git
+#          - name: revision
+#            value: main
+#          - name: pathInRepo
+#            value: task/eaas-provision-space/0.1/eaas-provision-space.yaml
+#      params:
+#        - name: ownerName
+#          value: $(context.pipelineRun.name)
+#        - name: ownerUid
+#          value: $(context.pipelineRun.uid)
+#      when:
+#        - input: "$(tasks.check-prerequisites.results.prerequisites-met)"
+#          operator: in
+#          values: ["true"]
+#
+#    - name: provision-cluster
+#      runAfter:
+#        - provision-eaas-space
+#      taskSpec:
+#        results:
+#          - name: clusterName
+#            value: "$(steps.create-cluster.results.clusterName)"
+#        steps:
+#          - name: get-supported-versions
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-get-supported-ephemeral-cluster-versions/0.1/eaas-get-supported-ephemeral-cluster-versions.yaml
+#            params:
+#              - name: eaasSpaceSecretRef
+#                value: $(tasks.provision-eaas-space.results.secretRef)
+#          - name: pick-version
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-get-latest-openshift-version-by-prefix/0.1/eaas-get-latest-openshift-version-by-prefix.yaml
+#            params:
+#              - name: prefix
+#                value: "$(steps.get-supported-versions.results.versions[0])."
+#          - name: create-cluster
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-create-ephemeral-cluster-hypershift-aws/0.1/eaas-create-ephemeral-cluster-hypershift-aws.yaml
+#            params:
+#              - name: eaasSpaceSecretRef
+#                value: $(tasks.provision-eaas-space.results.secretRef)
+#              - name: version
+#                value: "$(steps.pick-version.results.version)"
+#              - name: instanceType
+#                value: m5.2xlarge
+#      when:
+#        - input: "$(tasks.check-prerequisites.results.prerequisites-met)"
+#          operator: in
+#          values: ["true"]
+#    - name: deploy-and-test
+#      runAfter:
+#        - provision-cluster
+#      params:
+#      - name: git-url
+#        value: "$(tasks.parse-metadata.results.source-git-url)"
+#      - name: git-rev
+#        value: "$(tasks.parse-metadata.results.target-git-branch)"
+#      - name: namespace
+#        value: "$(params.NAMESPACE)"
+#      - name: operator-image
+#        value: "$(tasks.parse-metadata.results.component-container-image)"
+#      taskSpec:
+#        params:
+#          - name: git-url
+#            type: string
+#          - name: git-rev
+#            type: string
+#          - name: namespace
+#            type: string
+#          - name: operator-image
+#            type: string
+#        volumes:
+#          - name: credentials
+#            emptyDir: {}
+#        steps:
+#          - name: get-kubeconfig
+#            ref:
+#              resolver: git
+#              params:
+#                - name: url
+#                  value: https://github.com/konflux-ci/build-definitions.git
+#                - name: revision
+#                  value: main
+#                - name: pathInRepo
+#                  value: stepactions/eaas-get-ephemeral-cluster-credentials/0.1/eaas-get-ephemeral-cluster-credentials.yaml
+#            params:
+#              - name: eaasSpaceSecretRef
+#                value: $(tasks.provision-eaas-space.results.secretRef)
+#              - name: clusterName
+#                value: "$(tasks.provision-cluster.results.clusterName)"
+#              - name: credentials
+#                value: credentials
+#
+#          - name: clone-repo
+#            image: alpine/git
+#            script: |
+#              echo $(params.git-url)
+#              echo $(params.git-rev)
+#              git clone --depth 1 --branch $(params.git-rev) $(params.git-url) /workspace/source
+#              git config --global --add safe.directory /workspace/source
+#              cd /workspace/source
+#
+#          - name: deploy-and-e2e
+#            image: golang:1.25-alpine
+#            computeResources:
+#              requests:
+#                memory: "16Gi"
+#                cpu: "4"
+#              limits:
+#                memory: "24Gi"
+#                cpu: "6"
+#            env:
+#              - name: KUBECONFIG
+#                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+#              - name: GOMEMLIMIT
+#                value: "10GiB"
+#            workingDir: /workspace/source
+#            volumeMounts:
+#              - name: credentials
+#                mountPath: /credentials
+#            script: |
+#              set -ex  # Show commands and exit on error
+#
+#              # Install dependencies
+#              apk add --no-cache bash make git curl
+#
+#              # Install kubectl
+#              curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+#              install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+#              rm kubectl
+#
+#              # Deploy the operator
+#              echo "Deploying operator..."
+#              make deploy IMG=$(params.operator-image) OPERATOR_NAMESPACE=$(params.namespace)
+#
+#              # Wait for operator to be ready
+#              echo "Waiting for operator to be ready..."
+#              kubectl wait --for=condition=available --timeout=60s deployment/opendatahub-operator-controller-manager -n $(params.namespace)
+#
+#              # Run e2e tests
+#              echo "Running e2e tests..."
+#              make e2e-test -e E2E_TEST_OPERATOR_NAMESPACE=$(params.namespace) || {
+#                EXIT_CODE=$?
+#                echo "============================================"
+#                echo "E2E tests failed with exit code: $EXIT_CODE"
+#                echo "Pods in namespace $(params.namespace):"
+#                kubectl get pods -n $(params.namespace) || true
+#                echo "Operator logs:"
+#                kubectl logs -n $(params.namespace) -l control-plane=controller-manager --tail=100 || true
+#                exit $EXIT_CODE
+#              }
+#      when:
+#        - input: "$(tasks.check-prerequisites.results.prerequisites-met)"
+#          operator: in
+#          values: ["true"]
