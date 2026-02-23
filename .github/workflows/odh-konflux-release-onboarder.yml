@@ -67,7 +67,7 @@ on:
         type: string
       version:
         description: 'New version (Required only for Release builds)'
-        required: true
+        required: false
         type: string
 
 jobs:
