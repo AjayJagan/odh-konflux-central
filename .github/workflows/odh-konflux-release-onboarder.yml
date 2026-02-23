@@ -138,6 +138,8 @@ jobs:
       - name: Prepare Tekton files
         run: |
           BUILD_TYPE="${{ inputs.build_type }}"
+          VERSION="${{ inputs.version }}"
+          
           repo_folder="okc-repo/pipelineruns/${OKC_FOLDER}"
       
           echo "Using pipelinerun path: $repo_folder"
