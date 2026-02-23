@@ -66,7 +66,7 @@ on:
         required: true
         type: string
       version:
-        description: 'New version'
+        description: 'New version (Required only for Release builds)'
         required: true
         type: string
 
@@ -99,19 +99,27 @@ jobs:
 
       - name: Validate and set tag
         run: |
+          BUILD_TYPE="${{ inputs.build_type }}"
+          VERSION="${{ inputs.version }}"
           BASE_COMPONENT="odh-${{ inputs.component }}"
-
+          
           if [ "$BUILD_TYPE" = "CI" ]; then
-            echo "EFFECTIVE_TAG=odh-stable" >> $GITHUB_ENV
-            echo "COMPONENT_NAME=${BASE_COMPONENT}-ci" >> $GITHUB_ENV
+            EFFECTIVE_TAG="odh-stable"
+            COMPONENT_NAME="${BASE_COMPONENT}-ci"
+          
           else
             if [ -z "$VERSION" ]; then
-              echo "ERROR: Version must be provided for Release builds"
-              exit 1
+              echo "No version provided for Release → defaulting to odh-stable"
+              EFFECTIVE_TAG="odh-stable"
+            else
+              EFFECTIVE_TAG="$VERSION"
             fi
-            echo "EFFECTIVE_TAG=$VERSION" >> $GITHUB_ENV
-            echo "COMPONENT_NAME=${BASE_COMPONENT}" >> $GITHUB_ENV
+          
+            COMPONENT_NAME="${BASE_COMPONENT}"
           fi
+          
+          echo "EFFECTIVE_TAG=$EFFECTIVE_TAG" >> $GITHUB_ENV
+          echo "COMPONENT_NAME=$COMPONENT_NAME" >> $GITHUB_ENV
 
 
       - name: Prepare Tekton files
