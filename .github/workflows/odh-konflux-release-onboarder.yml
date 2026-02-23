@@ -99,19 +99,18 @@ jobs:
 
       - name: Validate and set tag
         run: |
-          BUILD_TYPE="${{ inputs.build_type }}"
-          VERSION="${{ inputs.version }}"
+          BASE_COMPONENT="odh-${{ inputs.component }}"
 
           if [ "$BUILD_TYPE" = "CI" ]; then
             echo "EFFECTIVE_TAG=odh-stable" >> $GITHUB_ENV
-            echo "APPLICATION_NAME=opendatahub-builds" >> $GITHUB_ENV
+            echo "COMPONENT_NAME=${BASE_COMPONENT}-ci" >> $GITHUB_ENV
           else
             if [ -z "$VERSION" ]; then
               echo "ERROR: Version must be provided for Release builds"
               exit 1
             fi
             echo "EFFECTIVE_TAG=$VERSION" >> $GITHUB_ENV
-            echo "APPLICATION_NAME=opendatahub-release" >> $GITHUB_ENV
+            echo "COMPONENT_NAME=${BASE_COMPONENT}" >> $GITHUB_ENV
           fi
 
 
@@ -150,7 +149,7 @@ jobs:
             sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$file"
             sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
 
-            sed -i -E 's|(appstudio\.openshift\.io/application:).*|\1 '"${APPLICATION_NAME}"'|g' "$file"
+            sed -i -E 's|\$\$COMPONENT_NAME\$\$|'"${COMPONENT_NAME}"'|g' "$file"
           done
 
 
