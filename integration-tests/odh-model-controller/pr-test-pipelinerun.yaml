@@ -80,10 +80,6 @@ spec:
                 valueFrom:
                   fieldRef:
                     fieldPath: metadata.labels['pac.test.appstudio.openshift.io/event-type']
-              - name: SNAPSHOT
-                value: $(tasks.generate-snapshot.results.SNAPSHOT)
-              - name: COMPONENTS
-                value: $(params.COMPONENTS)
               - name: PR_AUTHOR
                 valueFrom:
                   fieldRef:

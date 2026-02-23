@@ -62,7 +62,7 @@ spec:
       - name: pathInRepo
         value: integration-tests/odh-model-controller/pr-test-pipelinerun.yaml
     resolver: git
-    resourceKind: pipeline
+    resourceKind: pipelinerun
 
 ---
 apiVersion: appstudio.redhat.com/v1beta2
