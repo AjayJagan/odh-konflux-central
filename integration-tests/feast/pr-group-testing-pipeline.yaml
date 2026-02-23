@@ -11,6 +11,12 @@ spec:
     - description: List of components in the group
       name: group-components
       type: string
+    - name: oci-artifacts-repo
+      default: 'quay.io/opendatahub/odh-ci-artifacts'
+      description: The OCI container used to store all test artifacts.
+    - name: artifact-browser-url
+      default: 'https://app-artifact-browser.apps.rosa.konflux-qe.zmr9.p3.openshiftapps.com'
+      description: The OCI container used to store all test artifacts.
   tasks:
     - name: generate-snapshot
       description: Placeholder task that prints the Snapshot and outputs standard TEST_OUTPUT
@@ -39,6 +45,12 @@ spec:
         params:
           - name: COMPONENTS
             description: List of components in the group
+        results:
+        - name: pull-request-author
+        - name: pull-request-number
+        - name: git-repo
+        - name: git-org
+        - name: git-revision
         steps:
           - name: audit-snapshot
             image: quay.io/konflux-ci/konflux-test:stable
@@ -48,6 +60,26 @@ spec:
                 value: $(tasks.generate-snapshot.results.SNAPSHOT)
               - name: COMPONENTS
                 value: $(params.COMPONENTS)
+              - name: PR_AUTHOR
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.annotations['pipelinesascode.tekton.dev/sender']
+              - name: PR_NUMBER
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['pipelinesascode.tekton.dev/pull-request']
+              - name: GIT_REPO
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.annotations['pipelinesascode.tekton.dev/url-repository']
+              - name: GIT_ORG
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.annotations['pipelinesascode.tekton.dev/url-org']
+              - name: GIT_REVISION
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.annotations['pipelinesascode.tekton.dev/sha']
             script: |
               #!/bin/bash
               set -e
@@ -63,6 +95,13 @@ spec:
                   echo "GIT_COMMIT=${GIT_COMMIT}"
                   echo "GIT_URL=${GIT_URL}"
               done < <(echo "$COMPONENTS" | jq -r 'to_entries[] | @base64')
+
+              echo -n "${PR_AUTHOR}" > "$(results.pull-request-author.path)"
+              echo -n "${PR_NUMBER}" > "$(results.pull-request-number.path)"
+              echo -n "${GIT_REPO}" > "$(results.git-repo.path)"
+              echo -n "${GIT_ORG}" > "$(results.git-org.path)"
+              echo -n "${GIT_REVISION}" > "$(results.git-revision.path)"
+
     - name: provision-eaas-space
       runAfter:
         - audit-snapshot
@@ -132,12 +171,18 @@ spec:
               - name: instanceType
                 value: m5.2xlarge
     - name: deploy-and-test
+      workspaces:
+      - name: basic-auth
+        workspace: git-auth
       runAfter:
         - provision-cluster
       taskSpec:
         volumes:
           - name: credentials
             emptyDir: {}
+        workspaces:
+          - name: basic-auth
+            optional: true
         steps:
           - name: get-kubeconfig
             ref:
@@ -158,6 +203,7 @@ spec:
                 value: credentials
           - name: deploy-and-e2e
             image: quay.io/rhoai/rhoai-task-toolset:go-its
+            onError: continue
             env:
               - name: KUBECONFIG
                 value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
@@ -208,6 +254,164 @@ spec:
               oc delete deployment feast-operator-controller-manager -n feast-operator-system
 
               make test-upgrade
+
+          - name: must-gather
+            onError: continue
+            image: quay.io/rhoai/rhoai-task-toolset:go-its
+            env:
+              - name: KUBECONFIG
+                value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+              - name: ARTIFACT_DIR
+                value: /workspace/artifacts-dir
+            workingDir: /workspace/source
+            volumeMounts:
+              - name: credentials
+                mountPath: /credentials
+            script: |
+                  # feast-must-gather
+                  mkdir -p "${ARTIFACT_DIR}/gather-feast"
+                  oc adm must-gather --image=quay.io/modh/must-gather:rhoai-2.24 --dest-dir "${ARTIFACT_DIR}/gather-feast" -- "export COMPONENT=feastoperator; /usr/bin/gather"
+
+                  # openshift-must-gather
+                  mkdir -p "${ARTIFACT_DIR}/gather-openshift"
+                  oc adm must-gather --dest-dir "${ARTIFACT_DIR}/gather-openshift"
+          - name: git-push-artifacts
+            ref:
+              resolver: git
+              params:
+                - name: url
+                  value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
+                - name: revision
+                  value: odh
+                - name: pathInRepo
+                  value: stepactions/secure-git-push/0.1/secure-git-push.yaml
+            params:
+              - name: source-path
+                value: /workspace/artifacts-dir
+              - name: repo-path
+                value: 'opendatahub-io/odh-build-metadata'
+              - name: repo-branch
+                value: 'ci-artifacts'
+              - name: sparse-file-path
+                value: 'test-artifacts/docs'
+              - name: dest-path
+                value: 'test-artifacts/$(context.pipelineRun.name)'
+              - name: pipelinerun-name
+                value: $(context.pipelineRun.name)
+
+
+
+  finally:
+  - name: push-ci-artifacts-and-update-pr
+    workspaces:
+    - name: basic-auth
+      workspace: git-auth
+    params:
+      - name: oci-artifacts-repo
+        value: $(params.oci-artifacts-repo)
+      - name: pipeline-status
+        value: $(tasks.status)
+    taskSpec:
+      volumes:
+        - name: odh-registry-secret-volume
+          secret:
+            secretName: odh-registry-secret
+            items:
+            - key: .dockerconfigjson
+              path: oci-storage-dockerconfigjson
+      workspaces:
+        - name: basic-auth
+          optional: true
+      params:
+        - name: oci-artifacts-repo
+          description: oci-artifacts-repo
+        - name: pipeline-status
+          type: string
+      steps:
+        - name: pull-ci-artifacts
+          ref:
+            resolver: git
+            params:
+              - name: url
+                value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
+              - name: revision
+                value: odh
+              - name: pathInRepo
+                value: stepactions/git-clone/0.1/git-clone.yaml
+          params:
+            - name: repo-path
+              value: 'opendatahub-io/odh-build-metadata'
+            - name: repo-branch
+              value: 'ci-artifacts'
+            - name: sparse-file-path
+              value: 'test-artifacts/$(context.pipelineRun.name)'
+            - name: dest-path
+              value: /workspace/odh-ci-artifacts
+            - name: artifacts-dir-path
+              value: 'test-artifacts/$(context.pipelineRun.name)'
+        - name: secure-push-oci
+          ref:
+            resolver: git
+            params:
+              - name: url
+                value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
+              - name: revision
+                value: odh
+              - name: pathInRepo
+                value: stepactions/secure-push-oci/0.1/secure-push-oci.yaml
+          params:
+            - name: workdir-path
+              value: '/workspace/odh-ci-artifacts/test-artifacts/$(context.pipelineRun.name)'
+            - name: oci-ref
+              value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
+            - name: credentials-volume-name
+              value: odh-registry-secret-volume
+        - name: share-status-on-pull-request
+          ref:
+            resolver: git
+            params:
+              - name: url
+                value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
+              - name: revision
+                value: odh
+              - name: pathInRepo
+                value: stepactions/pull-request-comment/0.1/pull-request-comment.yaml
+          params:
+            - name: test-name
+              value: $(context.pipelineRun.name)
+            - name: oci-container
+              value: $(params.oci-artifacts-repo):$(context.pipelineRun.name)
+            - name: pipeline-aggregate-status
+              value: $(params.pipeline-status)
+            - name: pull-request-author
+              value: $(tasks.audit-snapshot.results.pull-request-author)
+            - name: pull-request-number
+              value: $(tasks.audit-snapshot.results.pull-request-number)
+            - name: git-repo
+              value: $(tasks.audit-snapshot.results.git-repo)
+            - name: git-org
+              value: $(tasks.audit-snapshot.results.git-org)
+            - name: git-revision
+              value: $(tasks.audit-snapshot.results.git-revision)
+            - name: artifact-browser-url
+              value: $(params.artifact-browser-url)
+        - name: cleanup-artifacts-from-git
+          ref:
+            resolver: git
+            params:
+              - name: url
+                value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
+              - name: revision
+                value: odh
+              - name: pathInRepo
+                value: stepactions/cleanup-git-repo/0.1/cleanup-git-repo.yaml
+          params:
+            - name: work-dir
+              value: '/workspace/odh-ci-artifacts'
+            - name: artifacts-dir-path
+              value: 'test-artifacts'
+            - name: dir-to-be-deleted
+              value: '$(context.pipelineRun.name)'
   workspaces:
   - name: git-auth
     optional: true
