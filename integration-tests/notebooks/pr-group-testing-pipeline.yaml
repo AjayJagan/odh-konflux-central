@@ -295,7 +295,7 @@ spec:
 
               #odh-workbench-jupyter-trustyai-cpu-py312-ubi9
 
-              COMPONENT_NAME=odh-workbench-jupyter-tensorflow-cuda-py312-ubi9-ci
+              COMPONENT_NAME=odh-workbench-jupyter-trustyai-cpu-py312-ubi9-ci
               JUPYTER_TRUSTYAI_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
               GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
               GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
