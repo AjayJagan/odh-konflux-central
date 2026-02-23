@@ -182,9 +182,11 @@ jobs:
       
             # ---- Component Suffix Logic ----
             if [ "$BUILD_TYPE" = "CI" ]; then
-              # Ensure -ci exists
-              sed -i -E 's|(appstudio\.openshift\.io/component: .*)(-ci)?$|\1-ci|' "$file"
-      
+              # Add -ci only if it does NOT already exist
+              sed -i -E '/appstudio\.openshift\.io\/component:/ {
+                /-ci$/! s|$|-ci|
+              }' "$file"
+            
             elif [ "$BUILD_TYPE" = "Release" ]; then
               # Remove -ci if present
               sed -i -E 's|(appstudio\.openshift\.io/component: .*)-ci$|\1|' "$file"
