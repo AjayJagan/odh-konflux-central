@@ -659,15 +659,15 @@ spec:
               - name: pipeline-aggregate-status
                 value: $(params.pipeline-status)
               - name: pull-request-author
-                value: $(tasks.audit-snapshot.results.pull-request-author)
+                value: $(tasks.check-prerequisites.results.pull-request-author)
               - name: pull-request-number
-                value: $(tasks.audit-snapshot.results.pull-request-number)
+                value: $(tasks.check-prerequisites.results.pull-request-number)
               - name: git-repo
-                value: $(tasks.audit-snapshot.results.git-repo)
+                value: $(tasks.check-prerequisites.results.git-repo)
               - name: git-org
-                value: $(tasks.audit-snapshot.results.git-org)
+                value: $(tasks.check-prerequisites.results.git-org)
               - name: git-revision
-                value: $(tasks.audit-snapshot.results.git-revision)
+                value: $(tasks.check-prerequisites.results.git-revision)
               - name: artifact-browser-url
                 value: $(params.artifact-browser-url)
           - name: cleanup-artifacts-from-git
