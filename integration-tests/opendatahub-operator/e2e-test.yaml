@@ -243,10 +243,10 @@ spec:
             computeResources:
               requests:
                 memory: "16Gi"
-                cpu: "2"
+                cpu: "4"
               limits:
                 memory: "24Gi"
-                cpu: "4"
+                cpu: "6"
             env:
               - name: KUBECONFIG
                 value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
