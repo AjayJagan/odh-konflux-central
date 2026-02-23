@@ -192,9 +192,6 @@ spec:
 
 
       - name: e2e-odh-kserve
-        workspaces:
-        - name: basic-auth
-          workspace: git-auth
         runAfter:
           - provision-cluster-kserve
         params:
@@ -215,9 +212,6 @@ spec:
           volumes:
             - name: credentials
               emptyDir: {}
-          workspaces:
-            - name: basic-auth
-              optional: true
           steps:
             - name: get-kubeconfig
               ref:
@@ -433,9 +427,6 @@ spec:
 
 
       - name: e2e-odh-llmisvc
-        workspaces:
-        - name: basic-auth
-          workspace: git-auth
         runAfter:
           - provision-cluster-llmisvc
         params:
@@ -456,9 +447,6 @@ spec:
           volumes:
             - name: credentials
               emptyDir: {}
-          workspaces:
-            - name: basic-auth
-              optional: true
           steps:
             - name: get-kubeconfig
               ref:
@@ -596,9 +584,6 @@ spec:
             values: ["pull_request", "retest-all-comment", "on-comment", "test-comment"]
     finally:
     - name: push-ci-artifacts-and-update-pr
-      workspaces:
-      - name: basic-auth
-        workspace: git-auth
       params:
         - name: oci-artifacts-repo
           value: $(params.oci-artifacts-repo)
@@ -612,9 +597,6 @@ spec:
               items:
               - key: .dockerconfigjson
                 path: oci-storage-dockerconfigjson
-        workspaces:
-          - name: basic-auth
-            optional: true
         params:
           - name: oci-artifacts-repo
             description: oci-artifacts-repo
