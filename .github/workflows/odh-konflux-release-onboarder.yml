@@ -110,19 +110,25 @@ jobs:
           VERSION="${{ inputs.version }}"
           BASE_COMPONENT="odh-${{ inputs.component }}"
           
+          echo "Build type: $BUILD_TYPE"
+          echo "Version: $VERSION"
+          
           if [ "$BUILD_TYPE" = "CI" ]; then
             EFFECTIVE_TAG="odh-stable"
             COMPONENT_NAME="${BASE_COMPONENT}-ci"
           
-          else
+          elif [ "$BUILD_TYPE" = "Release" ]; then
             if [ -z "$VERSION" ]; then
-              echo "No version provided for Release → defaulting to odh-stable"
-              EFFECTIVE_TAG="odh-stable"
-            else
-              EFFECTIVE_TAG="$VERSION"
+              echo "ERROR: Version is required for Release build"
+              exit 1
             fi
           
+            EFFECTIVE_TAG="$VERSION"
             COMPONENT_NAME="${BASE_COMPONENT}"
+          
+          else
+            echo "ERROR: Invalid build_type value"
+            exit 1
           fi
           
           echo "EFFECTIVE_TAG=$EFFECTIVE_TAG" >> $GITHUB_ENV
