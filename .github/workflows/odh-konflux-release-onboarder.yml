@@ -171,27 +171,40 @@ jobs:
       
           # ---- MODIFY FILES ----
           find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
-      
+
             echo "Processing $file"
-      
-            # Replace image tag
-            sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$file"
-      
-            # Replace target branch
-            sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
-      
-            # ---- Component Suffix Logic ----
+          
             if [ "$BUILD_TYPE" = "CI" ]; then
-              # Add -ci only if it does NOT already exist
-              sed -i -E '/appstudio\.openshift\.io\/component:/ {
-                /-ci$/! s|$|-ci|
-              }' "$file"
-            
+          
+              if [[ "$file" == *pull* ]]; then
+                EFFECTIVE_TAG="odh-pr"
+              elif [[ "$file" == *push* ]]; then
+                EFFECTIVE_TAG="odh-stable"
+              else
+                echo "Unknown pipeline type for $file"
+                exit 1
+              fi
+          
             elif [ "$BUILD_TYPE" = "Release" ]; then
-              # Remove -ci if present
-              sed -i -E 's|(appstudio\.openshift\.io/component: .*)-ci$|\1|' "$file"
+          
+              if [ -z "$VERSION" ]; then
+                echo "ERROR: Version is required for Release build"
+                exit 1
+              fi
+          
+              EFFECTIVE_TAG="$VERSION"
+          
+            else
+              echo "ERROR: Invalid build_type"
+              exit 1
             fi
-      
+          
+            echo "Using tag: $EFFECTIVE_TAG"
+          
+            # Replace placeholders
+            sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$file"
+            sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
+          
           done
 
 
