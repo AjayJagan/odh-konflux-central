@@ -217,12 +217,3 @@ spec:
                 # && rm kubectl && bash
                 bash
                 ./test/e2e/scripts/prow_run_smoke_test.sh
-
-
-
-
-
-  workspaces:
-  - name: git-auth
-    secret:
-      secretName: '{{ git_auth_secret }}'

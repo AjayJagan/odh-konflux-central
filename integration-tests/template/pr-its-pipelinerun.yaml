@@ -190,9 +190,6 @@ spec:
             operator: in
             values: ["pull_request", "retest-all-comment", "on-comment"]
       - name: deploy-and-test
-        workspaces:
-        - name: basic-auth
-          workspace: git-auth
         runAfter:
           - provision-cluster
         params:
@@ -206,9 +203,6 @@ spec:
           volumes:
             - name: credentials
               emptyDir: {}
-          workspaces:
-            - name: basic-auth
-              optional: true
           steps:
             - name: get-kubeconfig
               ref:
@@ -285,9 +279,6 @@ spec:
                   value: $(context.pipelineRun.name)
     finally:
     - name: push-ci-artifacts-and-update-pr
-      workspaces:
-      - name: basic-auth
-        workspace: git-auth
       params:
         - name: oci-artifacts-repo
           value: $(params.oci-artifacts-repo)
@@ -301,9 +292,6 @@ spec:
               items:
               - key: .dockerconfigjson
                 path: oci-storage-dockerconfigjson
-        workspaces:
-          - name: basic-auth
-            optional: true
         params:
           - name: oci-artifacts-repo
             description: oci-artifacts-repo
@@ -394,10 +382,3 @@ spec:
                 value: 'test-artifacts'
               - name: dir-to-be-deleted
                 value: '$(context.pipelineRun.name)'
-    workspaces:
-    - name: git-auth
-      optional: true
-  workspaces:
-  - name: git-auth
-    secret:
-      secretName: '{{ git_auth_secret }}'

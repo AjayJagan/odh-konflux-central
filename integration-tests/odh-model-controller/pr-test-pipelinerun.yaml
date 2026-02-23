@@ -687,10 +687,3 @@ spec:
                 value: 'test-artifacts'
               - name: dir-to-be-deleted
                 value: '$(context.pipelineRun.name)'
-    workspaces:
-    - name: git-auth
-      optional: true
-  workspaces:
-  - name: git-auth
-    secret:
-      secretName: '{{ git_auth_secret }}'
