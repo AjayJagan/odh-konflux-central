@@ -66,9 +66,16 @@ on:
         required: true
         type: string
       version:
-        description: 'New version'
-        required: true
+        description: 'New version (Required only for Release builds)'
+        required: false
         type: string
+      build_type:
+        description: 'Select build type'
+        required: true
+        type: choice
+        options:
+          - CI
+          - Release
 
 jobs:
   update-tekton-pipelines-and-create-pr:
@@ -101,18 +108,31 @@ jobs:
         run: |
           BUILD_TYPE="${{ inputs.build_type }}"
           VERSION="${{ inputs.version }}"
-
+          BASE_COMPONENT="odh-${{ inputs.component }}"
+          
+          echo "Build type: $BUILD_TYPE"
+          echo "Version: $VERSION"
+          
           if [ "$BUILD_TYPE" = "CI" ]; then
-            echo "EFFECTIVE_TAG=odh-stable" >> $GITHUB_ENV
-            echo "APPLICATION_NAME=opendatahub-builds" >> $GITHUB_ENV
-          else
+            EFFECTIVE_TAG="odh-stable"
+            COMPONENT_NAME="${BASE_COMPONENT}-ci"
+          
+          elif [ "$BUILD_TYPE" = "Release" ]; then
             if [ -z "$VERSION" ]; then
-              echo "ERROR: Version must be provided for Release builds"
+              echo "ERROR: Version is required for Release build"
               exit 1
             fi
-            echo "EFFECTIVE_TAG=$VERSION" >> $GITHUB_ENV
-            echo "APPLICATION_NAME=opendatahub-release" >> $GITHUB_ENV
+          
+            EFFECTIVE_TAG="$VERSION"
+            COMPONENT_NAME="${BASE_COMPONENT}"
+          
+          else
+            echo "ERROR: Invalid build_type value"
+            exit 1
           fi
+          
+          echo "EFFECTIVE_TAG=$EFFECTIVE_TAG" >> $GITHUB_ENV
+          echo "COMPONENT_NAME=$COMPONENT_NAME" >> $GITHUB_ENV
 
 
       - name: Prepare Tekton files
@@ -150,7 +170,7 @@ jobs:
             sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$file"
             sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
 
-            sed -i -E 's|(appstudio\.openshift\.io/application:).*|\1 '"${APPLICATION_NAME}"'|g' "$file"
+            sed -i -E 's|\$\$COMPONENT_NAME\$\$|'"${COMPONENT_NAME}"'|g' "$file"
           done
 
 
