@@ -158,87 +158,46 @@ jobs:
           ########################################
       
           if [ "$BUILD_TYPE" = "Release" ]; then
-            echo "Release build → copying only push pipeluns"
-      
-            find "$repo_folder" -type f -name "*push.yaml" | while read file; do
-              base=$(basename "$file" .yaml)
-      
-              # rename -push → -release-push
-              new_name=$(echo "$base" | sed 's/-push$/-release-push/')
-      
-              cp "$file" "extracted/.tekton/$new_name"
-            done
-      
-          else
-            echo "CI build → copying all pipelinerun yaml files"
-            find "$repo_folder" -type f -name "*.yaml" -exec cp {} extracted/.tekton/ \;
-          fi
-      
-          if [ -z "$(ls -A extracted/.tekton)" ]; then
-            echo "ERROR: No pipelinerun files found"
-            exit 1
-          fi
-      
-          ########################################
-          # PROCESS FILES
-          ########################################
-      
-          find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
-      
-            echo "Processing $file"
-      
-            ########################################
-            # TAG LOGIC
-            ########################################
-      
-            if [ "$BUILD_TYPE" = "CI" ]; then
-      
-              if [[ "$file" == *pull* ]]; then
-                EFFECTIVE_TAG="odh-pr"
-              elif [[ "$file" == *push* ]]; then
-                EFFECTIVE_TAG="odh-stable"
-              else
-                echo "ERROR: Unknown pipeline type in CI"
-                exit 1
-              fi
-      
-            elif [ "$BUILD_TYPE" = "Release" ]; then
-      
-              if [ -z "$VERSION" ]; then
-                echo "ERROR: Version is required for Release build"
-                exit 1
-              fi
-      
-              EFFECTIVE_TAG="$VERSION"
-      
+          echo "Release build → ensuring release file exists"
+        
+          mkdir -p .tekton
+        
+          find "$repo_folder" -type f -name "*push.yaml" | while read src_file; do
+        
+            base=$(basename "$src_file" .yaml)
+        
+            # Generate release filename
+            release_name=$(echo "$base" | sed 's/-push$/-release-push/')
+            target_file=".tekton/${release_name}.yaml"
+        
+            if [ -f "$target_file" ]; then
+              echo "Release file exists → modifying $target_file"
             else
-              echo "ERROR: Invalid build_type"
+              echo "Release file does not exist → creating $target_file"
+              cp "$src_file" "$target_file"
+            fi
+        
+            ########################################
+            # Now modify the release file
+            ########################################
+        
+            # Update metadata.name
+            sed -i -E 's|(name: .*)-on-push|\1-on-release-push|' "$target_file"
+        
+            # Remove -ci from component if present
+            sed -i -E 's|(appstudio\.openshift\.io/component: .*)-ci$|\1|' "$target_file"
+        
+            # Replace tag
+            if [ -z "$VERSION" ]; then
+              echo "ERROR: Version required for release"
               exit 1
             fi
-      
-            echo "Using tag: $EFFECTIVE_TAG"
-      
-            ########################################
-            # REPLACE PLACEHOLDERS
-            ########################################
-      
-            sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$file"
-            sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
-      
-            ########################################
-            # RELEASE SPECIFIC FIXES
-            ########################################
-      
-            if [ "$BUILD_TYPE" = "Release" ]; then
-      
-              # Fix metadata.name: -on-push → -on-release-push
-              sed -i -E 's|(name: .*)-on-push|\1-on-release-push|' "$file"
-      
-              # Remove -ci suffix from component
-              sed -i -E 's|(appstudio\.openshift\.io/component: .*)-ci$|\1|' "$file"
-            fi
-      
+        
+            sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${VERSION}"'|g' "$target_file"
+            sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$target_file"
+        
           done
+        fi
 
 
       - name: Prepare GitHub workflow files (if applicable)
