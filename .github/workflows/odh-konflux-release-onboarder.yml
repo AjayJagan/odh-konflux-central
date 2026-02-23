@@ -69,6 +69,13 @@ on:
         description: 'New version (Required only for Release builds)'
         required: false
         type: string
+      build_type:
+        description: 'Select build type'
+        required: true
+        type: choice
+        options:
+          - CI
+          - Release
 
 jobs:
   update-tekton-pipelines-and-create-pr:
