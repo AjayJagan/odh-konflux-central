@@ -64,15 +64,15 @@ spec:
         description: check prerequisites if the ITS needs to execute
         runAfter:
           - find-component-image
+        taskSpec:
+          results:
+          - name: event-type
+            description: "stores info about event type"
           - name: pull-request-author
           - name: pull-request-number
           - name: git-repo
           - name: git-org
           - name: git-revision
-        taskSpec:
-          results:
-          - name: event-type
-            description: "stores info about event type"
           steps:
           - image: quay.io/konflux-ci/konflux-test:stable
             env:
