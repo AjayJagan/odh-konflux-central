@@ -84,9 +84,9 @@ spec:
       - name: revision
         value: main
       - name: pathInRepo
-        value: integration-tests/models-as-a-service/pr-test-pipeline.yaml
+        value: integration-tests/models-as-a-service/pr-test-pipelinerun.yaml
     resolver: git
-    resourceKind: pipeline
+    resourceKind: pipelinerun
 #---
 #apiVersion: appstudio.redhat.com/v1beta2
 #kind: IntegrationTestScenario
