@@ -269,52 +269,73 @@ jobs:
 
       - name: Clone and push Tekton changes
         run: |
+          set -e
+      
+          WORKSPACE_DIR="$GITHUB_WORKSPACE"
+          SOURCE_TEKTON="$WORKSPACE_DIR/.tekton"
+      
           git clone https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${REPOSITORY} repo-workspace
           cd repo-workspace
+      
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+      
           git fetch origin ${{ inputs.pr_target_branch }}
           git checkout -B ${{ inputs.pr_target_branch }} origin/${{ inputs.pr_target_branch }}
-
-          #branch_name="appstudio-${{ inputs.component }}-konflux-replicator"
-          #branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}"
-          branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${EFFECTIVE_TAG}-$(date +%s)"
+      
+          branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}-$(date +%s)"
           echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
-
+      
           git checkout -B "$branch_name" ${{ inputs.pr_target_branch }}
-
-          # Copy .tekton files
+      
+          ########################################
+          # Copy .tekton files (NEW LOGIC)
+          ########################################
+      
           mkdir -p .tekton
-
-          for file in ../extracted/.tekton/*.yaml; do
-            target=".tekton/$(basename "$file")"
-            cp "$file" "$target"
-            git add -f "$target"
-          done
-
-
-          # Conditionally copy workflows if available
-          workflow_src="../extracted/.github/workflows"
-          workflow_dest=".github/workflows"
-
-          if [ -d "$workflow_src" ]; then
-            echo "Copying workflow files from $workflow_src to $workflow_dest"
-            mkdir -p "$workflow_dest"
-            rsync -av "$workflow_src/" "$workflow_dest/"
-            git add -f "$workflow_dest"
+      
+          if compgen -G "$SOURCE_TEKTON/*.yaml" > /dev/null; then
+            echo "Copying Tekton files from $SOURCE_TEKTON"
+      
+            for file in "$SOURCE_TEKTON"/*.yaml; do
+              target=".tekton/$(basename "$file")"
+              cp "$file" "$target"
+              git add -f "$target"
+            done
           else
-            echo "No workflow files found for component '${{ inputs.component }}'. Skipping workflow update."
+            echo "ERROR: No Tekton YAML files found in $SOURCE_TEKTON"
+            exit 1
           fi
-
-          # Commit if there are changes
+      
+          ########################################
+          # Copy workflows if they exist
+          ########################################
+      
+          WORKFLOW_SRC="$WORKSPACE_DIR/.github/workflows"
+          WORKFLOW_DEST=".github/workflows"
+      
+          if [ -d "$WORKFLOW_SRC" ]; then
+            echo "Copying workflow files"
+            mkdir -p "$WORKFLOW_DEST"
+            rsync -av "$WORKFLOW_SRC/" "$WORKFLOW_DEST/"
+            git add -f "$WORKFLOW_DEST"
+          else
+            echo "No workflow updates found."
+          fi
+      
+          ########################################
+          # Commit
+          ########################################
+      
           if git diff --cached --quiet; then
             echo "No changes to commit."
             echo "commit=false" >> $GITHUB_ENV
             exit 0
           fi
-
-          git commit -m "Update Tekton output-image tags to ${EFFECTIVE_TAG}"
+      
+          git commit -m "Update Tekton files for ${{ inputs.build_type }} build"
           git push --set-upstream origin "$branch_name"
+      
           echo "commit=true" >> $GITHUB_ENV
 
 
