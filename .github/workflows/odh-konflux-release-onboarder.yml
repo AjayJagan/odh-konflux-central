@@ -137,67 +137,115 @@ jobs:
 
       - name: Prepare Tekton files
         run: |
+          set -e
+      
           BUILD_TYPE="${{ inputs.build_type }}"
           VERSION="${{ inputs.version }}"
           OKC_FOLDER="${{ inputs.component }}"
-          
+          TARGET_BRANCH="${{ inputs.build_branch }}"
+      
           repo_folder="okc-repo/pipelineruns/${OKC_FOLDER}"
-          echo "Using pipelinerun path: $repo_folder"
+          echo "Repo folder: $repo_folder"
           echo "Build type: $BUILD_TYPE"
           echo "Version: $VERSION"
       
           if [ ! -d "$repo_folder" ]; then
-            echo "ERROR: $repo_folder does not exist!"
+            echo "ERROR: $repo_folder does not exist"
             exit 1
           fi
       
-          mkdir -p extracted/.tekton
-      
-          ########################################
-          # COPY FILES
-          ########################################
-      
-          if [ "$BUILD_TYPE" = "Release" ]; then
-          echo "Release build → ensuring release file exists"
-        
           mkdir -p .tekton
-        
-          find "$repo_folder" -type f -name "*push.yaml" | while read src_file; do
-        
-            base=$(basename "$src_file" .yaml)
-        
-            # Generate release filename
-            release_name=$(echo "$base" | sed 's/-push$/-release-push/')
-            target_file=".tekton/${release_name}.yaml"
-        
-            if [ -f "$target_file" ]; then
-              echo "Release file exists → modifying $target_file"
-            else
-              echo "Release file does not exist → creating $target_file"
+      
+          ##################################################
+          # CI BUILD
+          ##################################################
+          if [ "$BUILD_TYPE" = "CI" ]; then
+      
+            echo "CI build → syncing all pipelineruns"
+      
+            find "$repo_folder" -type f -name "*.yaml" | while read src_file; do
+      
+              filename=$(basename "$src_file")
+              target_file=".tekton/$filename"
+      
               cp "$src_file" "$target_file"
-            fi
-        
-            ########################################
-            # Now modify the release file
-            ########################################
-        
-            # Update metadata.name
-            sed -i -E 's|(name: .*)-on-push|\1-on-release-push|' "$target_file"
-        
-            # Remove -ci from component if present
-            sed -i -E 's|(appstudio\.openshift\.io/component: .*)-ci$|\1|' "$target_file"
-        
-            # Replace tag
+      
+              echo "Processing $target_file"
+      
+              # Tag logic
+              if [[ "$filename" == *pull* ]]; then
+                EFFECTIVE_TAG="odh-pr"
+              elif [[ "$filename" == *push* ]]; then
+                EFFECTIVE_TAG="odh-stable"
+              else
+                echo "ERROR: Unknown pipeline type in CI"
+                exit 1
+              fi
+      
+              # Replace placeholders
+              sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$target_file"
+              sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${TARGET_BRANCH}"'|g' "$target_file"
+      
+            done
+          fi
+      
+          ##################################################
+          # RELEASE BUILD
+          ##################################################
+          if [ "$BUILD_TYPE" = "Release" ]; then
+      
             if [ -z "$VERSION" ]; then
-              echo "ERROR: Version required for release"
+              echo "ERROR: Version is required for Release build"
               exit 1
             fi
-        
-            sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${VERSION}"'|g' "$target_file"
-            sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$target_file"
-        
-          done
-        fi
+      
+            echo "Release build → ensuring release-push file exists"
+      
+            find "$repo_folder" -type f -name "*push.yaml" | while read src_file; do
+      
+              base=$(basename "$src_file" .yaml)
+      
+              # Convert -push → -release-push
+              release_base=$(echo "$base" | sed 's/-push$/-release-push/')
+              target_file=".tekton/${release_base}.yaml"
+      
+              if [ -f "$target_file" ]; then
+                echo "Release file exists → modifying $target_file"
+              else
+                echo "Release file missing → creating $target_file"
+                cp "$src_file" "$target_file"
+              fi
+      
+              echo "Processing $target_file"
+      
+              ########################################
+              # Update metadata.name
+              ########################################
+              sed -i -E 's|(name: .*)-on-push|\1-on-release-push|' "$target_file"
+      
+              ########################################
+              # Remove -ci from component if present
+              ########################################
+              sed -i -E 's|(appstudio\.openshift\.io/component: .*)-ci$|\1|' "$target_file"
+      
+              ########################################
+              # Replace placeholders
+              ########################################
+              sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${VERSION}"'|g' "$target_file"
+              sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${TARGET_BRANCH}"'|g' "$target_file"
+      
+            done
+          fi
+      
+          ##################################################
+          # INVALID TYPE GUARD
+          ##################################################
+          if [ "$BUILD_TYPE" != "CI" ] && [ "$BUILD_TYPE" != "Release" ]; then
+            echo "ERROR: Invalid build_type"
+            exit 1
+          fi
+      
+          echo "Tekton processing complete."
 
 
       - name: Prepare GitHub workflow files (if applicable)
