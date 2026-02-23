@@ -137,41 +137,115 @@ jobs:
 
       - name: Prepare Tekton files
         run: |
+          set -e
+      
+          BUILD_TYPE="${{ inputs.build_type }}"
+          VERSION="${{ inputs.version }}"
+          OKC_FOLDER="${{ inputs.component }}"
+          TARGET_BRANCH="${{ inputs.build_branch }}"
+      
           repo_folder="okc-repo/pipelineruns/${OKC_FOLDER}"
-          echo "Using pipelinerun path: $repo_folder"
-
+          echo "Repo folder: $repo_folder"
+          echo "Build type: $BUILD_TYPE"
+          echo "Version: $VERSION"
+      
           if [ ! -d "$repo_folder" ]; then
-            echo "ERROR: $repo_folder does not exist!"
+            echo "ERROR: $repo_folder does not exist"
             exit 1
           fi
-
-          mkdir -p extracted/.tekton
-
-          if [ "${{ inputs.build_type }}" = "Release" ]; then
-            echo "Release build → copying only push pipelineruns"
-
-            find "$repo_folder" -type f -name "*push.yaml" | while read file; do
-              base=$(basename "$file" .yaml)
-              new_name="${base}-release.yaml"
-              cp "$file" "extracted/.tekton/$new_name"
+      
+          mkdir -p .tekton
+      
+          ##################################################
+          # CI BUILD
+          ##################################################
+          if [ "$BUILD_TYPE" = "CI" ]; then
+      
+            echo "CI build → syncing all pipelineruns"
+      
+            find "$repo_folder" -type f -name "*.yaml" | while read src_file; do
+      
+              filename=$(basename "$src_file")
+              target_file=".tekton/$filename"
+      
+              cp "$src_file" "$target_file"
+      
+              echo "Processing $target_file"
+      
+              # Tag logic
+              if [[ "$filename" == *pull* ]]; then
+                EFFECTIVE_TAG="odh-pr"
+              elif [[ "$filename" == *push* ]]; then
+                EFFECTIVE_TAG="odh-stable"
+              else
+                echo "ERROR: Unknown pipeline type in CI"
+                exit 1
+              fi
+      
+              # Replace placeholders
+              sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$target_file"
+              sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${TARGET_BRANCH}"'|g' "$target_file"
+      
             done
-
-          else
-            echo "CI build → copying all pipelinerun yaml files"
-            find "$repo_folder" -type f -name "*.yaml" -exec cp {} extracted/.tekton/ \;
           fi
-
-          if [ -z "$(ls -A extracted/.tekton)" ]; then
-            echo "ERROR: No pipelinerun files found"
+      
+          ##################################################
+          # RELEASE BUILD
+          ##################################################
+          if [ "$BUILD_TYPE" = "Release" ]; then
+      
+            if [ -z "$VERSION" ]; then
+              echo "ERROR: Version is required for Release build"
+              exit 1
+            fi
+      
+            echo "Release build → ensuring release-push file exists"
+      
+            find "$repo_folder" -type f -name "*push.yaml" | while read src_file; do
+      
+              base=$(basename "$src_file" .yaml)
+      
+              # Convert -push → -release-push
+              release_base=$(echo "$base" | sed 's/-push$/-release-push/')
+              target_file=".tekton/${release_base}.yaml"
+      
+              if [ -f "$target_file" ]; then
+                echo "Release file exists → modifying $target_file"
+              else
+                echo "Release file missing → creating $target_file"
+                cp "$src_file" "$target_file"
+              fi
+      
+              echo "Processing $target_file"
+      
+              ########################################
+              # Update metadata.name
+              ########################################
+              sed -i -E 's|(name: .*)-on-push|\1-on-release-push|' "$target_file"
+      
+              ########################################
+              # Remove -ci from component if present
+              ########################################
+              sed -i -E 's|(appstudio\.openshift\.io/component: .*)-ci$|\1|' "$target_file"
+      
+              ########################################
+              # Replace placeholders
+              ########################################
+              sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${VERSION}"'|g' "$target_file"
+              sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${TARGET_BRANCH}"'|g' "$target_file"
+      
+            done
+          fi
+      
+          ##################################################
+          # INVALID TYPE GUARD
+          ##################################################
+          if [ "$BUILD_TYPE" != "CI" ] && [ "$BUILD_TYPE" != "Release" ]; then
+            echo "ERROR: Invalid build_type"
             exit 1
           fi
-
-          find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
-            sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$file"
-            sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
-
-            sed -i -E 's|\$\$COMPONENT_NAME\$\$|'"${COMPONENT_NAME}"'|g' "$file"
-          done
+      
+          echo "Tekton processing complete."
 
 
       - name: Prepare GitHub workflow files (if applicable)
@@ -195,52 +269,73 @@ jobs:
 
       - name: Clone and push Tekton changes
         run: |
+          set -e
+      
+          WORKSPACE_DIR="$GITHUB_WORKSPACE"
+          SOURCE_TEKTON="$WORKSPACE_DIR/.tekton"
+      
           git clone https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${REPOSITORY} repo-workspace
           cd repo-workspace
+      
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+      
           git fetch origin ${{ inputs.pr_target_branch }}
           git checkout -B ${{ inputs.pr_target_branch }} origin/${{ inputs.pr_target_branch }}
-
-          #branch_name="appstudio-${{ inputs.component }}-konflux-replicator"
-          #branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}"
-          branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${EFFECTIVE_TAG}-$(date +%s)"
+      
+          branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}-$(date +%s)"
           echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
-
+      
           git checkout -B "$branch_name" ${{ inputs.pr_target_branch }}
-
-          # Copy .tekton files
+      
+          ########################################
+          # Copy .tekton files (NEW LOGIC)
+          ########################################
+      
           mkdir -p .tekton
-
-          for file in ../extracted/.tekton/*.yaml; do
-            target=".tekton/$(basename "$file")"
-            cp "$file" "$target"
-            git add -f "$target"
-          done
-
-
-          # Conditionally copy workflows if available
-          workflow_src="../extracted/.github/workflows"
-          workflow_dest=".github/workflows"
-
-          if [ -d "$workflow_src" ]; then
-            echo "Copying workflow files from $workflow_src to $workflow_dest"
-            mkdir -p "$workflow_dest"
-            rsync -av "$workflow_src/" "$workflow_dest/"
-            git add -f "$workflow_dest"
+      
+          if compgen -G "$SOURCE_TEKTON/*.yaml" > /dev/null; then
+            echo "Copying Tekton files from $SOURCE_TEKTON"
+      
+            for file in "$SOURCE_TEKTON"/*.yaml; do
+              target=".tekton/$(basename "$file")"
+              cp "$file" "$target"
+              git add -f "$target"
+            done
           else
-            echo "No workflow files found for component '${{ inputs.component }}'. Skipping workflow update."
+            echo "ERROR: No Tekton YAML files found in $SOURCE_TEKTON"
+            exit 1
           fi
-
-          # Commit if there are changes
+      
+          ########################################
+          # Copy workflows if they exist
+          ########################################
+      
+          WORKFLOW_SRC="$WORKSPACE_DIR/.github/workflows"
+          WORKFLOW_DEST=".github/workflows"
+      
+          if [ -d "$WORKFLOW_SRC" ]; then
+            echo "Copying workflow files"
+            mkdir -p "$WORKFLOW_DEST"
+            rsync -av "$WORKFLOW_SRC/" "$WORKFLOW_DEST/"
+            git add -f "$WORKFLOW_DEST"
+          else
+            echo "No workflow updates found."
+          fi
+      
+          ########################################
+          # Commit
+          ########################################
+      
           if git diff --cached --quiet; then
             echo "No changes to commit."
             echo "commit=false" >> $GITHUB_ENV
             exit 0
           fi
-
-          git commit -m "Update Tekton output-image tags to ${EFFECTIVE_TAG}"
+      
+          git commit -m "Update Tekton files for ${{ inputs.build_type }} build"
           git push --set-upstream origin "$branch_name"
+      
           echo "commit=true" >> $GITHUB_ENV
 
 
