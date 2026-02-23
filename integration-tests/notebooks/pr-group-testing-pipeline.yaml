@@ -267,6 +267,58 @@ spec:
               make test-cuda-jupyter-minimal-ubi9-python-3.12
               make undeploy9-cuda-jupyter-minimal-ubi9-python-3.12
 
+              #odh-workbench-jupyter-tensorflow-cuda-py312-ubi9
+              
+              COMPONENT_NAME=odh-workbench-jupyter-tensorflow-cuda-py312-ubi9-ci
+              JUPYTER_TENSORFLOW_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
+              GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
+              GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
+              echo " JUPYTER_TENSORFLOW_IMAGE: ${JUPYTER_TENSORFLOW_IMAGE}"
+              echo "GIT_COMMIT=${GIT_COMMIT}"
+              echo "GIT_URL=${GIT_URL}"
+
+              REPO_URL=${GIT_URL}
+              REVISION=${GIT_COMMIT}
+
+              echo "REPO_URL=${REPO_URL}"
+              echo "REVISION=${REVISION}"
+              git clone "${REPO_URL}" src_code
+              cd src_code
+              git checkout ${REVISION}
+
+              oc new-project cuda-jupyter-tensorflow-ubi9-python-3-11
+              IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_TENSORFLOW_IMAGE}"
+              make deploy9-cuda-jupyter-tensorflow-ubi9-python-3.11 \
+                  -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
+              make test-cuda-jupyter-tensorflow-ubi9-python-3.11
+              make undeploy9-cuda-jupyter-tensorflow-ubi9-python-3.11
+
+              #odh-workbench-jupyter-trustyai-cpu-py312-ubi9
+
+              COMPONENT_NAME=odh-workbench-jupyter-tensorflow-cuda-py312-ubi9-ci
+              JUPYTER_TRUSTYAI_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
+              GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
+              GIT_URL=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.url"' <<< "${SNAPSHOT}")
+              echo " JUPYTER_TRUSTYAI_IMAGE: ${JUPYTER_TRUSTYAI_IMAGE}"
+              echo "GIT_COMMIT=${GIT_COMMIT}"
+              echo "GIT_URL=${GIT_URL}"
+
+              REPO_URL=${GIT_URL}
+              REVISION=${GIT_COMMIT}
+
+              echo "REPO_URL=${REPO_URL}"
+              echo "REVISION=${REVISION}"
+              git clone "${REPO_URL}" src_code
+              cd src_code
+              git checkout ${REVISION}
+
+              oc new-project jupyter-trustyai-ubi9-python-3-11
+              IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_TRUSTYAI_IMAGE}"
+              make deploy9-jupyter-trustyai-ubi9-python-3.11 \
+                  -e IMAGE_REGISTRY="${NOTEBOOK_IMAGE[0]}" -e NOTEBOOK_TAG="${NOTEBOOK_IMAGE[1]}"
+              make test-jupyter-trustyai-ubi9-python-3.11
+              make undeploy9-jupyter-trustyai-ubi9-python-3.11
+
 
     #       - name: cuda-jupyter-pt-ubi9-python-3-12-test-e2e
     #         image: quay.io/rhoai/rhoai-task-toolset:notebooks
