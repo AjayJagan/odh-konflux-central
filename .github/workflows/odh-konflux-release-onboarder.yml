@@ -139,11 +139,12 @@ jobs:
         run: |
           BUILD_TYPE="${{ inputs.build_type }}"
           VERSION="${{ inputs.version }}"
+          OKC_FOLDER="${{ inputs.component }}"
           
           repo_folder="okc-repo/pipelineruns/${OKC_FOLDER}"
-      
           echo "Using pipelinerun path: $repo_folder"
           echo "Build type: $BUILD_TYPE"
+          echo "Version: $VERSION"
       
           if [ ! -d "$repo_folder" ]; then
             echo "ERROR: $repo_folder does not exist!"
@@ -152,12 +153,19 @@ jobs:
       
           mkdir -p extracted/.tekton
       
+          ########################################
+          # COPY FILES
+          ########################################
+      
           if [ "$BUILD_TYPE" = "Release" ]; then
-            echo "Release build → copying only push pipelineruns"
+            echo "Release build → copying only push pipeluns"
       
             find "$repo_folder" -type f -name "*push.yaml" | while read file; do
               base=$(basename "$file" .yaml)
-              new_name="${base}-release.yaml"
+      
+              # rename -push → -release-push
+              new_name=$(echo "$base" | sed 's/-push$/-release-push/')
+      
               cp "$file" "extracted/.tekton/$new_name"
             done
       
@@ -171,42 +179,65 @@ jobs:
             exit 1
           fi
       
-          # ---- MODIFY FILES ----
+          ########################################
+          # PROCESS FILES
+          ########################################
+      
           find extracted/.tekton/ -type f -name "*.yaml" | while read file; do
-
+      
             echo "Processing $file"
-          
+      
+            ########################################
+            # TAG LOGIC
+            ########################################
+      
             if [ "$BUILD_TYPE" = "CI" ]; then
-          
+      
               if [[ "$file" == *pull* ]]; then
                 EFFECTIVE_TAG="odh-pr"
               elif [[ "$file" == *push* ]]; then
                 EFFECTIVE_TAG="odh-stable"
               else
-                echo "Unknown pipeline type for $file"
+                echo "ERROR: Unknown pipeline type in CI"
                 exit 1
               fi
-          
+      
             elif [ "$BUILD_TYPE" = "Release" ]; then
-          
+      
               if [ -z "$VERSION" ]; then
                 echo "ERROR: Version is required for Release build"
                 exit 1
               fi
-          
+      
               EFFECTIVE_TAG="$VERSION"
-          
+      
             else
               echo "ERROR: Invalid build_type"
               exit 1
             fi
-          
+      
             echo "Using tag: $EFFECTIVE_TAG"
-          
-            # Replace placeholders
+      
+            ########################################
+            # REPLACE PLACEHOLDERS
+            ########################################
+      
             sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$file"
             sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${{ inputs.build_branch }}"'|g' "$file"
-          
+      
+            ########################################
+            # RELEASE SPECIFIC FIXES
+            ########################################
+      
+            if [ "$BUILD_TYPE" = "Release" ]; then
+      
+              # Fix metadata.name: -on-push → -on-release-push
+              sed -i -E 's|(name: .*)-on-push|\1-on-release-push|' "$file"
+      
+              # Remove -ci suffix from component
+              sed -i -E 's|(appstudio\.openshift\.io/component: .*)-ci$|\1|' "$file"
+            fi
+      
           done
 
 
