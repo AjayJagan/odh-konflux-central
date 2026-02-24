@@ -68,10 +68,6 @@ on:
         description: 'Branch that images are built from (e.g. stable).'
         required: true
         type: string
-      version:
-        description: 'New version (Required only for Release builds)'
-        required: false
-        type: string
       build_type:
         description: 'Select build type'
         required: true
@@ -79,6 +75,10 @@ on:
         options:
           - CI
           - Release
+      version:
+        description: 'New version (Required only for Release builds)'
+        required: false
+        type: string
 
 jobs:
   update-tekton-pipelines-and-create-pr:
