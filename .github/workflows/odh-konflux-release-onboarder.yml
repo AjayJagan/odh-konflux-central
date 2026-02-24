@@ -380,6 +380,10 @@ jobs:
           
           echo "commit=true" >> $GITHUB_ENV
           echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
+          
+          echo "PR_BODY<<EOF" >> $GITHUB_ENV
+          cat pr_body.txt >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
       
       
       - name: Create Pull Request
@@ -392,4 +396,4 @@ jobs:
             --base "${{ inputs.pr_target_branch }}" \
             --head "${BRANCH_NAME}" \
             --title "${PR_TITLE}" \
-            --body-file pr_body.txt
+            --body "${PR_BODY}"
