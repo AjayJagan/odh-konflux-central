@@ -224,20 +224,20 @@ jobs:
                 echo "Creating new release file $target_file"
                 cp "$src_file" "$target_file"
               fi
-
-    ########################################
-    # Update metadata.name inside YAML
-    ########################################
-    sed -i -E 's|(name: .*)-on-push|\1-on-release-push|' "$target_file"
-
-    ########################################
-    # Update tag
-    ########################################
-    sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${VERSION}"'|g' "$target_file"
-    sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${TARGET_BRANCH}"'|g' "$target_file"
-
-  done
-fi
+          
+              ########################################
+              # Update metadata.name inside YAML
+              ########################################
+              sed -i -E 's|(name: .*)-on-push|\1-on-release-push|' "$target_file"
+          
+              ########################################
+              # Update tag
+              ########################################
+              sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${VERSION}"'|g' "$target_file"
+              sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${TARGET_BRANCH}"'|g' "$target_file"
+          
+            done
+          fi
       
               ########################################
               # Update metadata.name
