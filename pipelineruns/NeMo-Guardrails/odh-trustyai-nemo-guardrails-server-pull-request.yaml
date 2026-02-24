@@ -2,20 +2,19 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/llm-d-kv-cache?rev={{revision}}
+    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/NeMo-Guardrails?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && target_branch
-      == "$$TARGET_BRANCH$$" && ( "services/uds_tokenizer/***".pathChanged() || ".tekton/llm-d-kv-cache-pull-request.yaml".pathChanged()
-      )
+      == "$$TARGET_BRANCH$$"
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
-    appstudio.openshift.io/component: llm-d-kv-cache
+    appstudio.openshift.io/component: odh-trustyai-nemo-guardrails-serve
     pipelines.appstudio.openshift.io/type: build
-  name: llm-d-kv-cache-release-on-pull-request
+  name: odh-trustyai-nemo-guardrails-server-on-pull-request
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -24,11 +23,15 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/llm-d-kv-cache:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/odh-trustyai-nemo-guardrails-server:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
-    value: Dockerfile
+    value: Dockerfile.server
   - name: path-context
-    value: services/uds_tokenizer
+    value: .
+  - name: build-platforms
+    value:
+    - linux/x86_64
+    - linux-m2xlarge/arm64
   - name: additional-tags
     value:
     - 'odh-pr-{{revision}}'
@@ -44,7 +47,7 @@ spec:
     - name: pathInRepo
       value: pipeline/multi-arch-container-build.yaml
   taskRunTemplate:
-    serviceAccountName: build-pipeline-llm-d-kv-cache
+    serviceAccountName: build-pipeline-odh-trustyai-nemo-guardrails-serve
   workspaces:
   - name: git-auth
     secret:

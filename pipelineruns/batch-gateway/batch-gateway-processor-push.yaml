@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/workload-variant-autoscaler?rev={{revision}}
+    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/batch-gateway?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-release
-    appstudio.openshift.io/component: workload-variant-autoscaler
+    appstudio.openshift.io/component: batch-gateway-processor
     pipelines.appstudio.openshift.io/type: build
-  name: workload-variant-autoscaler-release-on-push
+  name: batch-gateway-processor-release-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -23,9 +23,9 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/workload-variant-autoscaler:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/batch-gateway-processor:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
-    value: Dockerfile
+    value: docker/Dockerfile.processor
   - name: path-context
     value: .
   pipelineSpec:
@@ -661,7 +661,7 @@ spec:
     - name: netrc
       optional: true
   taskRunTemplate:
-    serviceAccountName: build-pipeline-workload-variant-autoscaler
+    serviceAccountName: build-pipeline-batch-gateway-processor
   workspaces:
   - name: git-auth
     secret:
