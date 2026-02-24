@@ -173,9 +173,6 @@ jobs:
       
               cp "$src_file" "$target_file"
       
-              echo "Processing $target_file"
-      
-              # Tag logic
               if [[ "$filename" == *pull* ]]; then
                 EFFECTIVE_TAG="odh-pr"
               elif [[ "$filename" == *push* ]]; then
@@ -185,7 +182,6 @@ jobs:
                 exit 1
               fi
       
-              # Replace placeholders
               sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$target_file"
               sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${TARGET_BRANCH}"'|g' "$target_file"
       
@@ -196,62 +192,28 @@ jobs:
           # RELEASE BUILD
           ##################################################
           if [ "$BUILD_TYPE" = "Release" ]; then
-
+      
             if [ -z "$VERSION" ]; then
               echo "ERROR: Version is required for Release build"
               exit 1
             fi
-          
+      
             echo "Release build → ensuring release-push file exists"
-          
+      
             find "$repo_folder" -type f -name "*-push.yaml" | while read src_file; do
-          
+      
               base_name=$(basename "$src_file")
-              release_name=$(echo "$base_name" | sed 's/-push.yaml$/-release-push.yaml/')
-          
+              release_name="${base_name%-push.yaml}-release-push.yaml"
               target_file=".tekton/$release_name"
-          
-              ########################################
-              # Case 1: release file already exists in branch
-              ########################################
-              if [ -f "$target_file" ]; then
-                echo "Release file already exists → updating $target_file"
-          
-              ########################################
-              # Case 2: release file does NOT exist
-              ########################################
-              else
+      
+              if [ ! -f "$target_file" ]; then
                 echo "Creating new release file $target_file"
                 cp "$src_file" "$target_file"
+              else
+                echo "Release file exists → updating $target_file"
               fi
-          
-              ########################################
-              # Update metadata.name inside YAML
-              ########################################
+      
               sed -i -E 's|(name: .*)-on-push|\1-on-release-push|' "$target_file"
-          
-              ########################################
-              # Update tag
-              ########################################
-              sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${VERSION}"'|g' "$target_file"
-              sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${TARGET_BRANCH}"'|g' "$target_file"
-          
-            done
-          fi
-      
-              ########################################
-              # Update metadata.name
-              ########################################
-              sed -i -E 's|(name: .*)-on-push|\1-on-release-push|' "$target_file"
-      
-              ########################################
-              # Remove -ci from component if present
-              ########################################
-              sed -i -E 's|(appstudio\.openshift\.io/component: .*)-ci$|\1|' "$target_file"
-      
-              ########################################
-              # Replace placeholders
-              ########################################
               sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${VERSION}"'|g' "$target_file"
               sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${TARGET_BRANCH}"'|g' "$target_file"
       
