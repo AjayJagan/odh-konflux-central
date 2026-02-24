@@ -197,33 +197,33 @@ jobs:
           ##################################################
           if [ "$BUILD_TYPE" = "Release" ]; then
 
-          if [ -z "$VERSION" ]; then
-            echo "ERROR: Version is required for Release build"
-            exit 1
-          fi
-        
-          echo "Release build → ensuring release-push file exists"
-        
-          find "$repo_folder" -type f -name "*-push.yaml" | while read src_file; do
-        
-            base_name=$(basename "$src_file")
-            release_name=$(echo "$base_name" | sed 's/-push.yaml$/-release-push.yaml/')
-        
-            target_file=".tekton/$release_name"
-        
-            ########################################
-            # Case 1: release file already exists in branch
-            ########################################
-            if [ -f "$target_file" ]; then
-              echo "Release file already exists → updating $target_file"
-        
-            ########################################
-            # Case 2: release file does NOT exist
-            ########################################
-            else
-              echo "Creating new release file $target_file"
-              cp "$src_file" "$target_file"
+            if [ -z "$VERSION" ]; then
+              echo "ERROR: Version is required for Release build"
+              exit 1
             fi
+          
+            echo "Release build → ensuring release-push file exists"
+          
+            find "$repo_folder" -type f -name "*-push.yaml" | while read src_file; do
+          
+              base_name=$(basename "$src_file")
+              release_name=$(echo "$base_name" | sed 's/-push.yaml$/-release-push.yaml/')
+          
+              target_file=".tekton/$release_name"
+          
+              ########################################
+              # Case 1: release file already exists in branch
+              ########################################
+              if [ -f "$target_file" ]; then
+                echo "Release file already exists → updating $target_file"
+          
+              ########################################
+              # Case 2: release file does NOT exist
+              ########################################
+              else
+                echo "Creating new release file $target_file"
+                cp "$src_file" "$target_file"
+              fi
 
     ########################################
     # Update metadata.name inside YAML
