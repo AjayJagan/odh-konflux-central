@@ -266,13 +266,22 @@ jobs:
           git fetch origin ${{ inputs.pr_target_branch }}
           git checkout -B ${{ inputs.pr_target_branch }} origin/${{ inputs.pr_target_branch }}
       
-          branch_name="appstudio-${{ inputs.component }}-konflux-replicator-${{ inputs.version }}-$(date +%s)"
+          ########################################
+          # Branch naming
+          ########################################
+      
+          if [ "${{ inputs.build_type }}" = "Release" ]; then
+            branch_name="release-${{ inputs.component }}-${{ inputs.version }}-$(date +%s)"
+          else
+            branch_name="ci-${{ inputs.component }}-$(date +%s)"
+          fi
+      
           echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
       
           git checkout -B "$branch_name" ${{ inputs.pr_target_branch }}
       
           ########################################
-          # Copy .tekton files (NEW LOGIC)
+          # Copy .tekton files
           ########################################
       
           mkdir -p .tekton
@@ -307,7 +316,7 @@ jobs:
           fi
       
           ########################################
-          # Commit
+          # Commit logic
           ########################################
       
           if git diff --cached --quiet; then
@@ -316,12 +325,56 @@ jobs:
             exit 0
           fi
       
-          git commit -m "Update Tekton files for ${{ inputs.build_type }} build"
+          if [ "${{ inputs.build_type }}" = "Release" ]; then
+      
+            COMMIT_MSG="Release: update Tekton release-push pipeline to ${{ inputs.version }}
+      
+      - Ensured release-push file exists
+      - Updated output-image tag to ${{ inputs.version }}
+      - Updated metadata.name to on-release-push
+      - Target branch: ${{ inputs.pr_target_branch }}"
+      
+            PR_TITLE="Release: Tekton pipelines → ${{ inputs.version }}"
+      
+            PR_BODY="This PR prepares Tekton pipelines for a Release build.
+      
+      - Version: ${{ inputs.version }}
+      - Ensured *-release-push.yaml exists
+      - Updated output-image tag to ${{ inputs.version }}
+      - PR target branch: ${{ inputs.pr_target_branch }}
+      - Build branch: ${{ inputs.build_branch }}"
+      
+          else
+      
+            COMMIT_MSG="CI: update Tekton pipelines
+      
+      - Pull pipelines use odh-pr tag
+      - Push pipelines use odh-stable tag
+      - Target branch: ${{ inputs.pr_target_branch }}"
+      
+            PR_TITLE="CI: Tekton pipeline sync"
+      
+            PR_BODY="This PR updates Tekton pipelines for a CI build.
+      
+      - Pull pipelines → odh-pr
+      - Push pipelines → odh-stable
+      - PR target branch: ${{ inputs.pr_target_branch }}
+      - Build branch: ${{ inputs.build_branch }}"
+      
+          fi
+      
+          git commit -m "$COMMIT_MSG"
           git push --set-upstream origin "$branch_name"
       
           echo "commit=true" >> $GITHUB_ENV
-
-
+          echo "PR_TITLE<<EOF" >> $GITHUB_ENV
+          echo "$PR_TITLE" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          echo "PR_BODY<<EOF" >> $GITHUB_ENV
+          echo "$PR_BODY" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+      
+      
       - name: Create Pull Request
         if: env.commit == 'true'
         env:
@@ -331,9 +384,5 @@ jobs:
             --repo "${REPOSITORY}" \
             --base "${{ inputs.pr_target_branch }}" \
             --head "${BRANCH_NAME}" \
-            --title "Update Tekton files to ${EFFECTIVE_TAG}" \
-            --body "This PR updates the \`output-image\` tags and CEL expressions in \`.tekton/\` to \`${EFFECTIVE_TAG}\`.
-
-          - **PR target branch:** \`${{ inputs.pr_target_branch }}\`
-          - **Build branch:** \`${{ inputs.build_branch }}\`"
-
+            --title "${PR_TITLE}" \
+            --body "${PR_BODY}"
