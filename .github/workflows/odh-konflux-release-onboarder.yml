@@ -319,60 +319,67 @@ jobs:
           # Commit logic
           ########################################
       
+          ########################################
+          # Commit logic
+          ########################################
+          
           if git diff --cached --quiet; then
             echo "No changes to commit."
             echo "commit=false" >> $GITHUB_ENV
             exit 0
           fi
-      
+          
           if [ "${{ inputs.build_type }}" = "Release" ]; then
-      
-            COMMIT_MSG="Release: update Tekton release-push pipeline to ${{ inputs.version }}
-      
-      - Ensured release-push file exists
-      - Updated output-image tag to ${{ inputs.version }}
-      - Updated metadata.name to on-release-push
-      - Target branch: ${{ inputs.pr_target_branch }}"
-      
+          
+            cat <<EOF > commit_message.txt
+          Release: update Tekton release-push pipeline to ${{ inputs.version }}
+          
+          - Ensured release-push file exists
+          - Updated output-image tag to ${{ inputs.version }}
+          - Updated metadata.name to on-release-push
+          - Target branch: ${{ inputs.pr_target_branch }}
+          EOF
+          
+            cat <<EOF > pr_body.txt
+          This PR prepares Tekton pipelines for a Release build.
+          
+          - Version: ${{ inputs.version }}
+          - Ensured *-release-push.yaml exists
+          - Updated output-image tag to ${{ inputs.version }}
+          - PR target branch: ${{ inputs.pr_target_branch }}
+          - Build branch: ${{ inputs.build_branch }}
+          EOF
+          
             PR_TITLE="Release: Tekton pipelines → ${{ inputs.version }}"
-      
-            PR_BODY="This PR prepares Tekton pipelines for a Release build.
-      
-      - Version: ${{ inputs.version }}
-      - Ensured *-release-push.yaml exists
-      - Updated output-image tag to ${{ inputs.version }}
-      - PR target branch: ${{ inputs.pr_target_branch }}
-      - Build branch: ${{ inputs.build_branch }}"
-      
+          
           else
-      
-            COMMIT_MSG="CI: update Tekton pipelines
-      
-      - Pull pipelines use odh-pr tag
-      - Push pipelines use odh-stable tag
-      - Target branch: ${{ inputs.pr_target_branch }}"
-      
+          
+            cat <<EOF > commit_message.txt
+          CI: update Tekton pipelines
+          
+          - Pull pipelines use odh-pr tag
+          - Push pipelines use odh-stable tag
+          - Target branch: ${{ inputs.pr_target_branch }}
+          EOF
+          
+            cat <<EOF > pr_body.txt
+          This PR updates Tekton pipelines for a CI build.
+          
+          - Pull pipelines → odh-pr
+          - Push pipelines → odh-stable
+          - PR target branch: ${{ inputs.pr_target_branch }}
+          - Build branch: ${{ inputs.build_branch }}
+          EOF
+          
             PR_TITLE="CI: Tekton pipeline sync"
-      
-            PR_BODY="This PR updates Tekton pipelines for a CI build.
-      
-      - Pull pipelines → odh-pr
-      - Push pipelines → odh-stable
-      - PR target branch: ${{ inputs.pr_target_branch }}
-      - Build branch: ${{ inputs.build_branch }}"
-      
+          
           fi
-      
-          git commit -m "$COMMIT_MSG"
+          
+          git commit -F commit_message.txt
           git push --set-upstream origin "$branch_name"
-      
+          
           echo "commit=true" >> $GITHUB_ENV
-          echo "PR_TITLE<<EOF" >> $GITHUB_ENV
-          echo "$PR_TITLE" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          echo "PR_BODY<<EOF" >> $GITHUB_ENV
-          echo "$PR_BODY" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
       
       
       - name: Create Pull Request
@@ -385,4 +392,4 @@ jobs:
             --base "${{ inputs.pr_target_branch }}" \
             --head "${BRANCH_NAME}" \
             --title "${PR_TITLE}" \
-            --body "${PR_BODY}"
+            --body-file pr_body.txt
