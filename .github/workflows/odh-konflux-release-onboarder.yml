@@ -196,30 +196,48 @@ jobs:
           # RELEASE BUILD
           ##################################################
           if [ "$BUILD_TYPE" = "Release" ]; then
-      
-            if [ -z "$VERSION" ]; then
-              echo "ERROR: Version is required for Release build"
-              exit 1
+
+          if [ -z "$VERSION" ]; then
+            echo "ERROR: Version is required for Release build"
+            exit 1
+          fi
+        
+          echo "Release build → ensuring release-push file exists"
+        
+          find "$repo_folder" -type f -name "*-push.yaml" | while read src_file; do
+        
+            base_name=$(basename "$src_file")
+            release_name=$(echo "$base_name" | sed 's/-push.yaml$/-release-push.yaml/')
+        
+            target_file=".tekton/$release_name"
+        
+            ########################################
+            # Case 1: release file already exists in branch
+            ########################################
+            if [ -f "$target_file" ]; then
+              echo "Release file already exists → updating $target_file"
+        
+            ########################################
+            # Case 2: release file does NOT exist
+            ########################################
+            else
+              echo "Creating new release file $target_file"
+              cp "$src_file" "$target_file"
             fi
-      
-            echo "Release build → ensuring release-push file exists"
-      
-            find "$repo_folder" -type f -name "*push.yaml" | while read src_file; do
-      
-              base=$(basename "$src_file" .yaml)
-      
-              # Convert -push → -release-push
-              release_base=$(echo "$base" | sed 's/-push$/-release-push/')
-              target_file=".tekton/${release_base}.yaml"
-      
-              if [ -f "$target_file" ]; then
-                echo "Release file exists → modifying $target_file"
-              else
-                echo "Release file missing → creating $target_file"
-                cp "$src_file" "$target_file"
-              fi
-      
-              echo "Processing $target_file"
+
+    ########################################
+    # Update metadata.name inside YAML
+    ########################################
+    sed -i -E 's|(name: .*)-on-push|\1-on-release-push|' "$target_file"
+
+    ########################################
+    # Update tag
+    ########################################
+    sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${VERSION}"'|g' "$target_file"
+    sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${TARGET_BRANCH}"'|g' "$target_file"
+
+  done
+fi
       
               ########################################
               # Update metadata.name
