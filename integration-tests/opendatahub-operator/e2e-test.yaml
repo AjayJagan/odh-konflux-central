@@ -259,6 +259,7 @@ spec:
             script: |
               set -ex  # Show commands and exit on error
 
+              git config --global --add safe.directory /workspace/source
               echo "=== Latest commit ==="
               git log -1 --format="Commit: %H%nAuthor: %an%nDate:   %ci%nMessage: %s"
               echo "=== Makefile ==="
