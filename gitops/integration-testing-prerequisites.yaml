@@ -131,6 +131,6 @@ spec:
       - name: revision
         value: main
       - name: pathInRepo
-        value: integration-tests/opendatahub-operator/e2e-test.yaml
+        value: integration-tests/opendatahub-operator/pr-test-pipelinerun.yaml
     resolver: git
-    resourceKind: pipeline
+    resourceKind: pipelinerun
