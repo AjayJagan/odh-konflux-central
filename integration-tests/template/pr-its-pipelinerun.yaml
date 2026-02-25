@@ -132,8 +132,8 @@ spec:
             value: $(context.pipelineRun.uid)
         when:
           - input: "$(tasks.check-prerequisites.results.event-type)"
-            operator: in
-            values: ["pull_request", "retest-all-comment", "on-comment"]
+            operator: notin
+            values: ["push"]
       - name: provision-cluster
         runAfter:
           - provision-eaas-space
@@ -187,8 +187,8 @@ spec:
                   value: m5.2xlarge
         when:
           - input: "$(tasks.check-prerequisites.results.event-type)"
-            operator: in
-            values: ["pull_request", "retest-all-comment", "on-comment"]
+            operator: notin
+            values: ["push"]
       - name: deploy-and-test
         runAfter:
           - provision-cluster
