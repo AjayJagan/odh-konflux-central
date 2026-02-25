@@ -193,7 +193,7 @@ spec:
         - name: git-url
           value: "$(tasks.parse-metadata.results.source-git-url)"
         - name: git-rev
-          value: "$(tasks.parse-metadata.results.target-git-branch)"
+          value: "$(tasks.parse-metadata.results.source-git-revision)"
         - name: namespace
           value: "$(params.NAMESPACE)"
         - name: operator-image
@@ -235,9 +235,10 @@ spec:
               script: |
                 echo $(params.git-url)
                 echo $(params.git-rev)
-                git clone --depth 1 --branch $(params.git-rev) $(params.git-url) /workspace/source
+                git init /workspace/source
+                git -C /workspace/source fetch --depth 1 $(params.git-url) $(params.git-rev)
+                git -C /workspace/source checkout FETCH_HEAD
                 git config --global --add safe.directory /workspace/source
-                cd /workspace/source
 
             - name: deploy-and-e2e
               image: quay.io/rhoai/rhoai-task-toolset:operator
@@ -263,8 +264,6 @@ spec:
                 git config --global --add safe.directory /workspace/source
                 echo "=== Latest commit ==="
                 git log -1 --format="Commit: %H%nAuthor: %an%nDate:   %ci%nMessage: %s"
-                echo "=== Makefile ==="
-                cat Makefile
 
                 # Install kubectl
                 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
