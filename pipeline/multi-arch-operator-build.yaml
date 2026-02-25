@@ -122,7 +122,7 @@ spec:
     type: string
     description: The format for the resulting image's mediaType. Valid values are oci or docker.
   - name: enable-slack-failure-notification
-    default: "false"
+    default: "true"
     type: string
     description: Show a slack notification on failure
   - name: pipeline-type
@@ -151,6 +151,8 @@ spec:
     params:
     - name: expected-cluster
       value: $(params.expected-cluster)
+    - name: pipeline-type
+      value: $(params.pipeline-type)
     taskRef:
       resolver: git
       params:
@@ -838,9 +840,9 @@ spec:
     - name: message
       value: "$(tasks.rhoai-init.results.slack-message-failure-text)"
     - name: secret-name
-      value: rhoai-konflux-secret
+      value: ci-slack-secret
     - name: key-name
-      value: slack-webhook
+      value: secret
     taskRef:
       params:
       - name: name
