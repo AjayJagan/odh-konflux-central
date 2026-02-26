@@ -147,7 +147,7 @@ spec:
       - name: url
         value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
       - name: revision
-        value: odh
+        value: main
       - name: pathInRepo
         value: konflux-tekton-tasks/rhoai-init/0.3/rhoai-init.yaml
   - name: init
@@ -754,7 +754,7 @@ spec:
       - name: url
         value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
       - name: revision
-        value: odh
+        value: main
       - name: pathInRepo
         value: konflux-tekton-tasks/trigger-group-testing/0.1/trigger-group-testing.yaml
     when:
@@ -787,7 +787,7 @@ spec:
       - name: url
         value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
       - name: revision
-        value: odh
+        value: main
       - name: pathInRepo
         value: konflux-tekton-tasks/trigger-operator-build/0.1/trigger-operator-build.yaml
     when:

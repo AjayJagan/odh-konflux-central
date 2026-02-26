@@ -28,7 +28,7 @@ spec:
         - name: url
           value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
         - name: revision
-          value: odh
+          value: main
         - name: pathInRepo
           value: konflux-tekton-tasks/generate-snapshot-for-group-testing/0.1/generate-snapshot-for-group-testing.yaml
     - name: audit-snapshot
@@ -190,7 +190,7 @@ spec:
               fi
 
               #odh-workbench-jupyter-datascience-cpu-py312-ubi9
-              
+
               COMPONENT_NAME=odh-workbench-jupyter-datascience-cpu-py312-ubi9-ci
               JUPYTER_DATA_SCIENCE_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
               GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
@@ -207,7 +207,7 @@ spec:
               git clone "${REPO_URL}" src_code
               cd src_code
               git checkout ${REVISION}
-              
+
               oc new-project jupyter-datascience-ubi9-python-3-12
               IFS=':' read -r -a NOTEBOOK_IMAGE <<< "${JUPYTER_DATA_SCIENCE_IMAGE}"
               make deploy9-jupyter-datascience-ubi9-python-3.12 \
@@ -216,7 +216,7 @@ spec:
               make undeploy9-jupyter-datascience-ubi9-python-3.12
 
               #odh-workbench-jupyter-pytorch-cuda-py312-ubi9
-              
+
               COMPONENT_NAME=odh-workbench-jupyter-pytorch-cuda-py312-ubi9-ci
               JUPYTER_PYTORCH_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
               GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")
@@ -268,7 +268,7 @@ spec:
               make undeploy9-cuda-jupyter-minimal-ubi9-python-3.12
 
               #odh-workbench-jupyter-tensorflow-cuda-py312-ubi9
-              
+
               COMPONENT_NAME=odh-workbench-jupyter-tensorflow-cuda-py312-ubi9-ci
               JUPYTER_TENSORFLOW_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
               GIT_COMMIT=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name]."git.commit"' <<< "${SNAPSHOT}")

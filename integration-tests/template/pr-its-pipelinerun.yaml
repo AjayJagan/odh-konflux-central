@@ -261,7 +261,7 @@ spec:
                   - name: url
                     value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
                   - name: revision
-                    value: odh
+                    value: main
                   - name: pathInRepo
                     value: stepactions/secure-git-push/0.1/secure-git-push.yaml
               params:
@@ -305,7 +305,7 @@ spec:
                 - name: url
                   value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
                 - name: revision
-                  value: odh
+                  value: main
                 - name: pathInRepo
                   value: stepactions/git-clone/0.1/git-clone.yaml
             params:
@@ -326,7 +326,7 @@ spec:
                 - name: url
                   value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
                 - name: revision
-                  value: odh
+                  value: main
                 - name: pathInRepo
                   value: stepactions/secure-push-oci/0.1/secure-push-oci.yaml
             params:
@@ -343,7 +343,7 @@ spec:
                 - name: url
                   value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
                 - name: revision
-                  value: odh
+                  value: main
                 - name: pathInRepo
                   value: stepactions/pull-request-comment/0.1/pull-request-comment.yaml
             params:
@@ -372,7 +372,7 @@ spec:
                 - name: url
                   value: https://github.com/red-hat-data-services/rhoai-konflux-tasks.git
                 - name: revision
-                  value: odh
+                  value: main
                 - name: pathInRepo
                   value: stepactions/cleanup-git-repo/0.1/cleanup-git-repo.yaml
             params:
