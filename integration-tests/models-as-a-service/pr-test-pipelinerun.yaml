@@ -161,6 +161,8 @@ spec:
           value: "$(tasks.parse-metadata.results.source-git-branch)"
         - name: component-image
           value: "$(tasks.parse-metadata.results.component-container-image)"
+        - name: pr-number
+          value: "$(tasks.parse-metadata.results.pull-request-number)"
         taskSpec:
           params:
             - name: git-url
@@ -168,6 +170,8 @@ spec:
             - name: git-rev
               type: string
             - name: component-image
+              type: string
+            - name: pr-number
               type: string
           volumes:
             - name: credentials
@@ -205,6 +209,10 @@ spec:
               env:
                 - name: KUBECONFIG
                   value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
+                - name: MAAS_API_IMAGE
+                  value: "quay.io/opendatahub/maas-api:pr-$(params.pr-number)"
+                - name: MAAS_CONTROLLER_IMAGE
+                  value: "quay.io/opendatahub/maas-controller:pr-$(params.pr-number)"
               workingDir: /workspace/source
               volumeMounts:
                 - name: credentials
