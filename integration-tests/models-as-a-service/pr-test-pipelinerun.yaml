@@ -158,7 +158,7 @@ spec:
         - name: git-url
           value: "$(tasks.parse-metadata.results.source-git-url)"
         - name: git-rev
-          value: "$(tasks.parse-metadata.results.source-git-branch)"
+          value: "$(tasks.parse-metadata.results.source-git-revision)"
         - name: component-image
           value: "$(tasks.parse-metadata.results.component-container-image)"
         - name: pr-number
