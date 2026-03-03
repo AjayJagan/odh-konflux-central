@@ -1,6 +1,5 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
-#
 metadata:
   annotations:
     build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/odh-dashboard?rev={{revision}}
@@ -9,14 +8,17 @@ metadata:
     build.appstudio.redhat.com/pull_request_number: '{{pull_request_number}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "true"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
-    pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && target_branch
-      == "$$TARGET_BRANCH$$"
+    pipelinesascode.tekton.dev/on-cel-expression: |
+      event == "pull_request" 
+      && target_branch == "$$TARGET_BRANCH$$"
+      && ( "packages/autorag/**".pathChanged()
+            || ".tekton/odh-mod-arch-autorag-ci-pull-request.yaml".pathChanged() )
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
     appstudio.openshift.io/component: odh-mod-arch-autorag-ci
     pipelines.appstudio.openshift.io/type: build
-  name: odh-mod-arch-autorag-ci-on-pull-request
+  name: odh-mod-arch-autorag-ci-pull-request
   namespace: open-data-hub-tenant
 spec:
   params:
