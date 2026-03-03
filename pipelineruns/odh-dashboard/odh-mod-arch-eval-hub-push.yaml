@@ -8,15 +8,15 @@ metadata:
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
-      == "$$TARGET_BRANCH$$" && ( "packages/mlflow/**".pathChanged()
-      || ".tekton/odh-mod-arch-mlflow-push.yaml".pathChanged() || "Dockerfile.workspace".pathChanged()
+      == "$$TARGET_BRANCH$$" && ( "packages/eval-hub/**".pathChanged()
+      || ".tekton/odh-mod-arch-eval-hub-push.yaml".pathChanged() || "Dockerfile.workspace".pathChanged()
       )
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
-    appstudio.openshift.io/component: odh-mod-arch-mlflow
+    appstudio.openshift.io/component: odh-mod-arch-eval-hub
     pipelines.appstudio.openshift.io/type: build
-  name: odh-mod-arch-mlflow-on-push
+  name: odh-mod-arch-eval-hub-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -25,9 +25,9 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/odh-mod-arch-mlflow:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/odh-mod-arch-eval-hub:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
-    value: packages/mlflow/Dockerfile.workspace
+    value: packages/eval-hub/Dockerfile.workspace
   - name: path-context
     value: .
   pipelineRef:
@@ -40,7 +40,7 @@ spec:
     - name: pathInRepo
       value: pipeline/multi-arch-container-build.yaml
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-mod-arch-mlflow
+    serviceAccountName: build-pipeline-odh-mod-arch-eval-hub
   workspaces:
   - name: git-auth
     secret:
