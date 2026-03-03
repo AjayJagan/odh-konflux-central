@@ -11,7 +11,7 @@ metadata:
       event == "pull_request"
       && target_branch == "$$TARGET_BRANCH$$"
       && ( "packages/automl/**".pathChanged()
-            || ".tekton/odh-mod-arch-automl-ci-on-push.yaml".pathChanged() )
+            || ".tekton/odh-mod-arch-automl-ci-pull-request.yaml".pathChanged() )
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
@@ -26,11 +26,16 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/odh-mod-arch-automl:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/odh-mod-arch-automl:odh-pr
   - name: dockerfile
     value: packages/automl/Dockerfile.workspace
   - name: path-context
     value: .
+  - name: pipeline-type
+    value: pull-request
+  - name: additional-tags
+    value:
+    - 'odh-pr-{{revision}}'
   pipelineRef:
     resolver: git
     params:
