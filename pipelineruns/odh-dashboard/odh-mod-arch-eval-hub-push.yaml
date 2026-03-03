@@ -11,6 +11,7 @@ metadata:
       == "$$TARGET_BRANCH$$" && ( " packages/eval-hub/**".pathChanged()
       || ".tekton/odh-mod-arch-eval-hub-push.yaml".pathChanged() || "Dockerfile.workspace".pathChanged()
       )
+  creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
     appstudio.openshift.io/component: odh-mod-arch-eval-hub
