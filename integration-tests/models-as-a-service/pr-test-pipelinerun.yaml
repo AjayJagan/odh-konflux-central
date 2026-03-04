@@ -200,9 +200,10 @@ spec:
               script: |
                 echo $(params.git-url)
                 echo $(params.git-rev)
-                git clone --depth 1 --branch $(params.git-rev) $(params.git-url) /workspace/source
+                git clone --depth 1 $(params.git-url) /workspace/source
                 git config --global --add safe.directory /workspace/source
                 cd /workspace/source
+                git checkout $(params.git-rev)
 
             - name: e2e-maas-api-openshift
               image: quay.io/rhoai/rhoai-task-toolset:maas
