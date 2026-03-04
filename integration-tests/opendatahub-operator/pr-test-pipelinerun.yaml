@@ -242,6 +242,7 @@ spec:
 
             - name: deploy-and-e2e
               image: quay.io/rhoai/rhoai-task-toolset:operator
+              imagePullPolicy: Always
               computeResources:
                 requests:
                   memory: "16Gi"
