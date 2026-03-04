@@ -198,7 +198,7 @@ spec:
         - name: git-url
           value: "$(tasks.parse-metadata.results.source-git-url)"
         - name: git-rev
-          value: "$(tasks.parse-metadata.results.target-git-branch)"
+          value: "$(tasks.parse-metadata.results.source-git-revision)"
         - name: component-image
           value: "$(tasks.parse-metadata.results.component-container-image)"
         taskSpec:
@@ -236,9 +236,10 @@ spec:
               script: |
                 echo $(params.git-url)
                 echo $(params.git-rev)
-                git clone --depth 1 --branch $(params.git-rev) $(params.git-url) /workspace/source
+                git clone --depth 1 $(params.git-url) /workspace/source
                 git config --global --add safe.directory /workspace/source
                 cd /workspace/source
+                git checkout $(params.git-rev)
 
             - name: e2e-odh-kserve
               onError: continue
@@ -433,7 +434,7 @@ spec:
         - name: git-url
           value: "$(tasks.parse-metadata.results.source-git-url)"
         - name: git-rev
-          value: "$(tasks.parse-metadata.results.target-git-branch)"
+          value: "$(tasks.parse-metadata.results.source-git-revision)"
         - name: component-image
           value: "$(tasks.parse-metadata.results.component-container-image)"
         taskSpec:
@@ -471,9 +472,10 @@ spec:
               script: |
                 echo $(params.git-url)
                 echo $(params.git-rev)
-                git clone --depth 1 --branch $(params.git-rev) $(params.git-url) /workspace/source
+                git clone --depth 1 $(params.git-url) /workspace/source
                 git config --global --add safe.directory /workspace/source
                 cd /workspace/source
+                git checkout $(params.git-rev)
             - name: e2e-odh-llmisvc
               onError: continue
               image: quay.io/rhoai/rhoai-task-toolset:model-controller-its
