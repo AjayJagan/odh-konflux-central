@@ -4,39 +4,52 @@ on:
   push:
     paths:
       - "integration-tests/**"
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Detect changed Dockerfiles
-        id: changes
-        run: |
-          FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E 'integration-tests/.*/Dockerfile\.' || true)
-
-          echo "files=$FILES" >> $GITHUB_OUTPUT
-          echo "Changed Dockerfiles:"
-          echo "$FILES"
+        with:
+          fetch-depth: 0
 
       - name: Login to Quay
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Detect changed Dockerfiles
+        id: changed
         run: |
-          echo "${{ secrets.QUAY_PASSWORD }}" | docker login quay.io -u ${{ secrets.QUAY_USERNAME }} --password-stdin
+          echo "Checking changed files..."
+
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E 'integration-tests/.*/Dockerfile\.' || true)
+
+          echo "Changed Dockerfiles:"
+          echo "$CHANGED_FILES"
+
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Build and Push Images
-        if: steps.changes.outputs.files != ''
+        if: steps.changed.outputs.files != ''
         run: |
-          for file in ${{ steps.changes.outputs.files }}
+          for file in ${{ steps.changed.outputs.files }}
           do
             TAG=$(basename $file | cut -d'.' -f2)
             DIR=$(dirname $file)
 
             echo "Building quay.io/rhoai/rhoai-task-toolset:$TAG"
 
-            docker build -f $file -t quay.io/rhoai/rhoai-task-toolset:$TAG $DIR
+            docker build \
+              -f $file \
+              -t quay.io/rhoai/rhoai-task-toolset:$TAG \
+              $DIR
+
             docker push quay.io/rhoai/rhoai-task-toolset:$TAG
           done
