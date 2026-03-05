@@ -236,7 +236,7 @@ spec:
               script: |
                 echo $(params.git-url)
                 echo $(params.git-rev)
-                git clone --depth 1 $(params.git-url) /workspace/source
+                git clone --depth 50 --no-single-branch $(params.git-url) /workspace/source
                 git config --global --add safe.directory /workspace/source
                 cd /workspace/source
                 git checkout $(params.git-rev)
@@ -472,7 +472,7 @@ spec:
               script: |
                 echo $(params.git-url)
                 echo $(params.git-rev)
-                git clone --depth 1 $(params.git-url) /workspace/source
+                git clone --depth 50 --no-single-branch $(params.git-url) /workspace/source
                 git config --global --add safe.directory /workspace/source
                 cd /workspace/source
                 git checkout $(params.git-rev)
