@@ -61,7 +61,7 @@ on:
 
           # Add all valid components here
       pr_target_branch:
-        description: 'Branch to open the PR against (e.g. main).'
+        description: 'Target branch for the PR (e.g. main)'
         required: true
         type: string
       
