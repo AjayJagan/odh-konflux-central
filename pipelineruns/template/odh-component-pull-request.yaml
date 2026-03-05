@@ -28,6 +28,12 @@ spec:
     value: dockerfilepath
   - name: path-context
     value: .
+  #add these additional params
+  - name: additional-tags
+    value:
+    - 'odh-pr-{{revision}}'
+  - name: pipeline-type
+    value: pull-request
   pipelineRef:
     resolver: git
     params:
