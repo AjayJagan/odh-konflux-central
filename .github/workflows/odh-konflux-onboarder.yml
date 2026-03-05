@@ -61,13 +61,10 @@ on:
 
           # Add all valid components here
       pr_target_branch:
-        description: 'Branch to open the PR against (e.g. master).'
+        description: 'Branch to open the PR against (e.g. main).'
         required: true
         type: string
-      build_branch:
-        description: 'Branch that images are built from (e.g. stable).'
-        required: true
-        type: string
+      
       build_type:
         description: 'Select build type'
         required: true
@@ -75,8 +72,14 @@ on:
         options:
           - CI
           - Release
+      
       version:
         description: 'New version (Required only for Release builds)'
+        required: false
+        type: string
+      
+      build_branch:
+        description: 'Branch that images are built from (e.g. stable). Defaults to PR target branch.'
         required: false
         type: string
 
@@ -106,6 +109,18 @@ jobs:
         run: |
           echo "REPOSITORY=opendatahub-io/${{ inputs.component }}" >> $GITHUB_ENV
           echo "OKC_FOLDER=${{ inputs.component }}" >> $GITHUB_ENV
+
+      - name: Determine build branch
+        run: |
+          if [ -n "${{ inputs.build_branch }}" ]; then
+            BUILD_BRANCH="${{ inputs.build_branch }}"
+            echo "Using provided build branch: $BUILD_BRANCH"
+          else
+            BUILD_BRANCH="${{ inputs.pr_target_branch }}"
+            echo "No build_branch provided. Using PR target branch: $BUILD_BRANCH"
+          fi
+      
+          echo "BUILD_BRANCH=$BUILD_BRANCH" >> $GITHUB_ENV
 
       - name: Validate and set tag
         run: |
@@ -145,7 +160,7 @@ jobs:
           BUILD_TYPE="${{ inputs.build_type }}"
           VERSION="${{ inputs.version }}"
           OKC_FOLDER="${{ inputs.component }}"
-          TARGET_BRANCH="${{ inputs.build_branch }}"
+          TARGET_BRANCH="${BUILD_BRANCH}"
       
           repo_folder="okc-repo/pipelineruns/${OKC_FOLDER}"
           echo "Repo folder: $repo_folder"
