@@ -59,6 +59,7 @@ on:
           - llm-d-kv-cache
           - batch-gateway
           - workload-variant-autoscaler
+          - models-as-a-service
 
           # Add all valid components here
       pr_target_branch:
