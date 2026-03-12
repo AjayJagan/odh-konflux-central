@@ -180,28 +180,45 @@ jobs:
           # CI BUILD
           ##################################################
           if [ "$BUILD_TYPE" = "CI" ]; then
-      
+          
             echo "CI build → syncing all pipelineruns"
-      
+          
             find "$repo_folder" -type f -name "*.yaml" | while read src_file; do
-      
+          
               filename=$(basename "$src_file")
               target_file=".tekton/$filename"
-      
+          
+              echo "Processing pipeline file: $filename"
+          
               cp "$src_file" "$target_file"
-      
+          
+              ########################################
+              # Pull pipelines
+              ########################################
               if [[ "$filename" == *pull* ]]; then
                 EFFECTIVE_TAG="odh-pr"
+                echo "Detected pull pipeline → using tag $EFFECTIVE_TAG"
+          
+                sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$target_file"
+                sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${TARGET_BRANCH}"'|g' "$target_file"
+          
+              ########################################
+              # Push pipelines
+              ########################################
               elif [[ "$filename" == *push* ]]; then
                 EFFECTIVE_TAG="odh-stable"
+                echo "Detected push pipeline → using tag $EFFECTIVE_TAG"
+          
+                sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$target_file"
+                sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${TARGET_BRANCH}"'|g' "$target_file"
+          
+              ########################################
+              # Other pipelines
+              ########################################
               else
-                echo "ERROR: Unknown pipeline type in CI"
-                exit 1
+                echo "Generic pipeline detected → copying as-is: $filename"
               fi
-      
-              sed -i -E 's|\$\$OUTPUT_IMAGE_TAG\$\$|'"${EFFECTIVE_TAG}"'|g' "$target_file"
-              sed -i -E 's|\$\$TARGET_BRANCH\$\$|'"${TARGET_BRANCH}"'|g' "$target_file"
-      
+          
             done
           fi
       
