@@ -60,7 +60,6 @@ on:
           - batch-gateway
           - workload-variant-autoscaler
           - models-as-a-service
-          - odh-kserve-llmisvc-controller
 
           # Add all valid components here
       pr_target_branch:
