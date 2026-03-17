@@ -28,9 +28,6 @@ spec:
     value: llmisvc-controller.Dockerfile
   - name: path-context
     value: .
-  - name: additional-tags
-    value:
-    - '$$OUTPUT_IMAGE_TAG$$'
   pipelineRef:
     resolver: git
     params:
