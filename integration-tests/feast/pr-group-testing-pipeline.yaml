@@ -274,7 +274,7 @@ spec:
             
               cd ../..
               echo "Registry REST API test run"
-              make install-pythons-dependencies-cia
+              make install-python-dependencies-ci
               uv run pytest -c sdk/python/pytest.ini sdk/python/tests/integration/rest_api/test_registry_rest_api.py --integration -s --timeout=600
 
               cd infra/feast-operator
