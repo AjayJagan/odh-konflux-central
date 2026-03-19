@@ -226,3 +226,7 @@ spec:
                 # && rm kubectl && bash
                 bash
                 ./test/e2e/scripts/prow_run_smoke_test.sh
+        when:
+          - input: "$(tasks.check-prerequisites.results.event-type)"
+            operator: notin
+            values: ["push"]
