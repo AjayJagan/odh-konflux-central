@@ -61,6 +61,7 @@ on:
           - workload-variant-autoscaler
           - models-as-a-service
           - odh-kserve-llmisvc-controller
+          - pipelines-components
 
           # Add all valid components here
       pr_target_branch:
