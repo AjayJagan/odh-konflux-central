@@ -180,6 +180,8 @@ spec:
         volumes:
           - name: credentials
             emptyDir: {}
+          - name: test-status
+            emptyDir: {}
         workspaces:
           - name: basic-auth
             optional: true
@@ -213,10 +215,16 @@ spec:
             volumeMounts:
               - name: credentials
                 mountPath: /credentials
+              - name: test-status
+                mountPath: /test-status
             script: |
+              STATUS_FILE="/test-status/deploy-and-e2e-status"
+              echo "failed" > "$STATUS_FILE"
+
               oc get pods
               oc whoami
 
+              echo "success" > "$STATUS_FILE"
           - name: must-gather
             onError: continue
             image: quay.io/rhoai/rhoai-task-toolset:go-its
@@ -260,7 +268,18 @@ spec:
                 value: 'test-artifacts/$(context.pipelineRun.name)'
               - name: pipelinerun-name
                 value: $(context.pipelineRun.name)
-
+          - name: fail-if-needed
+            image: alpine
+            volumeMounts:
+              - name: test-status
+                mountPath: /test-status
+            script: |
+              STATUS_FILE="/test-status/deploy-and-e2e-status"
+              if ! [ -f "$STATUS_FILE" ] || [ "$(cat "$STATUS_FILE")" != "success" ]; then
+                echo "Failing pipeline because deploy-and-e2e step failed"
+                exit 1
+              fi
+              echo "deploy-and-e2e step succeeded"
 
 
   finally:
