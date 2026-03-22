@@ -752,6 +752,8 @@ spec:
       volumes:
           - name: credentials
             emptyDir: {}
+          - name: test-status
+            emptyDir: {}
       steps:
         - name: get-kubeconfig
           ref:
@@ -815,6 +817,8 @@ spec:
           volumeMounts:
             - name: credentials
               mountPath: /credentials
+            - name: test-status
+              mountPath: /test-status
           script: |
             set -euxo pipefail
             # apk add --no-cache bash make git curl \
@@ -822,7 +826,8 @@ spec:
             # && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
             # && rm kubectl && bash
             bash
-
+            STATUS_FILE="/test-status/deploy-and-e2e-status"
+            echo "failed" > "$STATUS_FILE"
             COMPONENT_NAME=kserve-agent-ci
             export KSERVE_AGENT_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
 
@@ -838,6 +843,7 @@ spec:
             export GITHUB_SHA=stable
             ./test/scripts/openshift-ci/run-e2e-tests.sh graph 2 raw
 
+            echo "success" > "$STATUS_FILE"
         - name: must-gather
           onError: continue
           image: quay.io/rhoai/rhoai-task-toolset:go-its
@@ -883,7 +889,18 @@ spec:
               value: 'test-artifacts/$(context.pipelineRun.name)'
             - name: pipelinerun-name
               value: $(context.pipelineRun.name)
-
+        - name: fail-if-needed
+          image: alpine
+          volumeMounts:
+            - name: test-status
+              mountPath: /test-status
+          script: |
+            STATUS_FILE="/test-status/deploy-and-e2e-status"
+            if ! [ -f "$STATUS_FILE" ] || [ "$(cat "$STATUS_FILE")" != "success" ]; then
+              echo "Failing pipeline because deploy-and-e2e step failed"
+              exit 1
+            fi
+            echo "deploy-and-e2e step succeeded"
 
 
   - name: provision-eaas-space-raw
@@ -973,6 +990,8 @@ spec:
       volumes:
           - name: credentials
             emptyDir: {}
+          - name: test-status
+            emptyDir: {}
       steps:
         - name: get-kubeconfig
           ref:
@@ -1036,6 +1055,8 @@ spec:
           volumeMounts:
             - name: credentials
               mountPath: /credentials
+            - name: test-status
+              mountPath: /test-status
           script: |
             set -euxo pipefail
             # apk add --no-cache bash make git curl \
@@ -1043,7 +1064,8 @@ spec:
             # && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
             # && rm kubectl && bash
             bash
-
+            STATUS_FILE="/test-status/deploy-and-e2e-status"
+            echo "failed" > "$STATUS_FILE"
             COMPONENT_NAME=kserve-agent-ci
             export KSERVE_AGENT_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
 
@@ -1057,7 +1079,7 @@ spec:
             export STORAGE_INITIALIZER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
 
             ./test/scripts/openshift-ci/run-e2e-tests.sh raw
-
+            echo "success" > "$STATUS_FILE"
         - name: must-gather
           onError: continue
           image: quay.io/rhoai/rhoai-task-toolset:go-its
@@ -1103,7 +1125,18 @@ spec:
               value: 'test-artifacts/$(context.pipelineRun.name)'
             - name: pipelinerun-name
               value: $(context.pipelineRun.name)
-
+        - name: fail-if-needed
+          image: alpine
+          volumeMounts:
+            - name: test-status
+              mountPath: /test-status
+          script: |
+            STATUS_FILE="/test-status/deploy-and-e2e-status"
+            if ! [ -f "$STATUS_FILE" ] || [ "$(cat "$STATUS_FILE")" != "success" ]; then
+              echo "Failing pipeline because deploy-and-e2e step failed"
+              exit 1
+            fi
+            echo "deploy-and-e2e step succeeded"
 
   - name: provision-eaas-space-predictor
     runAfter:
@@ -1192,6 +1225,8 @@ spec:
       volumes:
           - name: credentials
             emptyDir: {}
+          - name: test-status
+            emptyDir: {}
       steps:
         - name: get-kubeconfig
           ref:
@@ -1255,6 +1290,8 @@ spec:
           volumeMounts:
             - name: credentials
               mountPath: /credentials
+            - name: test-status
+              mountPath: /test-status
           script: |
             set -euxo pipefail
             # apk add --no-cache bash make git curl \
@@ -1262,7 +1299,8 @@ spec:
             # && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
             # && rm kubectl && bash
             bash
-
+            STATUS_FILE="/test-status/deploy-and-e2e-status"
+            echo "failed" > "$STATUS_FILE"
             COMPONENT_NAME=kserve-agent-ci
             export KSERVE_AGENT_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
 
@@ -1276,7 +1314,7 @@ spec:
             export STORAGE_INITIALIZER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
 
             ./test/scripts/openshift-ci/run-e2e-tests.sh "predictor or kserve_on_openshift"
-
+            echo "success" > "$STATUS_FILE"
         - name: must-gather
           onError: continue
           image: quay.io/rhoai/rhoai-task-toolset:go-its
@@ -1322,7 +1360,18 @@ spec:
               value: 'test-artifacts/$(context.pipelineRun.name)'
             - name: pipelinerun-name
               value: $(context.pipelineRun.name)
-
+        - name: fail-if-needed
+          image: alpine
+          volumeMounts:
+            - name: test-status
+              mountPath: /test-status
+          script: |
+            STATUS_FILE="/test-status/deploy-and-e2e-status"
+            if ! [ -f "$STATUS_FILE" ] || [ "$(cat "$STATUS_FILE")" != "success" ]; then
+              echo "Failing pipeline because deploy-and-e2e step failed"
+              exit 1
+            fi
+            echo "deploy-and-e2e step succeeded"
 
 
   - name: provision-eaas-space-llm-inference-service
@@ -1412,6 +1461,8 @@ spec:
       volumes:
           - name: credentials
             emptyDir: {}
+          - name: test-status
+            emptyDir: {}
       steps:
         - name: get-kubeconfig
           ref:
@@ -1482,6 +1533,8 @@ spec:
           volumeMounts:
             - name: credentials
               mountPath: /credentials
+            - name: test-status
+              mountPath: /test-status
           script: |
             set -euxo pipefail
             # apk add --no-cache bash make git curl \
@@ -1489,7 +1542,8 @@ spec:
             # && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
             # && rm kubectl && bash
             bash
-
+            STATUS_FILE="/test-status/deploy-and-e2e-status"
+            echo "failed" > "$STATUS_FILE"
             COMPONENT_NAME=kserve-agent-ci
             export KSERVE_AGENT_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
 
@@ -1503,7 +1557,7 @@ spec:
             export STORAGE_INITIALIZER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.[$component_name].image' <<< "${SNAPSHOT}")
 
             ./test/scripts/openshift-ci/run-e2e-tests.sh "llminferenceservice and cluster_cpu" 2 "llm-d"
-
+            echo "success" > "$STATUS_FILE"
         - name: must-gather
           onError: continue
           image: quay.io/rhoai/rhoai-task-toolset:go-its
@@ -1550,7 +1604,18 @@ spec:
               value: 'test-artifacts/$(context.pipelineRun.name)'
             - name: pipelinerun-name
               value: $(context.pipelineRun.name)
-
+        - name: fail-if-needed
+          image: alpine
+          volumeMounts:
+            - name: test-status
+              mountPath: /test-status
+          script: |
+            STATUS_FILE="/test-status/deploy-and-e2e-status"
+            if ! [ -f "$STATUS_FILE" ] || [ "$(cat "$STATUS_FILE")" != "success" ]; then
+              echo "Failing pipeline because deploy-and-e2e step failed"
+              exit 1
+            fi
+            echo "deploy-and-e2e step succeeded"
 
   finally:
   - name: push-ci-artifacts-and-update-pr
