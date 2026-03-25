@@ -28,6 +28,12 @@ spec:
     value: llmisvc-controller.Dockerfile
   - name: path-context
     value: .
+  - name: additional-tags
+    value:
+    - 'odh-stable'
+  - name: build-args
+    value:
+    - "GOTAGS=distro"
   pipelineRef:
     resolver: git
     params:
