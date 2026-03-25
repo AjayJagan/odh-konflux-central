@@ -14,7 +14,7 @@ metadata:
     appstudio.openshift.io/application: opendatahub-builds
     appstudio.openshift.io/component: odh-pipelines-components-ci
     pipelines.appstudio.openshift.io/type: build
-  name: odh-pipelines-components-on-push
+  name: odh-pipelines-components-ci-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
