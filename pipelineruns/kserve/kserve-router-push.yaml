@@ -8,7 +8,7 @@ metadata:
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
-      == "release-v0.17"
+      == "$$TARGET_BRANCH$$"
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
@@ -23,14 +23,14 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/kserve-router:odh-stable
+    value: quay.io/opendatahub/kserve-router:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
     value: router.Dockerfile
   - name: path-context
     value: .
   - name: additional-tags
     value:
-    - 'odh-v3.4-EA2'
+    - 'odh-stable'
   pipelineRef:
     resolver: git
     params:
