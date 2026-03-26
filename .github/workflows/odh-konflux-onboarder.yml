@@ -62,6 +62,7 @@ on:
           - models-as-a-service
           - odh-kserve-llmisvc-controller
           - pipelines-components
+          - ai-gateway-payload-processing
 
           # Add all valid components here
       pr_target_branch:
