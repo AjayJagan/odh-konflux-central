@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/ai-gateway-payload-processing?rev={{revision}}
+    build.appstudio.openshift.io/repo: https://github.com/opendatahub-io/kserve-autogluon-server?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/cancel-in-progress: "false"
@@ -10,14 +10,14 @@ metadata:
     pipelinesascode.tekton.dev/on-cel-expression: |
       event == "push"
       && target_branch == "$$TARGET_BRANCH$$"
-      && ( "./**".pathChanged()
-            || ".tekton/odh-ai-gateway-payload-processing-ci-on-push.yaml".pathChanged() )
+      && ( "python/**".pathChanged()
+            || ".tekton/odh-kserve-autogluon-server-ci-on-push.yaml".pathChanged() )
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
-    appstudio.openshift.io/component: odh-ai-gateway-payload-processing-ci
+    appstudio.openshift.io/component: odh-kserve-autogluon-server-ci
     pipelines.appstudio.openshift.io/type: build
-  name: odh-ai-gateway-payload-processing-ci-on-push
+  name: odh-kserve-autogluon-server-ci-on-push
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -26,9 +26,9 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/opendatahub/odh-ai-gateway-payload-processing:$$OUTPUT_IMAGE_TAG$$
+    value: quay.io/opendatahub/odh-kserve-autogluon-server:$$OUTPUT_IMAGE_TAG$$
   - name: dockerfile
-    value: Dockerfile
+    value: python/autogluon.Dockerfile
   - name: path-context
     value: .
   - name: build-platforms
@@ -47,7 +47,7 @@ spec:
     - name: pathInRepo
       value: pipeline/multi-arch-container-build.yaml
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-ai-gateway-payload-processing-ci
+    serviceAccountName: build-pipeline-odh-kserve-autogluon-server-ci
   workspaces:
   - name: git-auth
     secret:
