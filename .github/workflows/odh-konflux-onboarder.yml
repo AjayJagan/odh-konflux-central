@@ -63,6 +63,7 @@ on:
           - odh-kserve-llmisvc-controller
           - pipelines-components
           - ai-gateway-payload-processing
+          - kserve-autogluon-server
 
           # Add all valid components here
       pr_target_branch:
