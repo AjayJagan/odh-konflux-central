@@ -12,14 +12,12 @@ metadata:
     pipelinesascode.tekton.dev/on-cel-expression: |
       event == "pull_request"
       && target_branch == "$$TARGET_BRANCH$$"
-      && ( "./**".pathChanged()
-            || ".tekton/odh-ai-gateway-payload-processing-ci-on-pull-request.yaml".pathChanged() )
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
     appstudio.openshift.io/component: odh-ai-gateway-payload-processing-ci
     pipelines.appstudio.openshift.io/type: build
-  name: odh-ai-gateway-payload-processing-ci-pull-request
+  name: odh-ai-gateway-payload-processing-ci-on-pull-request
   namespace: open-data-hub-tenant
 spec:
   params:

@@ -37,6 +37,8 @@ spec:
     - linux/aarch64
     - linux/ppc64le
     - linux/s390x
+  - name: pipeline-type
+    value: push
   pipelineRef:
     resolver: git
     params:
