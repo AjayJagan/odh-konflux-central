@@ -36,6 +36,11 @@ spec:
         taskSpec:
           params:
           - name: SNAPSHOT
+          results:
+            - name: maas-api-image
+              description: odh-maas-api-ci image ref from snapshot
+            - name: maas-controller-image
+              description: odh-maas-controller-ci image ref from snapshot
           steps:
           - image: quay.io/konflux-ci/konflux-test:stable
             workingDir: /workspace
@@ -48,12 +53,19 @@ spec:
                     fieldPath: metadata.labels['appstudio.openshift.io/component']
             script: |
               #!/bin/sh
+              set -eu
 
-              # Extract the component container image from the SNAPSHOT JSON data
+              # Extract the labeled component image (for logs; parse-metadata drives component-container-image)
               COMPONENT_CONTAINER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.components[] | select(.name == $component_name) | .containerImage' <<< "${SNAPSHOT}")
-
-              # Log the extracted variable
               echo "  COMPONENT_CONTAINER_IMAGE: ${COMPONENT_CONTAINER_IMAGE}"
+
+              MAAS_API_IMAGE=$(jq -r '.components[] | select(.name == "odh-maas-api-ci") | .containerImage' <<< "${SNAPSHOT}")
+              MAAS_CONTROLLER_IMAGE=$(jq -r '.components[] | select(.name == "odh-maas-controller-ci") | .containerImage' <<< "${SNAPSHOT}")
+              echo "  MAAS_API_IMAGE: ${MAAS_API_IMAGE}"
+              echo "  MAAS_CONTROLLER_IMAGE: ${MAAS_CONTROLLER_IMAGE}"
+
+              echo -n "${MAAS_API_IMAGE}" > "$(results.maas-api-image.path)"
+              echo -n "${MAAS_CONTROLLER_IMAGE}" > "$(results.maas-controller-image.path)"
       - name: check-prerequisites
         description: check prerequisites if the ITS needs to execute
         runAfter:
@@ -161,8 +173,10 @@ spec:
           value: "$(tasks.parse-metadata.results.source-git-revision)"
         - name: component-image
           value: "$(tasks.parse-metadata.results.component-container-image)"
-        - name: pr-number
-          value: "$(tasks.parse-metadata.results.pull-request-number)"
+        - name: maas-api-image
+          value: "$(tasks.find-component-image.results.maas-api-image)"
+        - name: maas-controller-image
+          value: "$(tasks.find-component-image.results.maas-controller-image)"
         taskSpec:
           params:
             - name: git-url
@@ -171,7 +185,9 @@ spec:
               type: string
             - name: component-image
               type: string
-            - name: pr-number
+            - name: maas-api-image
+              type: string
+            - name: maas-controller-image
               type: string
           volumes:
             - name: credentials
@@ -211,9 +227,9 @@ spec:
                 - name: KUBECONFIG
                   value: "/credentials/$(steps.get-kubeconfig.results.kubeconfig)"
                 - name: MAAS_API_IMAGE
-                  value: "quay.io/opendatahub/maas-api:pr-$(params.pr-number)"
+                  value: "$(params.maas-api-image)"
                 - name: MAAS_CONTROLLER_IMAGE
-                  value: "quay.io/opendatahub/maas-controller:pr-$(params.pr-number)"
+                  value: "$(params.maas-controller-image)"
               workingDir: /workspace/source
               volumeMounts:
                 - name: credentials
