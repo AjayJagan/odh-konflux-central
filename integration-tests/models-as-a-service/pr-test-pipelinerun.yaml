@@ -27,24 +27,31 @@ spec:
           - name: SNAPSHOT
             value: $(params.SNAPSHOT)
       - name: find-component-image
-        description: Placeholder task that prints the Snapshot and outputs standard TEST_OUTPUT
+        description: Extract MaaS component images from the Konflux snapshot and resolve PR-tagged refs
         runAfter:
           - parse-metadata
         params:
           - name: SNAPSHOT
             value: $(params.SNAPSHOT)
+          - name: PR_NUMBER
+            value: $(tasks.parse-metadata.results.pull-request-number)
         taskSpec:
           params:
           - name: SNAPSHOT
+          - name: PR_NUMBER
           results:
             - name: maas-api-image
-              description: odh-maas-api-ci image ref from snapshot
+              description: odh-maas-api-ci image with odh-pr-<PR> tag
+            - name: maas-controller-image
+              description: odh-maas-controller-ci image with odh-pr-<PR> tag
           steps:
           - image: quay.io/konflux-ci/konflux-test:stable
             workingDir: /workspace
             env:
               - name: SNAPSHOT
                 value: $(params.SNAPSHOT)
+              - name: PR_NUMBER
+                value: $(params.PR_NUMBER)
               - name: COMPONENT_NAME
                 valueFrom:
                   fieldRef:
@@ -57,10 +64,29 @@ spec:
               COMPONENT_CONTAINER_IMAGE=$(jq -r --arg component_name "${COMPONENT_NAME}" '.components[] | select(.name == $component_name) | .containerImage' <<< "${SNAPSHOT}")
               echo "  COMPONENT_CONTAINER_IMAGE: ${COMPONENT_CONTAINER_IMAGE}"
 
-              MAAS_API_IMAGE=$(jq -r '.components[] | select(.name == "odh-maas-api-ci") | .containerImage' <<< "${SNAPSHOT}")
-              echo "  MAAS_API_IMAGE: ${MAAS_API_IMAGE}"
+              # Extract digest refs from snapshot, then strip @sha256:... to get the repo.
+              # Append the odh-pr-<PR> tag created by the build pipeline's additional-tags.
+              MAAS_API_DIGEST=$(jq -r '.components[] | select(.name == "odh-maas-api-ci") | .containerImage' <<< "${SNAPSHOT}")
+              if [ -z "${MAAS_API_DIGEST}" ] || [ "${MAAS_API_DIGEST}" = "null" ]; then
+                echo "ERROR: odh-maas-api-ci not found in snapshot" >&2
+                exit 1
+              fi
+              MAAS_API_IMAGE="${MAAS_API_DIGEST%%@*}:odh-pr-${PR_NUMBER}"
+
+              MAAS_CONTROLLER_DIGEST=$(jq -r '.components[] | select(.name == "odh-maas-controller-ci") | .containerImage' <<< "${SNAPSHOT}")
+              if [ -z "${MAAS_CONTROLLER_DIGEST}" ] || [ "${MAAS_CONTROLLER_DIGEST}" = "null" ]; then
+                echo "ERROR: odh-maas-controller-ci not found in snapshot" >&2
+                exit 1
+              fi
+              MAAS_CONTROLLER_IMAGE="${MAAS_CONTROLLER_DIGEST%%@*}:odh-pr-${PR_NUMBER}"
+
+              echo "  MAAS_API_IMAGE (digest):      ${MAAS_API_DIGEST}"
+              echo "  MAAS_API_IMAGE (PR tag):       ${MAAS_API_IMAGE}"
+              echo "  MAAS_CONTROLLER_IMAGE (digest): ${MAAS_CONTROLLER_DIGEST}"
+              echo "  MAAS_CONTROLLER_IMAGE (PR tag): ${MAAS_CONTROLLER_IMAGE}"
 
               echo -n "${MAAS_API_IMAGE}" > "$(results.maas-api-image.path)"
+              echo -n "${MAAS_CONTROLLER_IMAGE}" > "$(results.maas-controller-image.path)"
       - name: check-prerequisites
         description: check prerequisites if the ITS needs to execute
         runAfter:
@@ -170,8 +196,8 @@ spec:
           value: "$(tasks.parse-metadata.results.component-container-image)"
         - name: maas-api-image
           value: "$(tasks.find-component-image.results.maas-api-image)"
-        - name: pr-number
-          value: "$(tasks.parse-metadata.results.pull-request-number)"
+        - name: maas-controller-image
+          value: "$(tasks.find-component-image.results.maas-controller-image)"
         taskSpec:
           params:
             - name: git-url
@@ -182,7 +208,7 @@ spec:
               type: string
             - name: maas-api-image
               type: string
-            - name: pr-number
+            - name: maas-controller-image
               type: string
           volumes:
             - name: credentials
@@ -224,17 +250,13 @@ spec:
                 - name: MAAS_API_IMAGE
                   value: "$(params.maas-api-image)"
                 - name: MAAS_CONTROLLER_IMAGE
-                  value: "quay.io/opendatahub/maas-controller:odh-pr-$(params.pr-number)"
+                  value: "$(params.maas-controller-image)"
               workingDir: /workspace/source
               volumeMounts:
                 - name: credentials
                   mountPath: /credentials
               script: |
                 set -euxo pipefail
-                # apk add --no-cache bash make git curl \
-                # && curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
-                # && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
-                # && rm kubectl && bash
                 bash
                 ./test/e2e/scripts/prow_run_smoke_test.sh
         when:
