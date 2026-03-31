@@ -1546,3 +1546,22 @@ spec:
       dockerfileUrl: maas-api/Dockerfile
       revision: main
       url: https://github.com/opendatahub-io/models-as-a-service.git
+---
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Component
+metadata:
+  annotations:
+    build.appstudio.openshift.io/pipeline: '{"name":"docker-build-multi-platform-oci-ta","bundle":"latest"}'
+    mintmaker.appstudio.redhat.com/disabled: true
+    build.appstudio.openshift.io/request: configure-pac-no-mr
+  name: odh-maas-controller-ci
+spec:
+  application: opendatahub-builds
+  componentName: odh-maas-controller-ci
+  containerImage: quay.io/opendatahub/maas-controller
+  source:
+    git:
+      context: maas-controller
+      dockerfileUrl: Dockerfile
+      revision: main
+      url: https://github.com/opendatahub-io/models-as-a-service.git
