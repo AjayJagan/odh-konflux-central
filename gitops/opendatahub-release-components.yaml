@@ -1570,7 +1570,7 @@ spec:
   containerImage: quay.io/opendatahub/llm-d-inference-scheduler
   source:
     git:
-      dockerfileUrl: Dockerfile
+      dockerfileUrl: Dockerfile.epp
       revision: release-v0.7.1
       url: https://github.com/opendatahub-io/llm-d-inference-scheduler.git
 ---
@@ -1588,8 +1588,9 @@ spec:
   containerImage: quay.io/opendatahub/llm-d-routing-sidecar
   source:
     git:
+      dockerfileURL: Dockerfile.sidecar
       revision: release-v0.7.1
-      url: https://github.com/opendatahub-io/llm-d-routing-sidecar
+      url: https://github.com/opendatahub-io/llm-d-inference-scheduler
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Component
@@ -2007,11 +2008,11 @@ metadata:
   annotations:
     build.appstudio.openshift.io/pipeline: '{"name":"docker-build-oci-ta","bundle":"latest"}'
     mintmaker.appstudio.redhat.com/disabled: true
-  name: llm-d-kv-cache
+  name: llm-d-uds-tokenizer
 spec:
   application: opendatahub-release
-  componentName: llm-d-kv-cache
-  containerImage: quay.io/opendatahub/llm-d-kv-cache
+  componentName: llm-d-uds-tokenizer
+  containerImage: quay.io/opendatahub/llm-d-uds-tokenizer
   source:
     git:
       context: services/uds_tokenizer
