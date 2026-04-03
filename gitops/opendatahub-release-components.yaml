@@ -1571,7 +1571,7 @@ spec:
   source:
     git:
       dockerfileUrl: Dockerfile
-      revision: konflux-poc
+      revision: release-v0.7.1
       url: https://github.com/opendatahub-io/llm-d-inference-scheduler.git
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -1588,7 +1588,7 @@ spec:
   containerImage: quay.io/opendatahub/llm-d-routing-sidecar
   source:
     git:
-      revision: konflux-poc
+      revision: release-v0.7.1
       url: https://github.com/opendatahub-io/llm-d-routing-sidecar
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
@@ -2016,7 +2016,7 @@ spec:
     git:
       context: services/uds_tokenizer
       dockerfileUrl: Dockerfile
-      revision: release-v0.5
+      revision: release-v0.7.1
       url: https://github.com/opendatahub-io/llm-d-kv-cache
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
