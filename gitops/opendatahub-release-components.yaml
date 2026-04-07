@@ -2017,7 +2017,7 @@ spec:
     git:
       context: .
       dockerfileUrl: Dockerfile
-      revision: release-v0.5
+      revision: release-v0.6
       url: https://github.com/opendatahub-io/workload-variant-autoscaler
 ---
 apiVersion: appstudio.redhat.com/v1alpha1
