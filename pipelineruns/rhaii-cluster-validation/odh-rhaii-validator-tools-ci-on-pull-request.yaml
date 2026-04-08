@@ -20,6 +20,12 @@ metadata:
   name: odh-rhaii-validator-tools-ci-on-pull-request
   namespace: open-data-hub-tenant
 spec:
+  pipelineSpec:
+    tasks:
+      - name: build-container
+        params:
+        - name: ACTIVATION_KEY
+          value: rhaii-cluster-validation-activation-key
   params:
   - name: git-url
     value: '{{source_url}}'
