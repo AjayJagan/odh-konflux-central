@@ -764,6 +764,13 @@ spec:
             - $(tasks.prefetch-manifests.results.SOURCE_ARTIFACT)=/var/workdir/source
             - $(tasks.prefetch-manifests.results.CACHI2_ARTIFACT)=/var/workdir/cachi2
         - image: quay.io/rhoai/rhoai-task-toolset:latest
+          resources:
+            requests:
+              cpu: '4'
+              memory: 16Gi
+            limits:
+              cpu: '4'
+              memory: 16Gi
           env:
           - name: SOURCE_ARTIFACT
             value: $(tasks.prefetch-manifests.results.SOURCE_ARTIFACT)
