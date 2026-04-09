@@ -826,6 +826,9 @@ spec:
     - input: "$(tasks.build-image-index.status)"
       operator: in
       values: ["Succeeded"]
+    - input: "$(params.build-type)"
+      operator: notin
+      values: ["Release"]
     workspaces:
     - name: basic-auth
       workspace: git-auth
@@ -901,6 +904,9 @@ spec:
       operator: in
       values:
         - "push"
+    - input: "$(params.build-type)"
+      operator: notin
+      values: ["Release"]
   workspaces:
   - name: git-auth
     optional: true
