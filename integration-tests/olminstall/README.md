@@ -16,13 +16,13 @@ flowchart TD
     classDef pass    fill:#22C55E,stroke:#15803D,color:#fff,font-weight:bold
     classDef fail    fill:#EF4444,stroke:#B91C1C,color:#fff,font-weight:bold
 
-    BUILD[🏗️ Snapshot ready -> ITS creates PipelineRun]:::trigger
-    CLUSTER[☁️ Ephemeral HyperShift cluster (latest supported OCP version) + IDMS mirror]:::infra
-    AUTH[🔐 Three-level credential setup]:::auth
-    HCCO[🤖 HCCO syncs kubelet creds to all nodes]:::hcco
-    OLM[📦 OLM: CatalogSource + Subscription + bundle-unpack + CSV]:::olm
-    PASS[✅ CSV Succeeded - operator version recorded]:::pass
-    FAIL[❌ Failed - oc adm inspect + diagnostics collected]:::fail
+    BUILD["🏗️ Snapshot ready → ITS creates PipelineRun"]:::trigger
+    CLUSTER["☁️ Ephemeral HyperShift cluster (latest supported OCP version) + IDMS mirror"]:::infra
+    AUTH["🔐 Three-level credential setup"]:::auth
+    HCCO["🤖 HCCO syncs kubelet creds to all nodes"]:::hcco
+    OLM["📦 OLM: CatalogSource + Subscription + bundle-unpack + CSV"]:::olm
+    PASS["✅ CSV Succeeded - operator version recorded"]:::pass
+    FAIL["❌ Failed - oc adm inspect + diagnostics collected"]:::fail
 
     BUILD -->|~20 min to provision| CLUSTER
     CLUSTER --> AUTH
