@@ -12,9 +12,9 @@ metadata:
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: opendatahub-builds
-    appstudio.openshift.io/component: odh-trustyai-nemo-guardrails-serve
+    appstudio.openshift.io/component: odh-trustyai-nemo-guardrails-serve-ci
     pipelines.appstudio.openshift.io/type: build
-  name: odh-trustyai-nemo-guardrails-server-on-pull-request
+  name: odh-trustyai-nemo-guardrails-server-ci-on-pull-request
   namespace: open-data-hub-tenant
 spec:
   params:
@@ -47,7 +47,7 @@ spec:
     - name: pathInRepo
       value: pipeline/multi-arch-container-build.yaml
   taskRunTemplate:
-    serviceAccountName: build-pipeline-odh-trustyai-nemo-guardrails-serve
+    serviceAccountName: build-pipeline-odh-trustyai-nemo-guardrails-serve-ci
   workspaces:
   - name: git-auth
     secret:
