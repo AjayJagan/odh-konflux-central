@@ -54,6 +54,7 @@ on:
           - odh-kserve-llmisvc-controller
           - odh-model-controller
           - odh-model-metadata-collection
+          - ogx-distribution
           - ogx-k8s-operator
           - opendatahub-operator
           - openvino_model_server
@@ -68,7 +69,6 @@ on:
           - vllm-orchestrator-gateway
           - workload-variant-autoscaler
           - rhaii-cluster-validation
-
       pr_target_branch:
         description: 'Target branch for the PR (e.g. main)'
         required: true
