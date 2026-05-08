@@ -54,6 +54,7 @@ on:
           - odh-kserve-llmisvc-controller
           - odh-model-controller
           - odh-model-metadata-collection
+          - ogx-k8s-operator
           - opendatahub-operator
           - openvino_model_server
           - pipelines-components
